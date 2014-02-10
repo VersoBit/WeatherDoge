@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <Preference android:key="pref_about_version"
+        android:title="@string/app_name"
+        android:summary="@string/made_with_love" />
+    <Preference android:key="pref_about_contribute"
+        android:title="@string/contribute_name"
+        android:summary="@string/contribute_desc" />
+    <Preference android:key="pref_about_additional_credits"
+        android:title="@string/additional_credits_name"
+        android:summary="@string/additional_credits_desc" />
+
+</PreferenceScreen>

@@ -1,0 +1,124 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/sky_01d"
+    android:id="@+id/main_suchlayout"
+    tools:context="com.versobit.weatherdoge.MainActivity">
+    <RelativeLayout
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <ImageView
+            android:src="@drawable/doge_01d"
+            android:layout_width="350dp"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:paddingBottom="100dp"
+            android:id="@+id/main_suchdoge"
+            android:adjustViewBounds="true" />
+
+        <LinearLayout
+            android:id="@+id/main_suchinfogroup"
+            android:layout_alignParentBottom="true"
+            android:layout_width="wrap_content"
+            android:orientation="vertical"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:layout_centerHorizontal="true">
+            <TextView
+                style="@style/AppTheme.TextViewDropShadow"
+                android:id="@+id/main_suchstatus"
+                android:text="@string/placeholder_description"
+                android:textSize="40sp"
+                android:gravity="center"
+                android:layout_marginBottom="-20dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <RelativeLayout
+                android:layout_width="400dp"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:id="@+id/main_suchnegative"
+                    android:lineSpacingExtra="-20dp"
+                    style="@style/AppTheme.TextViewDropShadow"
+                    android:textSize="120sp"
+                    android:layout_toLeftOf="@+id/main_suchtemp"
+                    android:text="@string/very_negative"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:visibility="gone" />
+                <TextView
+                    android:layout_centerHorizontal="true"
+                    android:lineSpacingExtra="-20dp"
+                    style="@style/AppTheme.TextViewDropShadow"
+                    android:id="@id/main_suchtemp"
+                    android:text="@string/placeholder_temperature"
+                    android:textSize="120sp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                <TextView
+                    android:id="@+id/main_suchdegree"
+                    android:lineSpacingExtra="-20dp"
+                    style="@style/AppTheme.TextViewDropShadow"
+                    android:layout_toRightOf="@id/main_suchtemp"
+                    android:textSize="120sp"
+                    android:text="@string/many_degree"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone" />
+            </RelativeLayout>
+
+            <TextView
+                style="@style/AppTheme.TextViewDropShadow"
+                android:id="@+id/main_suchlocation"
+                android:text="@string/placeholder_location"
+                android:textSize="25sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="-5dp" />
+        </LinearLayout>
+        </RelativeLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="100dp"
+        android:layout_height="50dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/round_rect_shape"
+        android:gravity="center_vertical|center_horizontal">
+
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:id="@+id/main_suchshare"
+            android:src="@drawable/ic_action_share"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:contentDescription="@string/action_share"
+            android:longClickable="true"
+            android:adjustViewBounds="false"
+            android:paddingBottom="8dp"
+            android:paddingTop="8dp" />
+
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:id="@+id/main_suchoptions"
+            android:src="@drawable/ic_action_settings"
+            android:contentDescription="@string/action_options"
+            android:layout_gravity="center"
+            android:clickable="true"
+            android:longClickable="true"
+            android:layout_weight="1"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp" />
+
+    </LinearLayout>
+
+</RelativeLayout>

@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Weather Doge</string>
+    <string name="action_share">Such Share</string>
+    <string name="action_options">Such Options</string>
+
+    <string name="share_title">%1$s in %2$s - Weather Doge</string>
+    <string name="share_text">%1$s. It\'s %2$s in %3$s.\n\nWow, this shibe is using Weather Doge for Android. https://play.google.com/store/apps/details?id=com.versobit.weatherdoge</string>
+
+    <string name="placeholder_description">wow loading</string>
+    <string name="placeholder_temperature">dunno</string>
+    <string name="placeholder_location">srsly dunno</string>
+    <string name="many_degree">&#176;</string>
+    <string name="very_negative">-</string>
+
+    <string name="wow">wow</string>
+
+    <string name="such_metric_name">Such Metric</string>
+    <string name="such_metric_desc">Force metric units in the US, Liberia, and Burma.</string>
+    <string name="force_location_name">Always use this location</string>
+    <string name="unset">Wow unset</string>
+
+    <string name="about">About</string>
+    <string name="made_with_love">Made with ♥ by VersoBit</string>
+    <string name="additional_credits_name">Other Shibes</string>
+    <string name="additional_credits_desc">Doge loves open source!</string>
+    <string name="contribute_name">Contribute</string>
+    <string name="contribute_desc">Help support Weather Doge!</string>
+
+    <string name="dialog_about_text1">Crafted by the fine shibes over at VersoBit and our wow-worthy open-source collaborators.</string>
+    <string name="dialog_about_text2">Based on <a href="http://dogeweather.com/">dogeweather.com</a>, which is probably one of the most awesome things on the planet.</string>
+    <string name="dialog_about_contact">Contact us on Twitter!</string>
+    <string-array name="dialog_about_twitter">
+        <item>\@VersoBit</item>
+        <item>\@Kev1nMark</item>
+        <item>\@DeviledMoon</item>
+    </string-array>
+
+    <string name="dialog_contribute_github_title">GitHub</string>
+    <string name="dialog_contribute_github_msg">Weather Doge is open-source and on GitHub!</string>
+    <string name="dialog_contribute_dogecoin_title">Dogecoin</string>
+    <string name="dialog_contribute_dogecoin_msg">We ♥ Dogecoin! Tap to copy our address to your clipboard.</string>
+    <string name="dialog_contribute_bitcoin_title">Bitcoin</string>
+    <string name="dialog_contribute_bitcoin_msg">No DOGE? Tap to copy our address to your clipboard.</string>
+
+    <string name="addr_github">https://github.com/VersoBit/WeatherDoge</string>
+    <string name="addr_dogecoin">DMdXi3PJ3o5sXpcnXLvqAvHerKLbBCC9yE</string>
+    <string name="addr_bitcoin">1LVdvcNDJ9JtNCZ7swT8z2pfJoUNRtrwCH</string>
+    <string name="such_copied">such copied</string>
+
+    <string-array name="dogefix">
+        <item>so wow</item>
+        <item>such %1$s</item>
+        <item>very %1$s</item>
+        <item>much %1$s</item>
+        <item>so %1$s</item>
+        <item>wow</item>
+    </string-array>
+    
+    <string-array name="weather_polarvortex">
+        <item>winter</item>
+        <item>freeze</item>
+        <item>polar vortex</item>
+        <item>ridiculous</item>
+        <item>hibernate</item>
+        <item>climate change</item>
+        <item>doom</item>
+    </string-array>
+
+    <string-array name="weather_yuck">
+        <item>cold</item>
+        <item>freeze</item>
+        <item>shiver</item>
+        <item>ice</item>
+        <item>yuck</item>
+        <item>climate change</item>
+        <item>popsicle</item>
+    </string-array>
+    
+    <string-array name="weather_notokay">
+        <item>icy</item>
+        <item>winter</item>
+        <item>chill</item>
+        <item>crisp</item>
+        <item>brrrrr</item>
+        <item>cool</item>
+        <item>not okay</item>
+    </string-array>
+    
+    <string-array name="weather_chilly">
+        <item>icy</item>
+        <item>frost</item>
+        <item>numb</item>
+        <item>shiver</item>
+        <item>brrr</item>
+        <item>chilly</item>
+        <item>below freezing point</item>
+    </string-array>
+    
+    <string-array name="weather_concern">
+        <item>chilly</item>
+        <item>concern</item>
+        <item>coat</item>
+        <item>frosty</item>
+        <item>uh oh</item>
+        <item>brrrr</item>
+        <item>almost freezing</item>
+    </string-array>
+    
+    <string-array name="weather_whatever">
+        <item>moderate</item>
+        <item>mild</item>
+        <item>okay</item>
+        <item>medium</item>
+        <item>cool</item>
+        <item>whatever</item>
+        <item>brisk</item>
+    </string-array>
+    
+    <string-array name="weather_warmth">
+        <item>heat</item>
+        <item>warmth</item>
+        <item>climate</item>
+        <item>sweating</item>
+        <item>balmy</item>
+        <item>nice day</item>
+        <item>ambient</item>
+    </string-array>
+    
+    <string-array name="weather_globalwarming">
+        <item>boiling</item>
+        <item>bake</item>
+        <item>melt</item>
+        <item>dying</item>
+        <item>suffer</item>
+        <item>global warming</item>
+        <item>tropical heat</item>
+    </string-array>
+    
+    <string-array name="weather_wow">
+        <item>concern</item>
+        <item>climate</item>
+        <item>degrees</item>
+        <item>shrug</item>
+        <item>wow</item>
+        <item>celsius</item>
+        <item>fahrenheit</item>
+    </string-array>
+</resources>

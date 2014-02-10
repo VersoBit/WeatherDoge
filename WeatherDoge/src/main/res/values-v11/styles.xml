@@ -1,0 +1,23 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="@android:style/Theme.NoTitleBar">
+        <item name="android:windowNoTitle">true</item>
+        <!--<item name="android:background">@drawable/placeholder_bg</item>-->
+    </style>
+
+    <style name="AppTheme.TextViewDropShadow">
+        <item name="android:paddingLeft">4px</item>
+        <item name="android:paddingBottom">4px</item>
+        <item name="android:textColor">#ffffffff</item>
+        <item name="android:shadowColor">#000000</item>
+        <item name="android:shadowDx">3</item> <!-- 5, 1 -->
+        <item name="android:shadowDy">3</item>
+        <item name="android:shadowRadius">1</item>
+    </style>
+
+    <style name="AppTheme.Options" parent="android:Theme.Holo.Light">
+        <!-- Holo! -->
+    </style>
+
+</resources>

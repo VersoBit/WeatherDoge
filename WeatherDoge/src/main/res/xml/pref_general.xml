@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <CheckBoxPreference
+        android:key="pref_force_metric"
+        android:title="@string/such_metric_name"
+        android:summary="@string/such_metric_desc"
+        android:defaultValue="false" />
+    <EditTextPreference
+        android:key="pref_force_location"
+        android:title="@string/force_location_name"
+        android:defaultValue=""
+        android:summary="@string/unset" />
+
+</PreferenceScreen>
