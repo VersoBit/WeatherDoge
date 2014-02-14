@@ -104,8 +104,12 @@ public class MainActivity extends Activity implements
         suchDoge.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                whereIsDoge = wowClient.getLastLocation();
-                new GetWeather(MainActivity.this).execute(whereIsDoge);
+                if(!forceLocation.isEmpty()) {
+                    new GetWeather(MainActivity.this).execute();
+                } else if(wowClient != null && wowClient.isConnected()) {
+                    whereIsDoge = wowClient.getLastLocation();
+                    new GetWeather(MainActivity.this).execute(whereIsDoge);
+                }
             }
         });
         suchStatus = (TextView)findViewById(R.id.main_suchstatus);
