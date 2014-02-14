@@ -51,7 +51,7 @@ android {
 }
 
 dependencies {
-    compile 'com.google.android.gms:play-services:4.1.32'
+    compile 'com.google.android.gms:play-services:4.2.42'
     compile 'com.android.support:support-v4:19.0.1'
     compile files('libs/commons-io-2.4.jar')
 }
