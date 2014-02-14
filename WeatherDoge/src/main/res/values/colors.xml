@@ -1,4 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="holo_light_pressed">#FFE3E3E3</color>
+    <integer-array name="wow_colors">
+        <item>0xFF0066FF</item>
+        <item>0xFFFF3399</item>
+        <item>0xFF33CC33</item>
+        <item>0xFFFFFF99</item>
+        <item>0xFFFFFF75</item>
+        <item>0xFF8533FF</item>
+        <item>0xFF33D6FF</item>
+        <item>0xFFFF5CFF</item>
+        <item>0xFF19D1A3</item>
+        <item>0xFFFF4719</item>
+        <item>0xFF197519</item>
+        <item>0xFF6699FF</item>
+        <item>0xFF4747D1</item>
+        <item>0xFFD1D1E0</item>
+        <item>0xFFFF5050</item>
+        <item>0xFFFFFFF0</item>
+        <item>0xFFCC99FF</item>
+        <item>0xFF66E0C2</item>
+        <item>0xFFFF4DFF</item>
+        <item>0xFF00CCFF</item>
+    </integer-array>
 </resources>

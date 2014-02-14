@@ -21,6 +21,12 @@
             android:id="@+id/main_suchdoge"
             android:adjustViewBounds="true" />
 
+        <RelativeLayout
+            android:id="@+id/main_suchoverlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+        </RelativeLayout>
+
         <LinearLayout
             android:id="@+id/main_suchinfogroup"
             android:layout_alignParentBottom="true"
@@ -82,7 +88,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="-5dp" />
         </LinearLayout>
-        </RelativeLayout>
+    </RelativeLayout>
 
     <LinearLayout
         android:orientation="horizontal"

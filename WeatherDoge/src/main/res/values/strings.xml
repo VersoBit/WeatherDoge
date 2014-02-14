@@ -60,7 +60,8 @@
         <item>so %1$s</item>
         <item>wow</item>
     </string-array>
-    
+
+    <!-- Temperature based descriptors -->
     <string-array name="weather_polarvortex">
         <item>winter</item>
         <item>freeze</item>
@@ -149,5 +150,175 @@
         <item>wow</item>
         <item>celsius</item>
         <item>fahrenheit</item>
+    </string-array>
+    
+    <!-- Background related descriptors -->
+    <string-array name="bg_01d">
+        <item>clear</item>
+        <item>sky</item>
+        <item>lovely</item>
+        <item>amaze</item>
+        <item>wonderful</item>
+        <item>sun</item>
+        <item>weather</item>
+    </string-array>
+
+    <string-array name="bg_01n">
+        <item>night</item>
+        <item>amaze</item>
+        <item>clear</item>
+        <item>lovely</item>
+        <item>wonderful</item>
+        <item>sky</item>
+        <item>starts</item>
+        <item>moon</item>
+        <item>dark</item>
+        <item>weather</item>
+    </string-array>
+    
+    <string-array name="bg_02d">
+        <item>cloud</item>
+        <item>okay</item>
+        <item>cumulus</item>
+        <item>amaze</item>
+        <item>sky</item>
+        <item>weather</item>
+    </string-array>
+
+    <string-array name="bg_02n">
+        <item>dark</item>
+        <item>cumulus</item>
+        <item>amaze</item>
+        <item>cloud</item>
+        <item>star</item>
+        <item>space</item>
+        <item>after dark</item>
+        <item>weather</item>
+    </string-array>
+
+    <string-array name="bg_03d">
+        <item>cloudy</item>
+        <item>scattered</item>
+        <item>overcast</item>
+        <item>weather</item>
+    </string-array>
+
+    <string-array name="bg_03n">
+        <item>cloud</item>
+        <item>scattered</item>
+        <item>clear sky</item>
+        <item>night time</item>
+        <item>weather</item>
+    </string-array>
+
+    <string-array name="bg_04">
+        <item>gloomy</item>
+        <item>clouds</item>
+        <item>shady</item>
+        <item>boring</item>
+        <item>weather</item>
+    </string-array>
+
+    <string-array name="bg_09d">
+        <item>cloud</item>
+        <item>showers</item>
+        <item>raindrop</item>
+        <item>wet</item>
+        <item>weather</item>
+    </string-array>
+
+    <string-array name="bg_09n">
+        <item>cloud</item>
+        <item>showers</item>
+        <item>raindrop</item>
+        <item>wet</item>
+        <item>night</item>
+        <item>weather</item>
+    </string-array>
+
+    <string-array name="bg_10d">
+        <item>raindrops</item>
+        <item>soak</item>
+        <item>wet</item>
+        <item>slippery</item>
+        <item>shower</item>
+        <item>terrible</item>
+        <item>weather</item>
+    </string-array>
+
+    <string-array name="bg_10n">
+        <item>raindrops</item>
+        <item>soak</item>
+        <item>wet</item>
+        <item>slippery</item>
+        <item>shower</item>
+        <item>terrible</item>
+        <item>scary</item>
+        <item>dark cloud</item>
+        <item>night</item>
+        <item>weather</item>
+    </string-array>
+
+    <string-array name="bg_11d">
+        <item>thunder</item>
+        <item>loud</item>
+        <item>scare</item>
+        <item>bolt</item>
+        <item>lightning</item>
+        <item>terrible</item>
+        <item>hide</item>
+        <item>weather</item>
+    </string-array>
+
+    <string-array name="bg_11n">
+        <item>scary night</item>
+        <item>thunder</item>
+        <item>loud</item>
+        <item>crash</item>
+        <item>bolt</item>
+        <item>lightning</item>
+        <item>terrible</item>
+        <item>hide</item>
+        <item>weather</item>
+    </string-array>
+
+    <string-array name="bg_13d">
+        <item>snow</item>
+        <item>white</item>
+        <item>soft</item>
+        <item>icy</item>
+        <item>snowflake</item>
+        <item>powder</item>
+        <item>joy</item>
+        <item>shiny</item>
+        <item>festive</item>
+        <item>weather</item>
+    </string-array>
+
+    <string-array name="bg_13n">
+        <item>snow</item>
+        <item>white</item>
+        <item>night time</item>
+        <item>slippery</item>
+        <item>icy</item>
+        <item>snowflake</item>
+        <item>powder</item>
+        <item>joy</item>
+        <item>shiny</item>
+        <item>festive</item>
+        <item>weather</item>
+    </string-array>
+
+    <string-array name="bg_50">
+        <item>mist</item>
+        <item>vapor</item>
+        <item>creepy</item>
+        <item>spook</item>
+        <item>blind</item>
+        <item>low visibility</item>
+        <item>darkness</item>
+        <item>gloomy</item>
+        <item>depress</item>
+        <item>weather</item>
     </string-array>
 </resources>

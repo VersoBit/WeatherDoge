@@ -16,6 +16,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.widget.ImageView;
@@ -42,8 +43,12 @@ import org.json.JSONObject;
 
 import java.net.URLEncoder;
 import java.text.DecimalFormat;
+import java.util.ArrayDeque;
 import java.util.List;
+import java.util.Queue;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MainActivity extends Activity implements
         GooglePlayServicesClient.ConnectionCallbacks,
@@ -52,12 +57,14 @@ public class MainActivity extends Activity implements
 
     private static final int REQUEST_PLAY_ERR_DIAG = 52000000;
     private static final int REQUEST_PLAY_CONN_FAIL_RES = 3643;
+    private static final long WOW_INTERVAL = 2300;
     private static final String TAG = "MainActivity";
 
     private boolean forceMetric = false;
     private String forceLocation = "";
 
     private RelativeLayout suchLayout;
+    private RelativeLayout suchOverlay;
     private ImageView suchDoge;
     private TextView suchStatus;
     private TextView suchNegative;
@@ -75,7 +82,10 @@ public class MainActivity extends Activity implements
     private double currentTemp;
     private String currentLocation;
     private String[] dogefixes;
-    private String[] tempAdjectives;
+    private String[] weatherAdjectives;
+    private int[] colors;
+    private Timer overlayTimer;
+    private Queue<TextView> overlays = new ArrayDeque<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,6 +99,7 @@ public class MainActivity extends Activity implements
 
         wowComicSans = Typeface.createFromAsset(getAssets(), "comic.ttf");
         suchLayout = (RelativeLayout)findViewById(R.id.main_suchlayout);
+        suchOverlay = (RelativeLayout)findViewById(R.id.main_suchoverlay);
         suchDoge = (ImageView)findViewById(R.id.main_suchdoge);
         suchDoge.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -117,7 +128,7 @@ public class MainActivity extends Activity implements
                 String temp = String.valueOf(Math.round(currentTemp)) + ' ' + unit;
                 i.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.share_title, temp, currentLocation));
                 Random r = new Random();
-                String dogeism = String.format(dogefixes[r.nextInt(dogefixes.length)], tempAdjectives[r.nextInt(tempAdjectives.length)]);
+                String dogeism = String.format(dogefixes[r.nextInt(dogefixes.length)], weatherAdjectives[r.nextInt(weatherAdjectives.length)]);
                 i.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_text, dogeism, temp, currentLocation));
                 startActivity(Intent.createChooser(i, getString(R.string.action_share)));
             }
@@ -148,6 +159,7 @@ public class MainActivity extends Activity implements
         } else if(playServicesAvailable()) {
             wowClient = new LocationClient(this, this, this);
         }
+        colors = getResources().getIntArray(R.array.wow_colors);
     }
 
     private void loadOptions() {
@@ -156,12 +168,52 @@ public class MainActivity extends Activity implements
         forceLocation = sp.getString(OptionsActivity.PREF_FORCE_LOCATION, "");
     }
 
+    private void initOverlayTimer() {
+        TimerTask handleOverlayText = new TimerTask() {
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(weatherAdjectives == null) {
+                            return;
+                        }
+                        TextView tv = new TextView(MainActivity.this);
+                        Random r = new Random();
+                        tv.setText(String.format(dogefixes[r.nextInt(dogefixes.length)], weatherAdjectives[r.nextInt(weatherAdjectives.length)]));
+                        tv.setTypeface(wowComicSans);
+                        tv.setTextColor(colors[r.nextInt(colors.length)]);
+                        tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, r.nextInt(15) + 25);
+                        int[] layoutDim = { suchOverlay.getWidth(), suchOverlay.getHeight() };
+                        tv.measure(layoutDim[0], layoutDim[1]);
+                        int[] textDim = { tv.getMeasuredWidth(), tv.getMeasuredHeight() };
+                        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(textDim[0], textDim[1]);
+                        int[] absPos = { layoutDim[0] - textDim[0], layoutDim[1] - textDim[1] };
+                        if(absPos[0] < 0 || absPos[1] < 0) {
+                            return; // Can't fit with that dogeism, text size, and layout dimensions
+                        }
+                        params.leftMargin = absPos[0] == 0 ? 0 : r.nextInt(absPos[0]);
+                        params.topMargin = absPos[1] == 0 ? 0 : r.nextInt(absPos[1]);
+                        if(overlays.size() == 4) {
+                            suchOverlay.removeView(overlays.remove());
+                        }
+                        overlays.add(tv);
+                        suchOverlay.addView(tv, params);
+                    }
+                });
+            }
+        };
+        overlayTimer = new Timer();
+        overlayTimer.schedule(handleOverlayText, 0, WOW_INTERVAL);
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
         if(wowClient != null) {
             wowClient.connect();
         }
+        initOverlayTimer();
     }
 
     @Override
@@ -170,6 +222,7 @@ public class MainActivity extends Activity implements
             wowClient.removeLocationUpdates(this);
             wowClient.disconnect();
         }
+        overlayTimer.cancel();
         super.onStop();
     }
 
@@ -337,9 +390,14 @@ public class MainActivity extends Activity implements
                 JSONObject subWeather = data.getJSONObject(1).getJSONArray("weather").getJSONObject(0);
                 JSONObject subMain = data.getJSONObject(1).getJSONObject("main");
                 suchStatus.setText(getString(R.string.wow) + " " + subWeather.getString("description").trim().toLowerCase());
-                setTemp(subMain.getDouble("temp"));
+                double temp = subMain.getDouble("temp");
+                setTemp(temp);
                 suchDoge.setImageResource(WeatherDoge.dogeSelect(subWeather.getString("icon")));
                 suchLayout.setBackgroundResource(WeatherDoge.skySelect(subWeather.getString("icon")));
+
+                String[] tempAdjs = getResources().getStringArray(WeatherDoge.getTempAdjectives((int)Math.round(temp - 273.15d)));
+                String[] bgAdjs = getResources().getStringArray(WeatherDoge.getBgAdjectives(subWeather.getString("icon")));
+                weatherAdjectives = WeatherDoge.condoge(tempAdjs, bgAdjs);
             } catch (JSONException ex) {
                 Log.wtf(TAG, ex);
             }
@@ -347,7 +405,6 @@ public class MainActivity extends Activity implements
 
         private void setTemp(double temp) {
             temp = temp - 273.15d; // C
-            tempAdjectives = WeatherDoge.getTempAdjectives(getResources(), (int)Math.round(temp));
             if(UnitLocale.getDefault() == UnitLocale.IMPERIAL && !forceMetric) {
                 temp = temp * 1.8d + 32d; // F
             }
