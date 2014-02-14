@@ -1,8 +1,10 @@
 package com.versobit.weatherdoge;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
@@ -14,6 +16,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -66,6 +69,8 @@ public class MainActivity extends Activity implements
     private LocationClient wowClient;
     private Location whereIsDoge;
     private Typeface wowComicSans;
+
+    private AlertDialog errorDialog;
 
     private double currentTemp;
     private String currentLocation;
@@ -266,6 +271,25 @@ public class MainActivity extends Activity implements
                     }
                     address = addresses.get(0);
                 } catch (Exception ex) {
+                    if(ex.getMessage().equalsIgnoreCase("Service not Available")) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if(errorDialog != null && errorDialog.isShowing()) {
+                                    return;
+                                }
+                                AlertDialog.Builder adb = new AlertDialog.Builder(new ContextThemeWrapper(ctx, R.style.AppTheme_Options));
+                                adb.setTitle(R.string.geocoder_error_title).setMessage(R.string.geocoder_error_msg);
+                                adb.setNeutralButton(R.string.wow, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                    }
+                                });
+                                errorDialog = adb.show();
+                            }
+                        });
+                    }
                     Log.wtf(TAG, ex);
                     return null;
                 }
