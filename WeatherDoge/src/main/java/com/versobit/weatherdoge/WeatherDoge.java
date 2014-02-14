@@ -39,7 +39,7 @@ public class WeatherDoge extends Application {
                 resId = day ? R.drawable.sky_09d : R.drawable.sky_09n;
                 break;
             case 10:
-                resId = day ? R.drawable.sky_10d : R.drawable.sky_10n;
+                resId = day ? R.drawable.sky_10d : R.drawable.sky_09n;
                 break;
             case 11:
                 resId = day ? R.drawable.sky_11d : R.drawable.sky_11n;
