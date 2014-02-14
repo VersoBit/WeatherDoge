@@ -15,8 +15,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/dialog_about_vb"
-        android:src="@drawable/versobit"
-        android:layout_marginTop="-20dp" />
+        android:src="@drawable/versobit" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -26,14 +25,13 @@
         android:id="@+id/textView"
         android:textColor="@android:color/black"
         android:layout_gravity="center_horizontal"
-        android:textStyle="bold"
-        android:layout_marginTop="-20dp" />
+        android:textStyle="bold" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text=""
+        android:text="0.8-c6f8b1"
         android:id="@+id/dialog_about_version"
         android:layout_gravity="center_horizontal" />
 
