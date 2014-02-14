@@ -128,12 +128,17 @@ public class MainActivity extends Activity implements
             public void onClick(View v) {
                 Intent i = new Intent(Intent.ACTION_SEND);
                 i.setType("text/plain");
-                String unit = (char)0x00b0 + ((UnitLocale.getDefault() == UnitLocale.IMPERIAL && !forceMetric) ? "F" : "C");
-                String temp = String.valueOf(Math.round(currentTemp)) + ' ' + unit;
-                i.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.share_title, temp, currentLocation));
-                Random r = new Random();
-                String dogeism = String.format(dogefixes[r.nextInt(dogefixes.length)], weatherAdjectives[r.nextInt(weatherAdjectives.length)]);
-                i.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_text, dogeism, temp, currentLocation));
+                if(weatherAdjectives == null) {
+                    i.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.app_name));
+                    i.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_text).split("\n\n")[1]);
+                } else {
+                    String unit = (char)0x00b0 + ((UnitLocale.getDefault() == UnitLocale.IMPERIAL && !forceMetric) ? "F" : "C");
+                    String temp = String.valueOf(Math.round(currentTemp)) + ' ' + unit;
+                    i.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.share_title, temp, currentLocation));
+                    Random r = new Random();
+                    String dogeism = String.format(dogefixes[r.nextInt(dogefixes.length)], weatherAdjectives[r.nextInt(weatherAdjectives.length)]);
+                    i.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_text, dogeism, temp, currentLocation));
+                }
                 startActivity(Intent.createChooser(i, getString(R.string.action_share)));
             }
         });
