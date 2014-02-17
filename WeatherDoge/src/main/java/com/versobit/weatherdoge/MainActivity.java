@@ -333,7 +333,7 @@ public class MainActivity extends Activity implements
                     }
                     address = addresses.get(0);
                 } catch (Exception ex) {
-                    if(ex.getMessage().equalsIgnoreCase("Service not Available")) {
+                    if(ex.getMessage() != null && ex.getMessage().equalsIgnoreCase("Service not Available")) {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
