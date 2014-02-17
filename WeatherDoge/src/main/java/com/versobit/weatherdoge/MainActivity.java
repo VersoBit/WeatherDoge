@@ -82,6 +82,7 @@ public class MainActivity extends Activity implements
     private double currentTemp;
     private String currentLocation;
     private String[] dogefixes;
+    private String[] wows;
     private String[] weatherAdjectives;
     private int[] colors;
     private Timer overlayTimer;
@@ -96,6 +97,8 @@ public class MainActivity extends Activity implements
         loadOptions();
 
         dogefixes = getResources().getStringArray(R.array.dogefix);
+        wows = getResources().getStringArray(R.array.wows);
+        colors = getResources().getIntArray(R.array.wow_colors);
 
         wowComicSans = Typeface.createFromAsset(getAssets(), "comic.ttf");
         suchLayout = (RelativeLayout)findViewById(R.id.main_suchlayout);
@@ -135,9 +138,7 @@ public class MainActivity extends Activity implements
                     String unit = (char)0x00b0 + ((UnitLocale.getDefault() == UnitLocale.IMPERIAL && !forceMetric) ? "F" : "C");
                     String temp = String.valueOf(Math.round(currentTemp)) + ' ' + unit;
                     i.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.share_title, temp, currentLocation));
-                    Random r = new Random();
-                    String dogeism = String.format(dogefixes[r.nextInt(dogefixes.length)], weatherAdjectives[r.nextInt(weatherAdjectives.length)]);
-                    i.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_text, dogeism, temp, currentLocation));
+                    i.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_text, WeatherDoge.getDogeism(wows, dogefixes, weatherAdjectives), temp, currentLocation));
                 }
                 startActivity(Intent.createChooser(i, getString(R.string.action_share)));
             }
@@ -168,7 +169,6 @@ public class MainActivity extends Activity implements
         } else if(playServicesAvailable()) {
             wowClient = new LocationClient(this, this, this);
         }
-        colors = getResources().getIntArray(R.array.wow_colors);
     }
 
     private void loadOptions() {
@@ -189,7 +189,7 @@ public class MainActivity extends Activity implements
                         }
                         TextView tv = new TextView(MainActivity.this);
                         Random r = new Random();
-                        tv.setText(String.format(dogefixes[r.nextInt(dogefixes.length)], weatherAdjectives[r.nextInt(weatherAdjectives.length)]));
+                        tv.setText(WeatherDoge.getDogeism(wows, dogefixes, weatherAdjectives));
                         tv.setTypeface(wowComicSans);
                         tv.setTextColor(colors[r.nextInt(colors.length)]);
                         tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, r.nextInt(15) + 25);

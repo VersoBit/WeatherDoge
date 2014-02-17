@@ -6,6 +6,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 
 import java.lang.reflect.Array;
+import java.util.Random;
 
 
 public class WeatherDoge extends Application {
@@ -164,5 +165,17 @@ public class WeatherDoge extends Application {
             pos += s.length;
         }
         return full;
+    }
+
+    static String getDogeism(String[] wows, String[] dogefixes, String[] weatherAdjectives) {
+        Random r = new Random();
+        // We need to treat so wow and wow as individual dogeisms, not overrepresented top-level dogefixes
+        int wowOrNot = r.nextInt(weatherAdjectives.length + wows.length);
+        if(wowOrNot >= weatherAdjectives.length) {
+            // Wow or so wow
+            return wows[wowOrNot - weatherAdjectives.length];
+        }
+        // Otherwise use a random dogefix with a random weather adjective
+        return String.format(dogefixes[r.nextInt(dogefixes.length)], weatherAdjectives[r.nextInt(weatherAdjectives.length)]);
     }
 }

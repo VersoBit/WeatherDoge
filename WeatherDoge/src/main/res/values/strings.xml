@@ -52,13 +52,16 @@
     <string name="geocoder_error_title">Geocoder Error</string>
     <string name="geocoder_error_msg">Oh noes. There\'s a known problem with the Android geocoding service that causes it to stop functioning properly. A reboot usually fixes this problem. Sorry.</string>
 
-    <string-array name="dogefix">
+    <string-array name="wows">
+        <item>wow</item>
         <item>so wow</item>
+    </string-array>
+
+    <string-array name="dogefix">
         <item>such %1$s</item>
         <item>very %1$s</item>
         <item>much %1$s</item>
         <item>so %1$s</item>
-        <item>wow</item>
     </string-array>
 
     <!-- Temperature based descriptors -->
