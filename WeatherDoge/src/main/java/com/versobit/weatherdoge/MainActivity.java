@@ -41,6 +41,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.util.ArrayDeque;
@@ -59,6 +60,10 @@ public class MainActivity extends Activity implements
     private static final int REQUEST_PLAY_CONN_FAIL_RES = 3643;
     private static final long WOW_INTERVAL = 2300;
     private static final String TAG = "MainActivity";
+    private static final String CACHE_DATA = "cache_data";
+    private static final String CACHE_EXPIRES = "cache_expiry";
+    private static final long CACHE_MAXAGE = 10 * 60 * 1000; // 10 minutes
+    private static final int CACHE_COORD_FUZZ = 2; // 1.1km, more digits -> less fuzz
 
     private boolean forceMetric = false;
     private String forceLocation = "";
@@ -321,43 +326,100 @@ public class MainActivity extends Activity implements
                 Log.wtf(TAG, new UnsupportedOperationException("No Geocoder is present on this device."));
                 return null;
             }
-            JSONArray data = new JSONArray();
-            Address address = null;
-            if(forceLocation.isEmpty()) {
-                Geocoder geocoder = new Geocoder(ctx);
-                Location loc = params[0];
+            Location loc = forceLocation.isEmpty() ? params[0] : null;
+            JSONArray data = getCache(loc);
+            if(data == null) {
+                data = new JSONArray();
+                Address addr = getAddress(loc);
+                JSONObject weather = getWeatherFromApi(addr);
+                if(weather == null) {
+                    return null; // Error should be previously reported
+                }
                 try {
-                    List<Address> addresses = geocoder.getFromLocation(loc.getLatitude(), loc.getLongitude(), 1);
-                    if(addresses == null || addresses.size() == 0) {
-                        return null;
+                    if(forceLocation.isEmpty()) {
+                        data.put(BigDecimal.valueOf(loc.getLatitude()).setScale(CACHE_COORD_FUZZ, BigDecimal.ROUND_DOWN).doubleValue());
+                        data.put(BigDecimal.valueOf(loc.getLongitude()).setScale(CACHE_COORD_FUZZ, BigDecimal.ROUND_DOWN).doubleValue());
+                        data.put("").put(addr.getLocality());
+                    } else {
+                        // Impossible lat lon values
+                        data.put(Double.MIN_VALUE).put(Double.MIN_VALUE).put(forceLocation).put(weather.getString("name"));
                     }
-                    address = addresses.get(0);
-                } catch (Exception ex) {
-                    if(ex.getMessage() != null && ex.getMessage().equalsIgnoreCase("Service not Available")) {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if(errorDialog != null && errorDialog.isShowing()) {
-                                    return;
-                                }
-                                AlertDialog.Builder adb = new AlertDialog.Builder(new ContextThemeWrapper(ctx, R.style.AppTheme_Options));
-                                adb.setTitle(R.string.geocoder_error_title).setMessage(R.string.geocoder_error_msg);
-                                adb.setNeutralButton(R.string.wow, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        dialog.dismiss();
-                                    }
-                                });
-                                errorDialog = adb.show();
-                            }
-                        });
-                    }
+                } catch (JSONException ex) {
                     Log.wtf(TAG, ex);
                     return null;
                 }
-                data.put(address.getLocality());
+                data.put(weather);
+                setCache(data);
             }
+            return data;
+        }
 
+        private JSONArray getCache(Location loc) {
+            // cache: 0 = lat, 1 = lon, 2 = forceLocation, 3 = locality, 4 = weather json
+            SharedPreferences actPref = getPreferences(MODE_PRIVATE);
+            long expiresWhen = actPref.getLong(CACHE_EXPIRES, Long.MIN_VALUE);
+            if(expiresWhen > System.currentTimeMillis()) {
+                try {
+                    JSONArray cache = new JSONArray(actPref.getString(CACHE_DATA, "[]"));
+                    if(cache.length() == 0) {
+                        return null;
+                    }
+                    // Check if location is still relevant
+                    if(forceLocation.isEmpty()) {
+                        double cacheLat = BigDecimal.valueOf(loc.getLatitude()).setScale(CACHE_COORD_FUZZ, BigDecimal.ROUND_DOWN).doubleValue();
+                        double cacheLon = BigDecimal.valueOf(loc.getLongitude()).setScale(CACHE_COORD_FUZZ, BigDecimal.ROUND_DOWN).doubleValue();
+                        if(cache.getDouble(0) != cacheLat || cache.getDouble(1) != cacheLon) {
+                            return null;
+                        }
+                    } else if(!cache.getString(2).equalsIgnoreCase(forceLocation)) {
+                        return null;
+                    }
+                    Log.d(TAG, "Cache expires in " + (expiresWhen - System.currentTimeMillis()) / 1000 + " seconds");
+                    return cache;
+                } catch (JSONException ex) {
+                    Log.wtf(TAG, ex);
+                }
+            }
+            return null;
+        }
+
+        private Address getAddress(Location loc) {
+            if(loc == null) {
+                return null;
+            }
+            Geocoder geocoder = new Geocoder(ctx);
+            try {
+                List<Address> addresses = geocoder.getFromLocation(loc.getLatitude(), loc.getLongitude(), 1);
+                if(addresses == null || addresses.size() == 0) {
+                    return null;
+                }
+                return addresses.get(0);
+            } catch (Exception ex) {
+                if(ex.getMessage() != null && ex.getMessage().equalsIgnoreCase("Service not Available")) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if(errorDialog != null && errorDialog.isShowing()) {
+                                return;
+                            }
+                            AlertDialog.Builder adb = new AlertDialog.Builder(new ContextThemeWrapper(ctx, R.style.AppTheme_Options));
+                            adb.setTitle(R.string.geocoder_error_title).setMessage(R.string.geocoder_error_msg);
+                            adb.setNeutralButton(R.string.wow, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            });
+                            errorDialog = adb.show();
+                        }
+                    });
+                }
+                Log.wtf(TAG, ex);
+                return null;
+            }
+        }
+
+        private JSONObject getWeatherFromApi(Address address) {
             try {
                 HttpClient httpClient = new DefaultHttpClient();
                 String queryString;
@@ -370,21 +432,34 @@ public class MainActivity extends Activity implements
                 HttpGet httpGet = new HttpGet("http://api.openweathermap.org/data/2.5/weather" + queryString);
                 HttpResponse httpResponse = httpClient.execute(httpGet);
                 HttpEntity httpEntity = httpResponse.getEntity();
-                JSONObject weatherJson = new JSONObject(IOUtils.toString(httpEntity.getContent()));
+                final JSONObject weatherJson = new JSONObject(IOUtils.toString(httpEntity.getContent()));
                 if(weatherJson.getInt("cod") != 200) {
-                    Toast.makeText(ctx, weatherJson.getString("message"), Toast.LENGTH_LONG).show();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                Toast.makeText(ctx, weatherJson.getString("message"), Toast.LENGTH_LONG).show();
+                            } catch (JSONException ex) {
+                                //
+                            }
+                        }
+                    });
                     Log.e(TAG, "OWM Error " + weatherJson.getInt("cod") + ", " + weatherJson.getString("message"));
                     return null;
                 }
-                if(!forceLocation.isEmpty()) {
-                    data.put(weatherJson.getString("name"));
-                }
-                data.put(weatherJson);
+                return weatherJson;
             } catch (Exception ex) {
                 Log.wtf(TAG, ex);
-                return null;
             }
-            return data;
+            return null;
+        }
+
+        private void setCache(JSONArray data) {
+            Log.d(TAG, "Cache updated");
+            SharedPreferences.Editor actPref = getPreferences(MODE_PRIVATE).edit();
+            actPref.putString(CACHE_DATA, data.toString());
+            actPref.putLong(CACHE_EXPIRES, System.currentTimeMillis() + CACHE_MAXAGE);
+            actPref.apply();
         }
 
         @Override
@@ -394,10 +469,10 @@ public class MainActivity extends Activity implements
             }
 
             try {
-                currentLocation = data.getString(0);
+                currentLocation = data.getString(3);
                 suchLocation.setText(currentLocation);
-                JSONObject subWeather = data.getJSONObject(1).getJSONArray("weather").getJSONObject(0);
-                JSONObject subMain = data.getJSONObject(1).getJSONObject("main");
+                JSONObject subWeather = data.getJSONObject(4).getJSONArray("weather").getJSONObject(0);
+                JSONObject subMain = data.getJSONObject(4).getJSONObject("main");
                 suchStatus.setText(getString(R.string.wow) + " " + subWeather.getString("description").trim().toLowerCase());
                 double temp = subMain.getDouble("temp");
                 setTemp(temp);
