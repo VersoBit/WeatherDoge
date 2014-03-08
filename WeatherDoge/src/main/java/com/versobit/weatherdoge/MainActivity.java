@@ -356,29 +356,34 @@ public class MainActivity extends Activity implements
 
         private JSONArray getCache(Location loc) {
             // cache: 0 = lat, 1 = lon, 2 = forceLocation, 3 = locality, 4 = weather json
-            SharedPreferences actPref = getPreferences(MODE_PRIVATE);
-            long expiresWhen = actPref.getLong(CACHE_EXPIRES, Long.MIN_VALUE);
-            if(expiresWhen > System.currentTimeMillis()) {
-                try {
-                    JSONArray cache = new JSONArray(actPref.getString(CACHE_DATA, "[]"));
-                    if(cache.length() == 0) {
-                        return null;
-                    }
-                    // Check if location is still relevant
-                    if(forceLocation.isEmpty()) {
-                        double cacheLat = BigDecimal.valueOf(loc.getLatitude()).setScale(CACHE_COORD_FUZZ, BigDecimal.ROUND_DOWN).doubleValue();
-                        double cacheLon = BigDecimal.valueOf(loc.getLongitude()).setScale(CACHE_COORD_FUZZ, BigDecimal.ROUND_DOWN).doubleValue();
-                        if(cache.getDouble(0) != cacheLat || cache.getDouble(1) != cacheLon) {
+            try {
+                SharedPreferences actPref = getPreferences(MODE_PRIVATE);
+                long expiresWhen = actPref.getLong(CACHE_EXPIRES, Long.MIN_VALUE);
+                if (expiresWhen > System.currentTimeMillis()) {
+                    try {
+                        JSONArray cache = new JSONArray(actPref.getString(CACHE_DATA, "[]"));
+                        if (cache.length() == 0) {
                             return null;
                         }
-                    } else if(!cache.getString(2).equalsIgnoreCase(forceLocation)) {
-                        return null;
+                        // Check if location is still relevant
+                        if (forceLocation.isEmpty()) {
+                            double cacheLat = BigDecimal.valueOf(loc.getLatitude()).setScale(CACHE_COORD_FUZZ, BigDecimal.ROUND_DOWN).doubleValue();
+                            double cacheLon = BigDecimal.valueOf(loc.getLongitude()).setScale(CACHE_COORD_FUZZ, BigDecimal.ROUND_DOWN).doubleValue();
+                            if (cache.getDouble(0) != cacheLat || cache.getDouble(1) != cacheLon) {
+                                return null;
+                            }
+                        } else if (!cache.getString(2).equalsIgnoreCase(forceLocation)) {
+                            return null;
+                        }
+                        Log.d(TAG, "Cache expires in " + (expiresWhen - System.currentTimeMillis()) / 1000 + " seconds");
+                        return cache;
+                    } catch (JSONException ex) {
+                        Log.wtf(TAG, ex);
                     }
-                    Log.d(TAG, "Cache expires in " + (expiresWhen - System.currentTimeMillis()) / 1000 + " seconds");
-                    return cache;
-                } catch (JSONException ex) {
-                    Log.wtf(TAG, ex);
                 }
+            } catch (NullPointerException ex) {
+                Log.e(TAG, ex.getMessage(), ex);
+                // Catches issues if the cache was improperly saved
             }
             return null;
         }
