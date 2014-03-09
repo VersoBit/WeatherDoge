@@ -1,3 +1,5 @@
+import org.apache.tools.ant.taskdefs.condition.Os;
+
 def getVersionCode = { ->
     try {
         def stdout = new ByteArrayOutputStream()
@@ -54,4 +56,36 @@ dependencies {
     compile 'com.google.android.gms:play-services:4.2.42'
     compile 'com.android.support:support-v4:19.0.1'
     compile files('libs/commons-io-2.4.jar')
+
+    def nativeLibs = new File("$buildDir/native-libs")
+    if(!nativeLibs.exists()) {
+        nativeLibs.mkdirs();
+    }
+    new File("$nativeLibs/native-libs.jar").createNewFile()
+    compile fileTree(dir: nativeLibs)
+}
+
+task ndkBuild(type: Exec) {
+    if(Os.isFamily(Os.FAMILY_WINDOWS)) {
+        commandLine 'ndk-build.cmd'
+    } else {
+        commandLine 'ndk-build'
+    }
+}
+
+tasks.withType(JavaCompile) {
+    // Only works if you're building from the CLI when the NDK is in your PATH :(
+    //compileTask -> compileTask.dependsOn(ndkBuild)
+}
+
+task nativeLibsToJar(type: Zip) {
+    destinationDir file("$buildDir/native-libs")
+    baseName "native-libs"
+    extension "jar"
+    from fileTree(dir: "libs", include: "**/*.so")
+    into "lib/"
+}
+
+tasks.withType(JavaCompile) {
+    //compileTask -> compileTask.dependsOn(nativeLibsToJar)
 }
