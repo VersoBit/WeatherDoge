@@ -2,9 +2,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/sky_01d"
     android:id="@+id/main_suchlayout"
     tools:context="com.versobit.weatherdoge.MainActivity">
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/main_suchbg"
+        android:src="@drawable/sky_01d"
+        android:scaleType="matrix" />
+
     <RelativeLayout
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"

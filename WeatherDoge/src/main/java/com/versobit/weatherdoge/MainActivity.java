@@ -8,6 +8,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.location.Address;
 import android.location.Geocoder;
@@ -15,6 +20,7 @@ import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
@@ -69,6 +75,7 @@ public class MainActivity extends Activity implements
     private String forceLocation = "";
 
     private RelativeLayout suchLayout;
+    private ImageView suchBg;
     private RelativeLayout suchOverlay;
     private ImageView suchDoge;
     private TextView suchStatus;
@@ -107,6 +114,7 @@ public class MainActivity extends Activity implements
 
         wowComicSans = Typeface.createFromAsset(getAssets(), "comic.ttf");
         suchLayout = (RelativeLayout)findViewById(R.id.main_suchlayout);
+        suchBg = (ImageView)findViewById(R.id.main_suchbg);
         suchOverlay = (RelativeLayout)findViewById(R.id.main_suchoverlay);
         suchDoge = (ImageView)findViewById(R.id.main_suchdoge);
         suchDoge.setOnClickListener(new View.OnClickListener() {
@@ -482,7 +490,33 @@ public class MainActivity extends Activity implements
                 double temp = subMain.getDouble("temp");
                 setTemp(temp);
                 suchDoge.setImageResource(WeatherDoge.dogeSelect(subWeather.getString("icon")));
-                suchLayout.setBackgroundResource(WeatherDoge.skySelect(subWeather.getString("icon")));
+
+                // Manually resize/crop the sky background because god forbid if Android can do this well on its own
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inScaled = false;
+                // Load in the full bitmap
+                Bitmap theSky = BitmapFactory.decodeResource(getResources(), WeatherDoge.skySelect(subWeather.getString("icon")), options);
+                // Get display info
+                DisplayMetrics metrics = new DisplayMetrics();
+                getWindowManager().getDefaultDisplay().getMetrics(metrics);
+
+                // Create empty bitmap the size of the screen
+                Bitmap scaledSky = Bitmap.createBitmap(metrics.widthPixels, metrics.heightPixels, Bitmap.Config.ARGB_8888);
+
+                // Use a canvas to draw on the bitmap
+                Canvas canvas = new Canvas(scaledSky);
+                float skyHeight = (float)theSky.getScaledHeight(canvas); // Height of the sky scaled on the canvas
+                skyHeight = skyHeight == 0f ? metrics.heightPixels : skyHeight; // If not scaled, use device height
+                float newScale = metrics.heightPixels / skyHeight; // The scale we need to achieve the device's height
+                // Magic number to get some important image elements onscreen
+                float moveAmount = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 200, metrics);
+
+                Matrix matrix = new Matrix();
+                matrix.setScale(newScale, newScale, moveAmount, 0);
+                canvas.setMatrix(matrix);
+                canvas.drawBitmap(theSky, 0, 0, new Paint()); // Draw the bitmap
+
+                suchBg.setImageBitmap(scaledSky);
 
                 String[] tempAdjs = getResources().getStringArray(WeatherDoge.getTempAdjectives((int)Math.round(temp - 273.15d)));
                 String[] bgAdjs = getResources().getStringArray(WeatherDoge.getBgAdjectives(subWeather.getString("icon")));
