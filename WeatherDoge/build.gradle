@@ -57,12 +57,14 @@ dependencies {
     compile 'com.android.support:support-v4:19.0.1'
     compile files('libs/commons-io-2.4.jar')
 
+    /*
     def nativeLibs = new File("$buildDir/native-libs")
     if(!nativeLibs.exists()) {
         nativeLibs.mkdirs();
     }
     new File("$nativeLibs/native-libs.jar").createNewFile()
     compile fileTree(dir: nativeLibs)
+    */
 }
 
 task ndkBuild(type: Exec) {
