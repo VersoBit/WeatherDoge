@@ -53,7 +53,8 @@
 
             <RelativeLayout
                 android:layout_width="400dp"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:id="@+id/main_suchtempgroup">
                 <TextView
                     android:id="@+id/main_suchnegative"
                     android:lineSpacingExtra="-20dp"

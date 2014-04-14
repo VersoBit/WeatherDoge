@@ -14,10 +14,14 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.TransitionDrawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
@@ -25,7 +29,11 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -77,8 +85,10 @@ public class MainActivity extends Activity implements
     private RelativeLayout suchLayout;
     private ImageView suchBg;
     private RelativeLayout suchOverlay;
+    private LinearLayout suchInfoGroup;
     private ImageView suchDoge;
     private TextView suchStatus;
+    private RelativeLayout suchTempGroup;
     private TextView suchNegative;
     private TextView suchTemp;
     private TextView suchDegree;
@@ -92,6 +102,7 @@ public class MainActivity extends Activity implements
     private AlertDialog errorDialog;
 
     private double currentTemp;
+    private boolean currentlyMetric;
     private String currentLocation;
     private String[] dogefixes;
     private String[] wows;
@@ -99,6 +110,9 @@ public class MainActivity extends Activity implements
     private int[] colors;
     private Timer overlayTimer;
     private Queue<TextView> overlays = new ArrayDeque<>();
+    private int currentBackgroundId = R.drawable.sky_01d;
+    private int currentDogeId = R.drawable.doge_01d;
+    private boolean currentlyAnim = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,6 +130,7 @@ public class MainActivity extends Activity implements
         suchLayout = (RelativeLayout)findViewById(R.id.main_suchlayout);
         suchBg = (ImageView)findViewById(R.id.main_suchbg);
         suchOverlay = (RelativeLayout)findViewById(R.id.main_suchoverlay);
+        suchInfoGroup = (LinearLayout)findViewById(R.id.main_suchinfogroup);
         suchDoge = (ImageView)findViewById(R.id.main_suchdoge);
         suchDoge.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -130,6 +145,7 @@ public class MainActivity extends Activity implements
         });
         suchStatus = (TextView)findViewById(R.id.main_suchstatus);
         suchStatus.setTypeface(wowComicSans);
+        suchTempGroup = (RelativeLayout)findViewById(R.id.main_suchtempgroup);
         suchNegative = (TextView)findViewById(R.id.main_suchnegative);
         suchNegative.setTypeface(wowComicSans);
         suchTemp = (TextView)findViewById(R.id.main_suchtemp);
@@ -148,8 +164,13 @@ public class MainActivity extends Activity implements
                     i.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.app_name));
                     i.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_text).split("\n\n")[1]);
                 } else {
-                    String unit = (char)0x00b0 + ((UnitLocale.getDefault() == UnitLocale.IMPERIAL && !forceMetric) ? "F" : "C");
-                    String temp = String.valueOf(Math.round(currentTemp)) + ' ' + unit;
+                    String unit = (char)0x00b0 + "C";
+                    double tempTemp = currentTemp - 273.15d; // temporary temperature...
+                    if(UnitLocale.getDefault() == UnitLocale.IMPERIAL && !forceMetric) {
+                        tempTemp = tempTemp * 1.8d + 32d; // F
+                        unit = (char)0x00b0 + "F";
+                    }
+                    String temp = String.valueOf(Math.round(tempTemp)) + ' ' + unit;
                     i.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.share_title, temp, currentLocation));
                     i.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_text, WeatherDoge.getDogeism(wows, dogefixes, weatherAdjectives), temp, currentLocation));
                 }
@@ -182,6 +203,7 @@ public class MainActivity extends Activity implements
         } else if(playServicesAvailable()) {
             wowClient = new LocationClient(this, this, this);
         }
+        setBackground(R.drawable.sky_01d);
     }
 
     private void loadOptions() {
@@ -227,6 +249,78 @@ public class MainActivity extends Activity implements
         };
         overlayTimer = new Timer();
         overlayTimer.schedule(handleOverlayText, 0, WOW_INTERVAL);
+    }
+
+    private void setBackground(int resId) {
+        if(currentBackgroundId == resId) {
+            return;
+        }
+        currentBackgroundId = resId;
+
+        // Manually resize/crop the sky background because god forbid if Android can do this well on its own
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inScaled = false;
+        // Load in the full bitmap
+        Bitmap theSky = BitmapFactory.decodeResource(getResources(), resId, options);
+        // Get display info
+        DisplayMetrics metrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(metrics);
+
+        // Create empty bitmap the size of the screen
+        Bitmap scaledSky = Bitmap.createBitmap(metrics.widthPixels, metrics.heightPixels, Bitmap.Config.ARGB_8888);
+
+        // Use a canvas to draw on the bitmap
+        Canvas canvas = new Canvas(scaledSky);
+        float skyHeight = (float)theSky.getScaledHeight(canvas); // Height of the sky scaled on the canvas
+        skyHeight = skyHeight == 0f ? metrics.heightPixels : skyHeight; // If not scaled, use device height
+        float newScale = metrics.heightPixels / skyHeight; // The scale we need to achieve the device's height
+        // Magic number to get some important image elements onscreen
+        float moveAmount = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 180, metrics);
+
+        Matrix matrix = new Matrix();
+        matrix.setScale(newScale, newScale, moveAmount, 0);
+        canvas.setMatrix(matrix);
+        canvas.drawBitmap(theSky, 0, 0, new Paint()); // Draw the bitmap
+
+        theSky.recycle();
+
+        Drawable current = suchBg.getDrawable();
+        if(current != null) {
+            if(current instanceof TransitionDrawable) {
+                current = ((TransitionDrawable) current).getDrawable(1);
+            }
+            Drawable[] drawables = new Drawable[] { current, new BitmapDrawable(getResources(), scaledSky)};
+            TransitionDrawable transition = new TransitionDrawable(drawables);
+            transition.setCrossFadeEnabled(true);
+            suchBg.setImageDrawable(transition);
+            transition.startTransition(getResources().getInteger(R.integer.anim_refresh_time) * 2);
+        } else {
+            suchBg.setImageDrawable(new BitmapDrawable(getResources(), scaledSky));
+        }
+    }
+
+    private void setDoge(final int resId) {
+        if(currentDogeId == resId) {
+            return;
+        }
+        currentDogeId = resId;
+
+        final Animation zoomOut = AnimationUtils.loadAnimation(this, R.anim.dogezoom_out);
+        final Animation zoomIn = AnimationUtils.loadAnimation(this, R.anim.dogezoom_in);
+        zoomOut.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {}
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                suchDoge.setImageResource(resId);
+                suchDoge.startAnimation(zoomIn);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {}
+        });
+        suchDoge.startAnimation(zoomOut);
     }
 
     @Override
@@ -477,61 +571,177 @@ public class MainActivity extends Activity implements
 
         @Override
         protected void onPostExecute(JSONArray data) {
-            if(data == null) {
+            if(data == null || currentlyAnim) {
                 return;
             }
 
             try {
+                currentlyAnim = true;
                 currentLocation = data.getString(3);
-                suchLocation.setText(currentLocation);
                 JSONObject subWeather = data.getJSONObject(4).getJSONArray("weather").getJSONObject(0);
                 JSONObject subMain = data.getJSONObject(4).getJSONObject("main");
-                suchStatus.setText(getString(R.string.wow) + " " + subWeather.getString("description").trim().toLowerCase());
-                double temp = subMain.getDouble("temp");
-                setTemp(temp);
-                suchDoge.setImageResource(WeatherDoge.dogeSelect(subWeather.getString("icon")));
 
-                // Manually resize/crop the sky background because god forbid if Android can do this well on its own
-                BitmapFactory.Options options = new BitmapFactory.Options();
-                options.inScaled = false;
-                // Load in the full bitmap
-                Bitmap theSky = BitmapFactory.decodeResource(getResources(), WeatherDoge.skySelect(subWeather.getString("icon")), options);
-                // Get display info
-                DisplayMetrics metrics = new DisplayMetrics();
-                getWindowManager().getDefaultDisplay().getMetrics(metrics);
-
-                // Create empty bitmap the size of the screen
-                Bitmap scaledSky = Bitmap.createBitmap(metrics.widthPixels, metrics.heightPixels, Bitmap.Config.ARGB_8888);
-
-                // Use a canvas to draw on the bitmap
-                Canvas canvas = new Canvas(scaledSky);
-                float skyHeight = (float)theSky.getScaledHeight(canvas); // Height of the sky scaled on the canvas
-                skyHeight = skyHeight == 0f ? metrics.heightPixels : skyHeight; // If not scaled, use device height
-                float newScale = metrics.heightPixels / skyHeight; // The scale we need to achieve the device's height
-                // Magic number to get some important image elements onscreen
-                float moveAmount = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 200, metrics);
-
-                Matrix matrix = new Matrix();
-                matrix.setScale(newScale, newScale, moveAmount, 0);
-                canvas.setMatrix(matrix);
-                canvas.drawBitmap(theSky, 0, 0, new Paint()); // Draw the bitmap
-
-                suchBg.setImageBitmap(scaledSky);
+                final String description = getString(R.string.wow) + " " + subWeather.getString("description").trim().toLowerCase();
+                final double temp = subMain.getDouble("temp");
 
                 String[] tempAdjs = getResources().getStringArray(WeatherDoge.getTempAdjectives((int)Math.round(temp - 273.15d)));
                 String[] bgAdjs = getResources().getStringArray(WeatherDoge.getBgAdjectives(subWeather.getString("icon")));
                 weatherAdjectives = WeatherDoge.condoge(tempAdjs, bgAdjs);
+
+                setDoge(WeatherDoge.dogeSelect(subWeather.getString("icon")));
+
+                setBackground(WeatherDoge.skySelect(subWeather.getString("icon")));
+
+                // Do we need to animate?
+                if(suchStatus.getText().equals(description) && (currentTemp == temp) &&
+                        (currentlyMetric != (UnitLocale.getDefault() == UnitLocale.IMPERIAL && !forceMetric)) &&
+                        suchLocation.getText().equals(currentLocation)) {
+                    currentlyAnim = false;
+                    return;
+                }
+
+                // Use a simpler animation for Gingerbread
+                // It hates AnimationUtils.loadAnimation for some reason
+                if(Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
+                    final AlphaAnimation fadeOut = new AlphaAnimation(1.0f, 0.0f);
+                    fadeOut.setDuration(ctx.getResources().getInteger(R.integer.anim_refresh_time));
+                    final AlphaAnimation fadeIn = new AlphaAnimation(0.0f, 1.0f);
+                    fadeIn.setDuration(ctx.getResources().getInteger(R.integer.anim_refresh_time));
+                    fadeOut.setAnimationListener(new Animation.AnimationListener() {
+                        @Override
+                        public void onAnimationStart(Animation animation) {}
+
+                        @Override
+                        public void onAnimationEnd(Animation animation) {
+                            suchStatus.setText(description);
+                            setTemp(temp);
+                            suchLocation.setText(currentLocation);
+                            suchInfoGroup.startAnimation(fadeIn);
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animation animation) {}
+                    });
+                    fadeIn.setAnimationListener(new Animation.AnimationListener() {
+                        @Override
+                        public void onAnimationStart(Animation animation) {}
+
+                        @Override
+                        public void onAnimationEnd(Animation animation) {
+                            currentlyAnim = false;
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animation animation) {}
+                    });
+                    suchInfoGroup.startAnimation(fadeOut);
+                    return;
+                }
+
+                final int animTime = (int)(ctx.getResources().getInteger(R.integer.anim_refresh_time) / 2.5);
+
+                final Animation[] fadeOuts = { AnimationUtils.loadAnimation(ctx, R.anim.textfade_out),
+                        AnimationUtils.loadAnimation(ctx, R.anim.textfade_out),
+                        AnimationUtils.loadAnimation(ctx, R.anim.textfade_out) };
+                final Animation[] fadeIns = { AnimationUtils.loadAnimation(ctx, R.anim.textfade_in),
+                        AnimationUtils.loadAnimation(ctx, R.anim.textfade_in),
+                        AnimationUtils.loadAnimation(ctx, R.anim.textfade_in) };
+
+                final TimerTask tempGroupTimer = new TimerTask() {
+                    @Override
+                    public void run() {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                suchTempGroup.startAnimation(fadeOuts[1]);
+                            }
+                        });
+                    }
+                };
+
+                final TimerTask locationTimer = new TimerTask() {
+                    @Override
+                    public void run() {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                suchLocation.startAnimation(fadeOuts[2]);
+                            }
+                        });
+                    }
+                };
+                fadeOuts[0].setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+                        new Timer().schedule(tempGroupTimer, animTime);
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        suchStatus.setText(description);
+                        suchStatus.startAnimation(fadeIns[0]);
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {}
+                });
+                fadeOuts[1].setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+                        new Timer().schedule(locationTimer, animTime);
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        setTemp(temp);
+                        suchTempGroup.startAnimation(fadeIns[1]);
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {}
+                });
+                fadeOuts[2].setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {}
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        suchLocation.setText(currentLocation);
+                        suchLocation.startAnimation(fadeIns[2]);
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {}
+                });
+                fadeIns[2].setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {}
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        currentlyAnim = false;
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {}
+                });
+
+                suchStatus.startAnimation(fadeOuts[0]);
             } catch (JSONException ex) {
                 Log.wtf(TAG, ex);
+                currentlyAnim = false;
             }
         }
 
         private void setTemp(double temp) {
+            currentTemp = temp;
+            boolean metric = true;
             temp = temp - 273.15d; // C
             if(UnitLocale.getDefault() == UnitLocale.IMPERIAL && !forceMetric) {
                 temp = temp * 1.8d + 32d; // F
+                metric = false;
             }
-            currentTemp = temp;
+            currentlyMetric = metric;
             temp = Math.round(temp);
             DecimalFormat df = new DecimalFormat();
             df.setNegativePrefix("");
