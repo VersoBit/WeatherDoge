@@ -129,7 +129,7 @@ public class MainActivity extends Activity implements
     private int[] colors;
     private Timer overlayTimer;
     private Queue<TextView> overlays = new ArrayDeque<>();
-    private int currentBackgroundId = R.drawable.sky_01d;
+    private int currentBackgroundId = Integer.MIN_VALUE;
     private int currentDogeId = R.drawable.doge_01d;
     private boolean currentlyAnim = false;
 
