@@ -36,6 +36,16 @@
         android:layout_gravity="center_horizontal" />
 
     <TextView
+        android:layout_gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="@string/dialog_about_copyright"
+        android:id="@+id/dialog_about_copyright"
+        android:textColor="@android:color/black"
+        android:gravity="center_horizontal" />
+
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
