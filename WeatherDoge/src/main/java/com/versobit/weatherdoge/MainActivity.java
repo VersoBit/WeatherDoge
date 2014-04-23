@@ -292,7 +292,8 @@ public class MainActivity extends Activity implements
         Canvas canvas = new Canvas(scaledSky);
         float skyHeight = (float)theSky.getScaledHeight(canvas); // Height of the sky scaled on the canvas
         skyHeight = skyHeight == 0f ? metrics.heightPixels : skyHeight; // If not scaled, use device height
-        float newScale = metrics.heightPixels / skyHeight; // The scale we need to achieve the device's height
+        int compensationPixels = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT ? 4 : 0; // Weird. Compensate for translucent status bar
+        float newScale = (metrics.heightPixels + compensationPixels) / skyHeight; // The scale we need to achieve the device's height
         // Magic number to get some important image elements onscreen
         float moveAmount = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 180, metrics);
 

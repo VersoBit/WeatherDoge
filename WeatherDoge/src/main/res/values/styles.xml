@@ -22,7 +22,6 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="@android:style/Theme.NoTitleBar">
         <item name="android:windowNoTitle">true</item>
-        <!--<item name="android:background">@drawable/placeholder_bg</item>-->
     </style>
     
     <style name="AppTheme.TextViewDropShadow">
