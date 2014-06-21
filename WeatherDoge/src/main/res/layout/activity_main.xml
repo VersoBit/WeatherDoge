@@ -83,7 +83,7 @@
                     android:text="@string/very_negative"
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
-                    android:visibility="gone" />
+                    android:visibility="invisible" />
                 <TextView
                     android:layout_centerHorizontal="true"
                     android:lineSpacingExtra="-20dp"
@@ -102,7 +102,7 @@
                     android:text="@string/many_degree"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:visibility="gone" />
+                    android:visibility="invisible" />
             </RelativeLayout>
 
             <TextView

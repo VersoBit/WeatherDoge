@@ -38,6 +38,8 @@
     <string name="such_metric_desc">Force metric units in the US, Liberia, and Burma.</string>
     <string name="force_location_name">Always use this location</string>
     <string name="unset">Wow unset</string>
+    <string name="very_neue_name">Very Neue</string>
+    <string name="very_neue_desc">Use Comic Neue!</string>
 
     <string name="about">About</string>
     <string name="made_with_love">Made with ♥ by VersoBit</string>

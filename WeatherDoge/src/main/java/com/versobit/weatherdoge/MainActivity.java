@@ -100,6 +100,7 @@ public class MainActivity extends Activity implements
 
     private boolean forceMetric = false;
     private String forceLocation = "";
+    private boolean useNeue = false;
 
     private RelativeLayout suchLayout;
     private ImageView suchBg;
@@ -145,7 +146,6 @@ public class MainActivity extends Activity implements
         wows = getResources().getStringArray(R.array.wows);
         colors = getResources().getIntArray(R.array.wow_colors);
 
-        wowComicSans = Typeface.createFromAsset(getAssets(), "comic.ttf");
         suchLayout = (RelativeLayout)findViewById(R.id.main_suchlayout);
         suchBg = (ImageView)findViewById(R.id.main_suchbg);
         suchOverlay = (RelativeLayout)findViewById(R.id.main_suchoverlay);
@@ -163,16 +163,12 @@ public class MainActivity extends Activity implements
             }
         });
         suchStatus = (TextView)findViewById(R.id.main_suchstatus);
-        suchStatus.setTypeface(wowComicSans);
+
         suchTempGroup = (RelativeLayout)findViewById(R.id.main_suchtempgroup);
         suchNegative = (TextView)findViewById(R.id.main_suchnegative);
-        suchNegative.setTypeface(wowComicSans);
         suchTemp = (TextView)findViewById(R.id.main_suchtemp);
-        suchTemp.setTypeface(wowComicSans);
         suchDegree = (TextView)findViewById(R.id.main_suchdegree);
-        suchDegree.setTypeface(wowComicSans);
         suchLocation = (TextView)findViewById(R.id.main_suchlocation);
-        suchLocation.setTypeface(wowComicSans);
         suchShare = (ImageView)findViewById(R.id.main_suchshare);
         suchShare.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -217,6 +213,8 @@ public class MainActivity extends Activity implements
                 return true;
             }
         });
+
+        updateFont();
         if(!forceLocation.isEmpty()) {
             new GetWeather(this).execute();
         } else if(playServicesAvailable()) {
@@ -229,6 +227,7 @@ public class MainActivity extends Activity implements
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
         forceMetric = sp.getBoolean(OptionsActivity.PREF_FORCE_METRIC, false);
         forceLocation = sp.getString(OptionsActivity.PREF_FORCE_LOCATION, "");
+        useNeue = sp.getBoolean(OptionsActivity.PREF_USE_COMIC_NEUE, false);
     }
 
     private void initOverlayTimer() {
@@ -365,7 +364,11 @@ public class MainActivity extends Activity implements
     @Override
     protected void onResume() {
         super.onResume();
+        boolean oldNeue = useNeue;
         loadOptions();
+        if(useNeue != oldNeue) {
+            updateFont();
+        }
         if(forceLocation.isEmpty()) {
             if(wowClient == null) {
                 wowClient = new LocationClient(this, this, this);
@@ -380,6 +383,37 @@ public class MainActivity extends Activity implements
             }
             new GetWeather(this).execute();
         }
+    }
+
+    private void updateFont() {
+        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams)suchTemp.getLayoutParams();
+        Typeface degTypeface;
+        if(useNeue) {
+            wowComicSans = Typeface.createFromAsset(getAssets(), "ComicNeue-Regular.ttf");
+
+            // Roboto Thin is used because Comic Neue's degree symbol is too thick
+            degTypeface = Typeface.createFromAsset(getAssets(), "Roboto-Thin.ttf");
+
+            // Horizontal and vertical centering for proper display
+            layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
+
+            // This only works when going from Comic Sans -> Comic Neue, not the other way around
+            // Android doesn't redraw Comic Sans correctly, or something...
+            for(TextView tv : overlays) {
+                tv.setTypeface(wowComicSans);
+            }
+        }
+        else {
+            wowComicSans = Typeface.createFromAsset(getAssets(), "comic.ttf");
+            degTypeface = wowComicSans;
+            layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, 0); // Disable vertical center
+        }
+        suchDegree.setTypeface(degTypeface);
+        suchStatus.setTypeface(wowComicSans);
+        suchLocation.setTypeface(wowComicSans);
+        suchNegative.setTypeface(wowComicSans);
+        suchTemp.setTypeface(wowComicSans);
+        suchTemp.setLayoutParams(layoutParams);
     }
 
     private boolean playServicesAvailable() {

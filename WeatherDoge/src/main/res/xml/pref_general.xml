@@ -29,5 +29,10 @@
         android:title="@string/force_location_name"
         android:defaultValue=""
         android:summary="@string/unset" />
+    <CheckBoxPreference
+        android:key="pref_use_comic_neue"
+        android:title="@string/very_neue_name"
+        android:defaultValue="false"
+        android:summary="@string/very_neue_desc" />
 
 </PreferenceScreen>
