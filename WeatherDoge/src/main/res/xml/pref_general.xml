@@ -34,5 +34,8 @@
         android:title="@string/very_neue_name"
         android:defaultValue="false"
         android:summary="@string/very_neue_desc" />
+    <Preference android:key="pref_drop_shadow"
+        android:title="@string/much_shadow_name"
+        android:summary="@string/much_shadow_desc" />
 
 </PreferenceScreen>

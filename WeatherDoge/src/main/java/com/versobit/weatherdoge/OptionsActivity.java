@@ -43,6 +43,7 @@ public class OptionsActivity extends PreferenceActivity {
     static final String PREF_FORCE_METRIC = "pref_force_metric";
     static final String PREF_FORCE_LOCATION = "pref_force_location";
     static final String PREF_USE_COMIC_NEUE = "pref_use_comic_neue";
+    static final String PREF_DROP_SHADOW = "pref_drop_shadow";
     static final String PREF_ABOUT_VERSION = "pref_about_version";
     static final String PREF_ABOUT_CONTRIBUTE = "pref_about_contribute";
     static final String PREF_ABOUT_ADD_CREDITS = "pref_about_additional_credits";
@@ -66,6 +67,13 @@ public class OptionsActivity extends PreferenceActivity {
 
         // Add 'general' preferences.
         addPreferencesFromResource(R.xml.pref_general);
+        findPreference(PREF_DROP_SHADOW).setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                new DropShadowDialog(OptionsActivity.this).show();
+                return true;
+            }
+        });
 
         // Add 'about' preferences, and a corresponding header.
         PreferenceCategory fakeHeader = new PreferenceCategory(this);

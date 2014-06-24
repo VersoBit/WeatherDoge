@@ -30,6 +30,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Typeface;
@@ -47,6 +48,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
+import android.view.Gravity;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -101,6 +103,10 @@ public class MainActivity extends Activity implements
     private boolean forceMetric = false;
     private String forceLocation = "";
     private boolean useNeue = false;
+    private float shadowR = 1f;
+    private float shadowX = 3f;
+    private float shadowY = 3f;
+    private boolean shadowAdjs = false;
 
     private RelativeLayout suchLayout;
     private ImageView suchBg;
@@ -163,7 +169,6 @@ public class MainActivity extends Activity implements
             }
         });
         suchStatus = (TextView)findViewById(R.id.main_suchstatus);
-
         suchTempGroup = (RelativeLayout)findViewById(R.id.main_suchtempgroup);
         suchNegative = (TextView)findViewById(R.id.main_suchnegative);
         suchTemp = (TextView)findViewById(R.id.main_suchtemp);
@@ -215,6 +220,8 @@ public class MainActivity extends Activity implements
         });
 
         updateFont();
+        updateShadow();
+
         if(!forceLocation.isEmpty()) {
             new GetWeather(this).execute();
         } else if(playServicesAvailable()) {
@@ -228,6 +235,10 @@ public class MainActivity extends Activity implements
         forceMetric = sp.getBoolean(OptionsActivity.PREF_FORCE_METRIC, false);
         forceLocation = sp.getString(OptionsActivity.PREF_FORCE_LOCATION, "");
         useNeue = sp.getBoolean(OptionsActivity.PREF_USE_COMIC_NEUE, false);
+        shadowR = sp.getFloat(OptionsActivity.PREF_DROP_SHADOW + "_radius", 1f);
+        shadowX = sp.getFloat(OptionsActivity.PREF_DROP_SHADOW + "_x", 3f);
+        shadowY = sp.getFloat(OptionsActivity.PREF_DROP_SHADOW + "_y", 3f);
+        shadowAdjs = sp.getBoolean(OptionsActivity.PREF_DROP_SHADOW + "_adjs", false);
     }
 
     private void initOverlayTimer() {
@@ -259,6 +270,20 @@ public class MainActivity extends Activity implements
                         if(overlays.size() == 4) {
                             suchOverlay.removeView(overlays.remove());
                         }
+                        if(shadowAdjs) {
+                            tv.setShadowLayer(shadowR, shadowX, shadowY, Color.BLACK);
+                        }
+                        // 15sp is a magic padding number I've tested with
+                        int padding = (int)Math.ceil(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 15, getResources().getDisplayMetrics()));
+                        params.width += padding * 2; // left + right
+                        params.height += padding * 2; // top + bottom
+                        // Padding is subtracted from top/left margins so the measured values are still accurate
+                        // We don't care if the shadow clips on the edge of the screen
+                        // abs prevents possibly dangerous negative margins
+                        params.leftMargin = Math.abs(params.leftMargin - padding);
+                        params.topMargin = Math.abs(params.topMargin - padding);
+                        tv.setGravity(Gravity.CENTER); // Text is centered within the now padded view
+
                         overlays.add(tv);
                         suchOverlay.addView(tv, params);
                     }
@@ -365,9 +390,15 @@ public class MainActivity extends Activity implements
     protected void onResume() {
         super.onResume();
         boolean oldNeue = useNeue;
+        float[] oldShadowFloats = { shadowR, shadowX, shadowY };
+        boolean oldShadowBool = shadowAdjs;
         loadOptions();
         if(useNeue != oldNeue) {
             updateFont();
+        }
+        if(oldShadowFloats[0] != shadowR || oldShadowFloats[1] != shadowX || oldShadowFloats[2] != shadowY
+                || oldShadowBool != shadowAdjs) {
+            updateShadow();
         }
         if(forceLocation.isEmpty()) {
             if(wowClient == null) {
@@ -414,6 +445,21 @@ public class MainActivity extends Activity implements
         suchNegative.setTypeface(wowComicSans);
         suchTemp.setTypeface(wowComicSans);
         suchTemp.setLayoutParams(layoutParams);
+    }
+
+    private void updateShadow() {
+        suchStatus.setShadowLayer(shadowR, shadowX, shadowY, Color.BLACK);
+        suchNegative.setShadowLayer(shadowR, shadowX, shadowY, Color.BLACK);
+        suchTemp.setShadowLayer(shadowR, shadowX, shadowY, Color.BLACK);
+        suchDegree.setShadowLayer(shadowR, shadowX, shadowY, Color.BLACK);
+        suchLocation.setShadowLayer(shadowR, shadowX, shadowY, Color.BLACK);
+        for(TextView tv : overlays) {
+            if(shadowAdjs) {
+                tv.setShadowLayer(shadowR, shadowX, shadowY, Color.BLACK);
+                continue;
+            }
+            tv.setShadowLayer(0, 0, 0, 0);
+        }
     }
 
     private boolean playServicesAvailable() {

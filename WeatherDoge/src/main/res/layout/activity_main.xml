@@ -68,7 +68,9 @@
                 android:gravity="center"
                 android:layout_marginBottom="-20dp"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:paddingLeft="10sp"
+                android:paddingRight="10sp" />
 
             <RelativeLayout
                 android:layout_width="400dp"
@@ -102,7 +104,9 @@
                     android:text="@string/many_degree"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:visibility="invisible" />
+                    android:visibility="invisible"
+                    android:paddingLeft="2sp"
+                    android:paddingRight="2sp" />
             </RelativeLayout>
 
             <TextView
@@ -112,7 +116,9 @@
                 android:textSize="25sp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="-5dp" />
+                android:layout_marginTop="-5dp"
+                android:paddingRight="10sp"
+                android:paddingLeft="10sp" />
         </LinearLayout>
     </RelativeLayout>
 

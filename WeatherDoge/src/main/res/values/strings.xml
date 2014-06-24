@@ -33,6 +33,8 @@
     <string name="very_negative">-</string>
 
     <string name="wow">wow</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
 
     <string name="such_metric_name">Such Metric</string>
     <string name="such_metric_desc">Force metric units in the US, Liberia, and Burma.</string>
@@ -40,6 +42,8 @@
     <string name="unset">Wow unset</string>
     <string name="very_neue_name">Very Neue</string>
     <string name="very_neue_desc">Use Comic Neue!</string>
+    <string name="much_shadow_name">Much Shadow</string>
+    <string name="much_shadow_desc">Customize text drop shadow</string>
 
     <string name="about">About</string>
     <string name="made_with_love">Made with ♥ by VersoBit</string>
@@ -72,6 +76,8 @@
 
     <string name="geocoder_error_title">Geocoder Error</string>
     <string name="geocoder_error_msg">Oh noes. There\'s a known problem with the Android geocoding service that causes it to stop functioning properly. A reboot usually fixes this problem. Sorry.</string>
+
+    <string name="dialog_dropshadow_adjectives">Use shadow for doge adjectives</string>
 
     <string-array name="wows">
         <item>wow</item>
