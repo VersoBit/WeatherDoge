@@ -37,7 +37,7 @@ import android.widget.TextView;
 
 import java.text.DecimalFormat;
 
-public class DropShadowDialog extends AlertDialog {
+class DropShadowDialog extends AlertDialog {
 
     private float radius;
     private float x;
