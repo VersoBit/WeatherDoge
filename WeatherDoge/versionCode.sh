@@ -1,3 +1,4 @@
 #!/bin/sh
 
-head -n 1 versionDef.txt
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+head -n 1 $DIR/versionDef.txt
