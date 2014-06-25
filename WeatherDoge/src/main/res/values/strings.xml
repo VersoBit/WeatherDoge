@@ -44,6 +44,8 @@
     <string name="very_neue_desc">Use Comic Neue!</string>
     <string name="much_shadow_name">Much Shadow</string>
     <string name="much_shadow_desc">Customize text drop shadow</string>
+    <string name="text_on_top_name">Text on top</string>
+    <string name="text_on_top_desc">Display doge-isms over weather info</string>
 
     <string name="about">About</string>
     <string name="made_with_love">Made with ♥ by VersoBit</string>

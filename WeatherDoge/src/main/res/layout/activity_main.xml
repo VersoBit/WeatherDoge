@@ -120,6 +120,12 @@
                 android:paddingRight="10sp"
                 android:paddingLeft="10sp" />
         </LinearLayout>
+
+        <RelativeLayout
+            android:id="@+id/main_suchtopoverlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+        </RelativeLayout>
     </RelativeLayout>
 
     <LinearLayout

@@ -37,5 +37,9 @@
     <Preference android:key="pref_drop_shadow"
         android:title="@string/much_shadow_name"
         android:summary="@string/much_shadow_desc" />
+    <CheckBoxPreference android:key="pref_text_on_top"
+        android:title="@string/text_on_top_name"
+        android:defaultValue="false"
+        android:summary="@string/text_on_top_desc" />
 
 </PreferenceScreen>

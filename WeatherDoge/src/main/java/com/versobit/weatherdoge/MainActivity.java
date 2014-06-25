@@ -107,10 +107,12 @@ public class MainActivity extends Activity implements
     private float shadowX = 3f;
     private float shadowY = 3f;
     private boolean shadowAdjs = false;
+    private boolean textOnTop = false;
 
     private RelativeLayout suchLayout;
     private ImageView suchBg;
     private RelativeLayout suchOverlay;
+    private RelativeLayout suchTopOverlay;
     private LinearLayout suchInfoGroup;
     private ImageView suchDoge;
     private TextView suchStatus;
@@ -155,6 +157,7 @@ public class MainActivity extends Activity implements
         suchLayout = (RelativeLayout)findViewById(R.id.main_suchlayout);
         suchBg = (ImageView)findViewById(R.id.main_suchbg);
         suchOverlay = (RelativeLayout)findViewById(R.id.main_suchoverlay);
+        suchTopOverlay = (RelativeLayout)findViewById(R.id.main_suchtopoverlay);
         suchInfoGroup = (LinearLayout)findViewById(R.id.main_suchinfogroup);
         suchDoge = (ImageView)findViewById(R.id.main_suchdoge);
         suchDoge.setOnClickListener(new View.OnClickListener() {
@@ -239,6 +242,7 @@ public class MainActivity extends Activity implements
         shadowX = sp.getFloat(OptionsActivity.PREF_DROP_SHADOW + "_x", 3f);
         shadowY = sp.getFloat(OptionsActivity.PREF_DROP_SHADOW + "_y", 3f);
         shadowAdjs = sp.getBoolean(OptionsActivity.PREF_DROP_SHADOW + "_adjs", false);
+        textOnTop = sp.getBoolean(OptionsActivity.PREF_TEXT_ON_TOP, false);
     }
 
     private void initOverlayTimer() {
@@ -268,7 +272,10 @@ public class MainActivity extends Activity implements
                         params.leftMargin = absPos[0] == 0 ? 0 : r.nextInt(absPos[0]);
                         params.topMargin = absPos[1] == 0 ? 0 : r.nextInt(absPos[1]);
                         if(overlays.size() == 4) {
-                            suchOverlay.removeView(overlays.remove());
+                            // If the view doesn't exist in the particular overlay it will not throw an exception
+                            View v = overlays.remove();
+                            suchOverlay.removeView(v);
+                            suchTopOverlay.removeView(v);
                         }
                         if(shadowAdjs) {
                             tv.setShadowLayer(shadowR, shadowX, shadowY, Color.BLACK);
@@ -285,6 +292,10 @@ public class MainActivity extends Activity implements
                         tv.setGravity(Gravity.CENTER); // Text is centered within the now padded view
 
                         overlays.add(tv);
+                        if(textOnTop) {
+                            suchTopOverlay.addView(tv, params);
+                            return;
+                        }
                         suchOverlay.addView(tv, params);
                     }
                 });
