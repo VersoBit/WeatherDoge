@@ -13,18 +13,16 @@ wow. Weather Doge is the full [dogeweather.com](http://dogeweather.com/) experie
  * Backgrounds are properly rendered across the majority (all?) of Android phone screen sizes and densities.
  * Ability to force metric units in locales where metric is not the default
  * Option to set a constant OpenWeatherMap location, instead of relying on location services.
+ * Configurable drop shadows for all text
+ * [Comic Neue](http://comicneue.com/)
+ * Ability to force doge adjectives to appear above weather info
  * Open-source!
 
 ## TODO?
  * Create a Google Play Services-free build variant to eliminate dependancies on non-FOSS code.
- * [Comic Neue](http://comicneue.com/)
  * Implement CSPRNG
- * Option to force doge adjectives over top of weather info
- * Configurable drop shadows for all text
- * Ability to force doge adjectives to appear above weather info
  * Animate doge adjectives
  * Configure the temperatures at which certain doge adjectives appear
- * Cool doge loading gifs or something
 
 ## Building & Contributing
 Import the project into Android Studio and you'll be up and running in no time. The build process relies on a shell script. Building will only work as-is for Mac and Linux systems until we create a Windows variant.
