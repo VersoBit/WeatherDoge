@@ -28,11 +28,11 @@ def getVersionName = { ->
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 'android-L'
+    compileSdkVersion 19
     buildToolsVersion '20.0.0'
     defaultConfig {
         minSdkVersion 10
-        targetSdkVersion 20
+        targetSdkVersion 19
         versionCode getVersionCode()
         versionName getVersionName()
     }
@@ -44,6 +44,6 @@ android {
 
 dependencies {
     compile 'com.google.android.gms:play-services:+'
-    compile 'com.android.support:support-v4:+'
+    compile 'com.android.support:support-v4:20.+'
     compile files('libs/commons-io-2.4.jar')
 }
