@@ -23,7 +23,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.method.LinkMovementMethod;
@@ -50,8 +49,7 @@ class AboutDialog extends AlertDialog {
                 getContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://versobit.com/")));
             }
         });
-        PackageInfo pi = WeatherDoge.getPackageInfo(getContext());
-                ((TextView) v.findViewById(R.id.dialog_about_version)).setText(pi.versionName);
+        ((TextView) v.findViewById(R.id.dialog_about_version)).setText(BuildConfig.VERSION_NAME);
         ((TextView)v.findViewById(R.id.dialog_about_text2)).setMovementMethod(LinkMovementMethod.getInstance());
         v.findViewById(R.id.dialog_about_contact).setOnClickListener(new View.OnClickListener() {
             @Override

@@ -29,14 +29,6 @@ import java.util.Random;
 
 
 public class WeatherDoge extends Application {
-    static PackageInfo getPackageInfo(Context ctx) {
-        try {
-            return ctx.getPackageManager().getPackageInfo(ctx.getPackageName(), 0);
-        } catch (PackageManager.NameNotFoundException ex) {
-            //
-        }
-        return null;
-    }
 
     static int skySelect(String icon) {
         int img = Integer.parseInt(icon.substring(0, 2));

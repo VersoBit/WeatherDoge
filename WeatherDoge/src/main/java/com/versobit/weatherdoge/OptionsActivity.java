@@ -19,7 +19,6 @@
 
 package com.versobit.weatherdoge;
 
-import android.content.pm.PackageInfo;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -83,8 +82,7 @@ public class OptionsActivity extends PreferenceActivity {
         addPreferencesFromResource(R.xml.pref_about);
 
         Preference aboutVersion = findPreference(PREF_ABOUT_VERSION);
-        PackageInfo pInfo = WeatherDoge.getPackageInfo(this);
-        aboutVersion.setTitle(getString(R.string.app_name) + " v" + pInfo.versionName.split("-")[0]);
+        aboutVersion.setTitle(getString(R.string.app_name) + " v" + BuildConfig.VERSION_NAME.split("-")[0]);
         aboutVersion.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
