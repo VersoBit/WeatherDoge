@@ -479,7 +479,7 @@ public class MainActivity extends Activity implements
             return true;
         }
         Dialog errorDialog = GooglePlayServicesUtil.getErrorDialog(result, this, REQUEST_PLAY_ERR_DIAG);
-        if(errorDialog != null) {
+        if(errorDialog != null && !isFinishing()) {
             errorDialog.show();
         }
         return false;
@@ -628,7 +628,10 @@ public class MainActivity extends Activity implements
                                     dialog.dismiss();
                                 }
                             });
-                            errorDialog = adb.show();
+                            // Prevent crash if MainActivity is finishing while attempting to display a new dialog
+                            if(!isFinishing()) {
+                                errorDialog = adb.show();
+                            }
                         }
                     });
                 }
