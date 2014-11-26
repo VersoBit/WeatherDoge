@@ -86,7 +86,7 @@ import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class MainActivity extends Activity implements
+final public class MainActivity extends Activity implements
         GooglePlayServicesClient.ConnectionCallbacks,
         GooglePlayServicesClient.OnConnectionFailedListener,
         LocationListener {
@@ -526,7 +526,7 @@ public class MainActivity extends Activity implements
         new GetWeather(this).execute(whereIsDoge);
     }
 
-    private class GetWeather extends AsyncTask<Location, Void, JSONArray> {
+    private final class GetWeather extends AsyncTask<Location, Void, JSONArray> {
         private static final String TAG = "GetWeather";
         private Context ctx;
         GetWeather(Context ctx) {

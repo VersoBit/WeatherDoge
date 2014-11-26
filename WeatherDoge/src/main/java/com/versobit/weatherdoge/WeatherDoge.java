@@ -28,7 +28,7 @@ import java.lang.reflect.Array;
 import java.util.Random;
 
 
-public class WeatherDoge extends Application {
+final public class WeatherDoge extends Application {
 
     static int skySelect(String icon) {
         int img = Integer.parseInt(icon.substring(0, 2));

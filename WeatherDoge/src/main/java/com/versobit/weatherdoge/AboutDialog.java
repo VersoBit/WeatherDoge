@@ -29,7 +29,7 @@ import android.text.method.LinkMovementMethod;
 import android.view.View;
 import android.widget.TextView;
 
-class AboutDialog extends AlertDialog {
+final class AboutDialog extends AlertDialog {
     AboutDialog(Context ctx) {
         super(ctx);
     }

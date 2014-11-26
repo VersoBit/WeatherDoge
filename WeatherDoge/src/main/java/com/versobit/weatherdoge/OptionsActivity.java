@@ -37,7 +37,7 @@ import android.preference.PreferenceManager;
  * href="http://developer.android.com/guide/topics/ui/settings.html">Settings
  * API Guide</a> for more information on developing a Settings UI.
  */
-public class OptionsActivity extends PreferenceActivity {
+final public class OptionsActivity extends PreferenceActivity {
 
     static final String PREF_FORCE_METRIC = "pref_force_metric";
     static final String PREF_FORCE_LOCATION = "pref_force_location";

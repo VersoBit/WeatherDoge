@@ -30,7 +30,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
 
-class ContributeDialog extends AlertDialog {
+final class ContributeDialog extends AlertDialog {
     ContributeDialog(Context ctx) {
         super(ctx);
     }

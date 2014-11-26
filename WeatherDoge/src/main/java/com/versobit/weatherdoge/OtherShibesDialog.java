@@ -25,7 +25,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.webkit.WebView;
 
-class OtherShibesDialog extends AlertDialog {
+final class OtherShibesDialog extends AlertDialog {
     OtherShibesDialog(Context ctx) {
         super(ctx);
     }
