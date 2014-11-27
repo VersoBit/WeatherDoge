@@ -35,6 +35,7 @@ android {
         targetSdkVersion 21
         versionCode getVersionCode()
         versionName getVersionName()
+        buildConfigField "String", "OWM_APPID", '""'
     }
 }
 
