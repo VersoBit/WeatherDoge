@@ -41,6 +41,9 @@ final class Cache {
     // http://gis.stackexchange.com/a/8674
     private static final int CACHE_COORD_FUZZ = 2; // 1.1km, more digits -> less fuzz
 
+    // For super fast access when the app is still around
+    private static WeatherUtil.WeatherData memCacheWeatherData = null;
+
     private Cache() {
         //
     }
@@ -57,6 +60,10 @@ final class Cache {
     // UI and that's best left up to the caller.
     // Returns null if retrieval failed or the data has expired.
     private static WeatherUtil.WeatherData getWeatherData(Context ctx, double latitude, double longitude, String location) {
+        if(memCacheWeatherData != null && !isWeatherDataExpired(memCacheWeatherData, latitude, longitude, location)) {
+            return memCacheWeatherData;
+        }
+
         FileInputStream fileIn = null;
         ObjectInputStream objectIn = null;
         try {
@@ -68,35 +75,10 @@ final class Cache {
             fileIn = new FileInputStream(file);
             objectIn = new ObjectInputStream(fileIn);
             WeatherUtil.WeatherData data = (WeatherUtil.WeatherData)objectIn.readObject();
-
-            // Expired?
-            if((data.time.getTime() + CACHE_MAX_AGE) < System.currentTimeMillis()) {
-                return null;
+            if(!isWeatherDataExpired(data, latitude, longitude, location)) {
+                memCacheWeatherData = data;
+                return data;
             }
-
-            // Location still accurate?
-            if(latitude == Double.MIN_VALUE && longitude == Double.MIN_VALUE) {
-                if(location == null) {
-                    throw new IllegalArgumentException();
-                }
-                if(!data.place.equals(location)) {
-                    return null;
-                }
-            } else {
-                // Round both sets of coordinates
-                double[] cacheCoords = {
-                        BigDecimal.valueOf(data.latitude).setScale(CACHE_COORD_FUZZ, RoundingMode.DOWN).doubleValue(),
-                        BigDecimal.valueOf(data.longitude).setScale(CACHE_COORD_FUZZ, RoundingMode.DOWN).doubleValue() };
-                double[] currentCoords = {
-                        BigDecimal.valueOf(latitude).setScale(CACHE_COORD_FUZZ, RoundingMode.DOWN).doubleValue(),
-                        BigDecimal.valueOf(longitude).setScale(CACHE_COORD_FUZZ, RoundingMode.DOWN).doubleValue() };
-                if(cacheCoords[0] != currentCoords[0] || cacheCoords[1] != currentCoords[1]) {
-                    // Difference must be larger than the radius possible with CACHE_COORD_FUZZ digits
-                    return null;
-                }
-            }
-            // Must be good to go!
-            return data;
         } catch (Exception ex) {
             Log.e(TAG, "Failed to retrieve or load WeatherData.", ex);
         } finally {
@@ -104,6 +86,37 @@ final class Cache {
             close(fileIn);
         }
         return null;
+    }
+
+    private static boolean isWeatherDataExpired(WeatherUtil.WeatherData data, double latitude, double longitude, String location) {
+        // Expired?
+        if((data.time.getTime() + CACHE_MAX_AGE) < System.currentTimeMillis()) {
+            return true;
+        }
+
+        // Location still accurate?
+        if(latitude == Double.MIN_VALUE && longitude == Double.MIN_VALUE) {
+            if(location == null) {
+                throw new IllegalArgumentException();
+            }
+            if(!data.place.equals(location)) {
+                return true;
+            }
+        } else {
+            // Round both sets of coordinates
+            double[] cacheCoords = {
+                    BigDecimal.valueOf(data.latitude).setScale(CACHE_COORD_FUZZ, RoundingMode.DOWN).doubleValue(),
+                    BigDecimal.valueOf(data.longitude).setScale(CACHE_COORD_FUZZ, RoundingMode.DOWN).doubleValue() };
+            double[] currentCoords = {
+                    BigDecimal.valueOf(latitude).setScale(CACHE_COORD_FUZZ, RoundingMode.DOWN).doubleValue(),
+                    BigDecimal.valueOf(longitude).setScale(CACHE_COORD_FUZZ, RoundingMode.DOWN).doubleValue() };
+            if(cacheCoords[0] != currentCoords[0] || cacheCoords[1] != currentCoords[1]) {
+                // Difference must be larger than the radius possible with CACHE_COORD_FUZZ digits
+                return true;
+            }
+        }
+        // Must be good to go!
+        return false;
     }
 
     // Fire and forget cache storage
@@ -119,6 +132,8 @@ final class Cache {
 
         @Override
         protected Void doInBackground(Object... params) {
+            memCacheWeatherData = (WeatherUtil.WeatherData)params[1];
+
             FileOutputStream fileOut = null;
             ObjectOutputStream objectOut = null;
             try {
