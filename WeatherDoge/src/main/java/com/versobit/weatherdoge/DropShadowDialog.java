@@ -95,12 +95,12 @@ final class DropShadowDialog extends AlertDialog {
         setButton(DialogInterface.BUTTON_POSITIVE, getContext().getString(R.string.save), new OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                SharedPreferences.Editor editor = sp.edit();
-                editor.putFloat(OptionsActivity.PREF_DROP_SHADOW + "_radius", radius);
-                editor.putFloat(OptionsActivity.PREF_DROP_SHADOW + "_x", x);
-                editor.putFloat(OptionsActivity.PREF_DROP_SHADOW + "_y", y);
-                editor.putBoolean(OptionsActivity.PREF_DROP_SHADOW + "_adjs", adjs);
-                editor.commit();
+                sp.edit()
+                .putFloat(OptionsActivity.PREF_DROP_SHADOW + "_radius", radius)
+                .putFloat(OptionsActivity.PREF_DROP_SHADOW + "_x", x)
+                .putFloat(OptionsActivity.PREF_DROP_SHADOW + "_y", y)
+                .putBoolean(OptionsActivity.PREF_DROP_SHADOW + "_adjs", adjs)
+                .apply();
             }
         });
 
