@@ -19,7 +19,6 @@
 
 package com.versobit.weatherdoge;
 
-import android.location.Address;
 import android.util.Log;
 
 import org.apache.commons.io.IOUtils;
@@ -46,14 +45,44 @@ final class WeatherUtil {
     private static final Pattern YAHOO_TIME = Pattern.compile("([0-9]{1,2}):([0-9]{2}) (am|pm)");
     private static final SimpleDateFormat YAHOO_DATE_FORMAT = new SimpleDateFormat("EEE, d MMM yyyy h:m a zzz");
 
-    static WeatherData getWeather(Address address) {
-        return getWeatherFromYahoo(address.getLatitude(), address.getLongitude(), null);
+    private WeatherUtil() {
+        //
+    }
+
+    // Fetch weather from a general location search string. Source dependent. Your mileage may vary.
+    static WeatherData getWeather(String location, Source source) {
+        return getWeather(Double.MIN_VALUE, Double.MIN_VALUE, location, source);
+    }
+
+    // Fetch weather from geographic coordinates
+    static WeatherData getWeather(double latitude, double longitude, Source source) {
+        return getWeather(latitude, longitude, null, source);
+    }
+
+    private static WeatherData getWeather(double latitude, double longitude, String location, Source source) {
+        switch (source) {
+            case OPEN_WEATHER_MAP:
+                return getWeatherFromOWM(latitude, longitude, location);
+            case YAHOO:
+                return getWeatherFromYahoo(latitude, longitude, location);
+        }
+        throw new IllegalArgumentException("No supported weather source provided.");
     }
 
     private static WeatherData getWeatherFromYahoo(double latitude, double longitude, String location) {
         try {
-            String query = URLEncoder.encode("select units, item.condition, astronomy from weather.forecast where woeid in (select woeid from geo.placefinder where text = \""+ String.valueOf(latitude) + ", " + String.valueOf(longitude) + "\" and gflags = \"R\")", "UTF-8");
-            URL url = new URL("https://query.yahooapis.com/v1/public/yql?q=" + query + "&format=json");
+            String yqlText;
+            if(latitude == Double.MIN_VALUE && longitude == Double.MIN_VALUE) {
+                if(location == null) {
+                    throw new IllegalArgumentException("No valid location parameters.");
+                }
+                yqlText = location.replaceAll("[^\\p{L}\\p{Nd} ,-]+", "");
+            } else {
+                yqlText = String.valueOf(latitude) + ", " + String.valueOf(longitude);
+            }
+            URL url = new URL("https://query.yahooapis.com/v1/public/yql?q="
+                    + URLEncoder.encode("select units, item.condition, astronomy from weather.forecast where woeid in (select woeid from geo.placefinder where text = \""
+                    + yqlText + "\" and gflags = \"R\")", "UTF-8") + "&format=json");
             HttpsURLConnection connection = (HttpsURLConnection)url.openConnection();
             try {
                 JSONObject response = new JSONObject(IOUtils.toString(connection.getInputStream()));
@@ -84,24 +113,19 @@ final class WeatherUtil {
         }
     }
 
-    private static WeatherData getWeatherFromOWM(double latitude, double longitude) {
-        return getWeatherFromOWM(latitude, longitude, null);
-    }
-
-    private static WeatherData getWeatherFromOWM(String location) {
-        return getWeatherFromOWM(Double.MIN_VALUE, Double.MIN_VALUE, location);
-    }
-
     private static WeatherData getWeatherFromOWM(double latitude, double longitude, String location) {
         try {
             String query;
             if(latitude == Double.MIN_VALUE && longitude == Double.MIN_VALUE) {
+                if(location == null) {
+                    throw new IllegalArgumentException("No valid location parameters.");
+                }
                 query = "q=" + URLEncoder.encode(location, "UTF-8");
             } else {
-                query = "lat=" + URLEncoder.encode(String.valueOf(latitude), "ISO-8859-1")
-                    + "&lon=" + URLEncoder.encode(String.valueOf(longitude), "ISO-8859-1");
+                query = "lat=" + URLEncoder.encode(String.valueOf(latitude), "UTF-8")
+                    + "&lon=" + URLEncoder.encode(String.valueOf(longitude), "UTF-8");
             }
-            query += "&APPID=" + URLEncoder.encode(BuildConfig.OWM_APPID, "ISO-8859-1");
+            query += "&APPID=" + URLEncoder.encode(BuildConfig.OWM_APPID, "UTF-8");
             URL url = new URL("http://api.openweathermap.org/data/2.5/weather?" + query);
             HttpURLConnection connection = (HttpURLConnection)url.openConnection();
             try {
@@ -265,7 +289,7 @@ final class WeatherUtil {
         final double latitude;
         final double longitude;
         final String place;
-        final Date time;
+        final Date time; // The system time the data was retrieved
         final Source source;
 
         WeatherData(double temperature, String condition, String image, double latitude,
