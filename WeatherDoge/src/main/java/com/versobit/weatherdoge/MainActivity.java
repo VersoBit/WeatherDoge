@@ -94,11 +94,7 @@ final public class MainActivity extends Activity implements
     private static final int REQUEST_PLAY_ERR_DIAG = 52000000;
     private static final int REQUEST_PLAY_CONN_FAIL_RES = 3643;
     private static final long WOW_INTERVAL = 2300;
-    private static final String TAG = "MainActivity";
-    private static final String CACHE_DATA = "cache_data";
-    private static final String CACHE_EXPIRES = "cache_expiry";
-    private static final long CACHE_MAXAGE = 10 * 60 * 1000; // 10 minutes
-    private static final int CACHE_COORD_FUZZ = 2; // 1.1km, more digits -> less fuzz
+    private static final String TAG = MainActivity.class.getSimpleName();
 
     private boolean forceMetric = false;
     private String forceLocation = "";
@@ -164,10 +160,10 @@ final public class MainActivity extends Activity implements
             @Override
             public void onClick(View v) {
                 if(!forceLocation.isEmpty()) {
-                    new GetWeather(MainActivity.this).execute();
+                    new GetWeather().execute();
                 } else if(wowClient != null && wowClient.isConnected()) {
                     whereIsDoge = wowClient.getLastLocation();
-                    new GetWeather(MainActivity.this).execute(whereIsDoge);
+                    new GetWeather().execute(whereIsDoge);
                 }
             }
         });
@@ -188,7 +184,7 @@ final public class MainActivity extends Activity implements
                     i.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_text).split("\n\n")[1]);
                 } else {
                     String unit = (char)0x00b0 + "C";
-                    double tempTemp = currentTemp - 273.15d; // temporary temperature...
+                    double tempTemp = currentTemp; // temporary temperature...
                     if(UnitLocale.getDefault() == UnitLocale.IMPERIAL && !forceMetric) {
                         tempTemp = tempTemp * 1.8d + 32d; // F
                         unit = (char)0x00b0 + "F";
@@ -226,7 +222,7 @@ final public class MainActivity extends Activity implements
         updateShadow();
 
         if(!forceLocation.isEmpty()) {
-            new GetWeather(this).execute();
+            new GetWeather().execute();
         } else if(playServicesAvailable()) {
             wowClient = new LocationClient(this, this, this);
         }
@@ -423,7 +419,7 @@ final public class MainActivity extends Activity implements
                 wowClient.removeLocationUpdates(this);
                 wowClient.disconnect();
             }
-            new GetWeather(this).execute();
+            new GetWeather().execute();
         }
     }
 
@@ -498,7 +494,7 @@ final public class MainActivity extends Activity implements
             Log.e(TAG, "dunno where this shibe is");
             return;
         }
-        new GetWeather(this).execute(whereIsDoge);
+        new GetWeather().execute(whereIsDoge);
     }
 
     @Override
@@ -523,91 +519,48 @@ final public class MainActivity extends Activity implements
     public void onLocationChanged(Location location) {
         Log.d(TAG, "onLocationChanged");
         whereIsDoge = location;
-        new GetWeather(this).execute(whereIsDoge);
+        new GetWeather().execute(whereIsDoge);
     }
 
-    private final class GetWeather extends AsyncTask<Location, Void, JSONArray> {
-        private static final String TAG = "GetWeather";
-        private Context ctx;
-        GetWeather(Context ctx) {
-            super();
-            this.ctx = ctx;
-        }
+    private final class GetWeather extends AsyncTask<Location, Void, Object[]> {
+        private final String TAG = GetWeather.class.getSimpleName();
         @Override
-        protected JSONArray doInBackground(Location... params) {
+        protected Object[] doInBackground(Location... params) {
             if(!Geocoder.isPresent() && forceLocation.isEmpty()) {
                 Log.wtf(TAG, new UnsupportedOperationException("No Geocoder is present on this device."));
                 return null;
             }
-            Location loc = forceLocation.isEmpty() ? params[0] : null;
-            JSONArray data = getCache(loc);
+
+            WeatherUtil.WeatherData data;
+            if(forceLocation.isEmpty()) {
+                data = Cache.getWeatherData(MainActivity.this, params[0].getLatitude(), params[0].getLongitude());
+            } else {
+                data = Cache.getWeatherData(MainActivity.this, forceLocation);
+            }
+
             if(data == null) {
-                data = new JSONArray();
-                Address addr = getAddress(loc);
-                JSONObject weather = getWeatherFromApi(addr);
-                if(weather == null) {
-                    return null; // Error should be previously reported
+                if(forceLocation.isEmpty()) {
+                    data = WeatherUtil.getWeather(params[0].getLatitude(), params[0].getLongitude(), WeatherUtil.Source.YAHOO);
+                } else {
+                    data = WeatherUtil.getWeather(forceLocation, WeatherUtil.Source.YAHOO);
                 }
-                try {
-                    if(forceLocation.isEmpty()) {
-                        data.put(BigDecimal.valueOf(loc.getLatitude()).setScale(CACHE_COORD_FUZZ, BigDecimal.ROUND_DOWN).doubleValue());
-                        data.put(BigDecimal.valueOf(loc.getLongitude()).setScale(CACHE_COORD_FUZZ, BigDecimal.ROUND_DOWN).doubleValue());
-                        data.put("").put(addr.getLocality());
-                    } else {
-                        // Impossible lat lon values
-                        data.put(Double.MIN_VALUE).put(Double.MIN_VALUE).put(forceLocation).put(weather.getString("name"));
-                    }
-                } catch (JSONException ex) {
-                    Log.wtf(TAG, ex);
-                    return null;
+                if(data == null) {
+                    throw new RuntimeException("Weather data is still null!");
                 }
-                data.put(weather);
-                setCache(data);
+                Cache.putWeatherData(MainActivity.this, data);
             }
-            return data;
+
+            Log.d(TAG, data.toString());
+
+            Address addr = data.place != null ? null : getAddress(data.latitude, data.longitude);
+
+            return new Object[] { data, addr };
         }
 
-        private JSONArray getCache(Location loc) {
-            // cache: 0 = lat, 1 = lon, 2 = forceLocation, 3 = locality, 4 = weather json
+        private Address getAddress(double latitude, double longitude) {
+            Geocoder geocoder = new Geocoder(MainActivity.this);
             try {
-                SharedPreferences actPref = getPreferences(MODE_PRIVATE);
-                long expiresWhen = actPref.getLong(CACHE_EXPIRES, Long.MIN_VALUE);
-                if (expiresWhen > System.currentTimeMillis()) {
-                    try {
-                        JSONArray cache = new JSONArray(actPref.getString(CACHE_DATA, "[]"));
-                        if (cache.length() == 0) {
-                            return null;
-                        }
-                        // Check if location is still relevant
-                        if (forceLocation.isEmpty()) {
-                            double cacheLat = BigDecimal.valueOf(loc.getLatitude()).setScale(CACHE_COORD_FUZZ, BigDecimal.ROUND_DOWN).doubleValue();
-                            double cacheLon = BigDecimal.valueOf(loc.getLongitude()).setScale(CACHE_COORD_FUZZ, BigDecimal.ROUND_DOWN).doubleValue();
-                            if (cache.getDouble(0) != cacheLat || cache.getDouble(1) != cacheLon) {
-                                return null;
-                            }
-                        } else if (!cache.getString(2).equalsIgnoreCase(forceLocation)) {
-                            return null;
-                        }
-                        Log.d(TAG, "Cache expires in " + (expiresWhen - System.currentTimeMillis()) / 1000 + " seconds");
-                        return cache;
-                    } catch (JSONException ex) {
-                        Log.wtf(TAG, ex);
-                    }
-                }
-            } catch (NullPointerException ex) {
-                Log.e(TAG, ex.getMessage(), ex);
-                // Catches issues if the cache was improperly saved
-            }
-            return null;
-        }
-
-        private Address getAddress(Location loc) {
-            if(loc == null) {
-                return null;
-            }
-            Geocoder geocoder = new Geocoder(ctx);
-            try {
-                List<Address> addresses = geocoder.getFromLocation(loc.getLatitude(), loc.getLongitude(), 1);
+                List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
                 if(addresses == null || addresses.size() == 0) {
                     return null;
                 }
@@ -620,7 +573,7 @@ final public class MainActivity extends Activity implements
                             if(errorDialog != null && errorDialog.isShowing()) {
                                 return;
                             }
-                            AlertDialog.Builder adb = new AlertDialog.Builder(new ContextThemeWrapper(ctx, R.style.AppTheme_Options));
+                            AlertDialog.Builder adb = new AlertDialog.Builder(new ContextThemeWrapper(MainActivity.this, R.style.AppTheme_Options));
                             adb.setTitle(R.string.geocoder_error_title).setMessage(R.string.geocoder_error_msg);
                             adb.setNeutralButton(R.string.wow, new DialogInterface.OnClickListener() {
                                 @Override
@@ -640,194 +593,59 @@ final public class MainActivity extends Activity implements
             }
         }
 
-        private JSONObject getWeatherFromApi(Address address) {
-            try {
-                HttpClient httpClient = new DefaultHttpClient();
-                String queryString;
-                if(forceLocation.isEmpty() && address != null) {
-                    queryString = "?lat=" + URLEncoder.encode(String.valueOf(address.getLatitude()), "ISO-8859-1") +
-                            "&lon=" + URLEncoder.encode(String.valueOf(address.getLongitude()), "ISO-8859-1");
-                } else {
-                    queryString = "?q=" + URLEncoder.encode(forceLocation, "ISO-8859-1");
-                }
-                HttpGet httpGet = new HttpGet("http://api.openweathermap.org/data/2.5/weather" + queryString);
-                HttpResponse httpResponse = httpClient.execute(httpGet);
-                HttpEntity httpEntity = httpResponse.getEntity();
-                final JSONObject weatherJson = new JSONObject(IOUtils.toString(httpEntity.getContent()));
-                if(weatherJson.getInt("cod") != 200) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                Toast.makeText(ctx, weatherJson.getString("message"), Toast.LENGTH_LONG).show();
-                            } catch (JSONException ex) {
-                                //
-                            }
-                        }
-                    });
-                    Log.e(TAG, "OWM Error " + weatherJson.getInt("cod") + ", " + weatherJson.getString("message"));
-                    return null;
-                }
-                return weatherJson;
-            } catch (Exception ex) {
-                Log.wtf(TAG, ex);
-            }
-            return null;
-        }
-
-        private void setCache(JSONArray data) {
-            Log.d(TAG, "Cache updated");
-            SharedPreferences.Editor actPref = getPreferences(MODE_PRIVATE).edit();
-            actPref.putString(CACHE_DATA, data.toString());
-            actPref.putLong(CACHE_EXPIRES, System.currentTimeMillis() + CACHE_MAXAGE);
-            actPref.apply();
-        }
-
         @Override
-        protected void onPostExecute(JSONArray data) {
+        protected void onPostExecute(Object[] result) {
+            final WeatherUtil.WeatherData data = (WeatherUtil.WeatherData)result[0];
             if(data == null || currentlyAnim) {
                 return;
             }
 
-            try {
-                currentlyAnim = true;
-                currentLocation = data.getString(3);
-                JSONObject subWeather = data.getJSONObject(4).getJSONArray("weather").getJSONObject(0);
-                JSONObject subMain = data.getJSONObject(4).getJSONObject("main");
+            currentlyAnim = true;
+            if(data.place == null) {
+                Address addr = (Address)result[1];
+                currentLocation = addr == null ? "" : addr.getLocality();
+            } else {
+                currentLocation = data.place;
+            }
+            final String description = getString(R.string.wow) + " " + data.condition.trim().toLowerCase();
+            String[] tempAdjs = getResources().getStringArray(WeatherDoge.getTempAdjectives((int)data.temperature));
+            String[] bgAdjs = getResources().getStringArray(WeatherDoge.getBgAdjectives(data.image));
+            weatherAdjectives = WeatherDoge.condoge(tempAdjs, bgAdjs);
 
-                final String description = getString(R.string.wow) + " " + subWeather.getString("description").trim().toLowerCase();
-                final double temp = subMain.getDouble("temp");
+            setDoge(WeatherDoge.dogeSelect(data.image));
+            setBackground(WeatherDoge.skySelect(data.image));
 
-                String[] tempAdjs = getResources().getStringArray(WeatherDoge.getTempAdjectives((int)Math.round(temp - 273.15d)));
-                String[] bgAdjs = getResources().getStringArray(WeatherDoge.getBgAdjectives(subWeather.getString("icon")));
-                weatherAdjectives = WeatherDoge.condoge(tempAdjs, bgAdjs);
+            // Do we need to animate?
+            if(suchStatus.getText().equals(description) && (currentTemp == data.temperature) &&
+                    (currentlyMetric != (UnitLocale.getDefault() == UnitLocale.IMPERIAL && !forceMetric)) &&
+                    suchLocation.getText().equals(currentLocation)) {
+                currentlyAnim = false;
+                return;
+            }
 
-                setDoge(WeatherDoge.dogeSelect(subWeather.getString("icon")));
-
-                setBackground(WeatherDoge.skySelect(subWeather.getString("icon")));
-
-                // Do we need to animate?
-                if(suchStatus.getText().equals(description) && (currentTemp == temp) &&
-                        (currentlyMetric != (UnitLocale.getDefault() == UnitLocale.IMPERIAL && !forceMetric)) &&
-                        suchLocation.getText().equals(currentLocation)) {
-                    currentlyAnim = false;
-                    return;
-                }
-
-                // Use a simpler animation for Gingerbread
-                // It hates AnimationUtils.loadAnimation for some reason
-                if(Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
-                    final AlphaAnimation fadeOut = new AlphaAnimation(1.0f, 0.0f);
-                    fadeOut.setDuration(ctx.getResources().getInteger(R.integer.anim_refresh_time));
-                    final AlphaAnimation fadeIn = new AlphaAnimation(0.0f, 1.0f);
-                    fadeIn.setDuration(ctx.getResources().getInteger(R.integer.anim_refresh_time));
-                    fadeOut.setAnimationListener(new Animation.AnimationListener() {
-                        @Override
-                        public void onAnimationStart(Animation animation) {}
-
-                        @Override
-                        public void onAnimationEnd(Animation animation) {
-                            suchStatus.setText(description);
-                            setTemp(temp);
-                            suchLocation.setText(currentLocation);
-                            suchInfoGroup.startAnimation(fadeIn);
-                        }
-
-                        @Override
-                        public void onAnimationRepeat(Animation animation) {}
-                    });
-                    fadeIn.setAnimationListener(new Animation.AnimationListener() {
-                        @Override
-                        public void onAnimationStart(Animation animation) {}
-
-                        @Override
-                        public void onAnimationEnd(Animation animation) {
-                            currentlyAnim = false;
-                        }
-
-                        @Override
-                        public void onAnimationRepeat(Animation animation) {}
-                    });
-                    suchInfoGroup.startAnimation(fadeOut);
-                    return;
-                }
-
-                final int animTime = (int)(ctx.getResources().getInteger(R.integer.anim_refresh_time) / 2.5);
-
-                final Animation[] fadeOuts = { AnimationUtils.loadAnimation(ctx, R.anim.textfade_out),
-                        AnimationUtils.loadAnimation(ctx, R.anim.textfade_out),
-                        AnimationUtils.loadAnimation(ctx, R.anim.textfade_out) };
-                final Animation[] fadeIns = { AnimationUtils.loadAnimation(ctx, R.anim.textfade_in),
-                        AnimationUtils.loadAnimation(ctx, R.anim.textfade_in),
-                        AnimationUtils.loadAnimation(ctx, R.anim.textfade_in) };
-
-                final TimerTask tempGroupTimer = new TimerTask() {
-                    @Override
-                    public void run() {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                suchTempGroup.startAnimation(fadeOuts[1]);
-                            }
-                        });
-                    }
-                };
-
-                final TimerTask locationTimer = new TimerTask() {
-                    @Override
-                    public void run() {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                suchLocation.startAnimation(fadeOuts[2]);
-                            }
-                        });
-                    }
-                };
-                fadeOuts[0].setAnimationListener(new Animation.AnimationListener() {
-                    @Override
-                    public void onAnimationStart(Animation animation) {
-                        new Timer().schedule(tempGroupTimer, animTime);
-                    }
-
-                    @Override
-                    public void onAnimationEnd(Animation animation) {
-                        suchStatus.setText(description);
-                        suchStatus.startAnimation(fadeIns[0]);
-                    }
-
-                    @Override
-                    public void onAnimationRepeat(Animation animation) {}
-                });
-                fadeOuts[1].setAnimationListener(new Animation.AnimationListener() {
-                    @Override
-                    public void onAnimationStart(Animation animation) {
-                        new Timer().schedule(locationTimer, animTime);
-                    }
-
-                    @Override
-                    public void onAnimationEnd(Animation animation) {
-                        setTemp(temp);
-                        suchTempGroup.startAnimation(fadeIns[1]);
-                    }
-
-                    @Override
-                    public void onAnimationRepeat(Animation animation) {}
-                });
-                fadeOuts[2].setAnimationListener(new Animation.AnimationListener() {
+            // Use a simpler animation for Gingerbread
+            // It hates AnimationUtils.loadAnimation for some reason
+            if(Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
+                final AlphaAnimation fadeOut = new AlphaAnimation(1.0f, 0.0f);
+                fadeOut.setDuration(MainActivity.this.getResources().getInteger(R.integer.anim_refresh_time));
+                final AlphaAnimation fadeIn = new AlphaAnimation(0.0f, 1.0f);
+                fadeIn.setDuration(MainActivity.this.getResources().getInteger(R.integer.anim_refresh_time));
+                fadeOut.setAnimationListener(new Animation.AnimationListener() {
                     @Override
                     public void onAnimationStart(Animation animation) {}
 
                     @Override
                     public void onAnimationEnd(Animation animation) {
+                        suchStatus.setText(description);
+                        setTemp(data.temperature);
                         suchLocation.setText(currentLocation);
-                        suchLocation.startAnimation(fadeIns[2]);
+                        suchInfoGroup.startAnimation(fadeIn);
                     }
 
                     @Override
                     public void onAnimationRepeat(Animation animation) {}
                 });
-                fadeIns[2].setAnimationListener(new Animation.AnimationListener() {
+                fadeIn.setAnimationListener(new Animation.AnimationListener() {
                     @Override
                     public void onAnimationStart(Animation animation) {}
 
@@ -839,18 +657,104 @@ final public class MainActivity extends Activity implements
                     @Override
                     public void onAnimationRepeat(Animation animation) {}
                 });
-
-                suchStatus.startAnimation(fadeOuts[0]);
-            } catch (JSONException ex) {
-                Log.wtf(TAG, ex);
-                currentlyAnim = false;
+                suchInfoGroup.startAnimation(fadeOut);
+                return;
             }
+
+            final int animTime = (int)(MainActivity.this.getResources().getInteger(R.integer.anim_refresh_time) / 2.5);
+
+            final Animation[] fadeOuts = { AnimationUtils.loadAnimation(MainActivity.this, R.anim.textfade_out),
+                    AnimationUtils.loadAnimation(MainActivity.this, R.anim.textfade_out),
+                    AnimationUtils.loadAnimation(MainActivity.this, R.anim.textfade_out) };
+            final Animation[] fadeIns = { AnimationUtils.loadAnimation(MainActivity.this, R.anim.textfade_in),
+                    AnimationUtils.loadAnimation(MainActivity.this, R.anim.textfade_in),
+                    AnimationUtils.loadAnimation(MainActivity.this, R.anim.textfade_in) };
+
+            final TimerTask tempGroupTimer = new TimerTask() {
+                @Override
+                public void run() {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            suchTempGroup.startAnimation(fadeOuts[1]);
+                        }
+                    });
+                }
+            };
+
+            final TimerTask locationTimer = new TimerTask() {
+                @Override
+                public void run() {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            suchLocation.startAnimation(fadeOuts[2]);
+                        }
+                    });
+                }
+            };
+            fadeOuts[0].setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+                    new Timer().schedule(tempGroupTimer, animTime);
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    suchStatus.setText(description);
+                    suchStatus.startAnimation(fadeIns[0]);
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {}
+            });
+            fadeOuts[1].setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+                    new Timer().schedule(locationTimer, animTime);
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    setTemp(data.temperature);
+                    suchTempGroup.startAnimation(fadeIns[1]);
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {}
+            });
+            fadeOuts[2].setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {}
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    suchLocation.setText(currentLocation);
+                    suchLocation.startAnimation(fadeIns[2]);
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {}
+            });
+            fadeIns[2].setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {}
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    currentlyAnim = false;
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {}
+            });
+
+            suchStatus.startAnimation(fadeOuts[0]);
         }
 
         private void setTemp(double temp) {
             currentTemp = temp;
             boolean metric = true;
-            temp = temp - 273.15d; // C
             if(UnitLocale.getDefault() == UnitLocale.IMPERIAL && !forceMetric) {
                 temp = temp * 1.8d + 32d; // F
                 metric = false;
