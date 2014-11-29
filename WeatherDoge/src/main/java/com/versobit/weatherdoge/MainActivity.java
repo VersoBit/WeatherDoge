@@ -514,8 +514,7 @@ final public class MainActivity extends Activity implements
         @Override
         protected Object[] doInBackground(Location... params) {
             if(!Geocoder.isPresent() && forceLocation.isEmpty()) {
-                Log.wtf(TAG, new UnsupportedOperationException("No Geocoder is present on this device."));
-                return null;
+                return new Object[] { new UnsupportedOperationException("No Geocoder is present on this device.") };
             }
 
             WeatherUtil.WeatherData data;
@@ -526,14 +525,16 @@ final public class MainActivity extends Activity implements
             }
 
             if(data == null) {
+                WeatherUtil.WeatherResult result;
                 if(forceLocation.isEmpty()) {
-                    data = WeatherUtil.getWeather(params[0].getLatitude(), params[0].getLongitude(), WeatherUtil.Source.YAHOO);
+                    result = WeatherUtil.getWeather(params[0].getLatitude(), params[0].getLongitude(), WeatherUtil.Source.YAHOO);
                 } else {
-                    data = WeatherUtil.getWeather(forceLocation, WeatherUtil.Source.YAHOO);
+                    result = WeatherUtil.getWeather(forceLocation, WeatherUtil.Source.YAHOO);
                 }
-                if(data == null) {
-                    throw new RuntimeException("Weather data is still null!");
+                if(result.error != WeatherUtil.WeatherResult.ERROR_NONE) {
+                    return new Object[] { result };
                 }
+                data = result.data;
                 Cache.putWeatherData(MainActivity.this, data);
             }
 
@@ -582,8 +583,29 @@ final public class MainActivity extends Activity implements
 
         @Override
         protected void onPostExecute(Object[] result) {
+            if(result[0] instanceof Throwable) {
+                Log.wtf(TAG, (Throwable) result[0]);
+                Toast.makeText(MainActivity.this, ((Throwable)result[0]).getMessage(), Toast.LENGTH_LONG).show();
+                return;
+            }
+            if(result[0] instanceof WeatherUtil.WeatherResult) {
+                WeatherUtil.WeatherResult wResult = (WeatherUtil.WeatherResult)result[0];
+                switch (wResult.error) {
+                    case WeatherUtil.WeatherResult.ERROR_API:
+                        Log.e(TAG, wResult.msg);
+                        Toast.makeText(MainActivity.this, wResult.msg, Toast.LENGTH_LONG).show();
+                        break;
+                    case WeatherUtil.WeatherResult.ERROR_THROWABLE:
+                        String errorMsg = wResult.msg != null ? wResult.msg : wResult.throwable.getMessage();
+                        Log.e(TAG, errorMsg, wResult.throwable);
+                        Toast.makeText(MainActivity.this, errorMsg, Toast.LENGTH_LONG).show();
+                        break;
+                }
+                return;
+            }
+
             final WeatherUtil.WeatherData data = (WeatherUtil.WeatherData)result[0];
-            if(data == null || currentlyAnim) {
+            if(currentlyAnim) {
                 return;
             }
 

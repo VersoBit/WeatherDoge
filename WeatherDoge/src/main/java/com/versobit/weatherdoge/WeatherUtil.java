@@ -50,16 +50,16 @@ final class WeatherUtil {
     }
 
     // Fetch weather from a general location search string. Source dependent. Your mileage may vary.
-    static WeatherData getWeather(String location, Source source) {
+    static WeatherResult getWeather(String location, Source source) {
         return getWeather(Double.MIN_VALUE, Double.MIN_VALUE, location, source);
     }
 
     // Fetch weather from geographic coordinates
-    static WeatherData getWeather(double latitude, double longitude, Source source) {
+    static WeatherResult getWeather(double latitude, double longitude, Source source) {
         return getWeather(latitude, longitude, null, source);
     }
 
-    private static WeatherData getWeather(double latitude, double longitude, String location, Source source) {
+    private static WeatherResult getWeather(double latitude, double longitude, String location, Source source) {
         switch (source) {
             case OPEN_WEATHER_MAP:
                 return getWeatherFromOWM(latitude, longitude, location);
@@ -69,12 +69,13 @@ final class WeatherUtil {
         throw new IllegalArgumentException("No supported weather source provided.");
     }
 
-    private static WeatherData getWeatherFromYahoo(double latitude, double longitude, String location) {
+    private static WeatherResult getWeatherFromYahoo(double latitude, double longitude, String location) {
         try {
             String yqlText;
             if(latitude == Double.MIN_VALUE && longitude == Double.MIN_VALUE) {
                 if(location == null) {
-                    throw new IllegalArgumentException("No valid location parameters.");
+                    return new WeatherResult(null, WeatherResult.ERROR_THROWABLE,
+                            "No valid location parameters.", new IllegalArgumentException());
                 }
                 yqlText = location.replaceAll("[^\\p{L}\\p{Nd} ,-]+", "");
             } else {
@@ -82,11 +83,20 @@ final class WeatherUtil {
             }
             URL url = new URL("https://query.yahooapis.com/v1/public/yql?q="
                     + URLEncoder.encode("select units, item.condition, astronomy from weather.forecast where woeid in (select woeid from geo.placefinder where text = \""
-                    + yqlText + "\" and gflags = \"R\")", "UTF-8") + "&format=json");
+                    + yqlText + "\" and gflags = \"R\" limit 1) limit 1", "UTF-8") + "&format=json");
             HttpsURLConnection connection = (HttpsURLConnection)url.openConnection();
             try {
                 JSONObject response = new JSONObject(IOUtils.toString(connection.getInputStream()));
-                JSONObject channel = response.getJSONObject("query").getJSONObject("results").getJSONObject("channel");
+                if(connection.getResponseCode() != HttpsURLConnection.HTTP_OK) {
+                    JSONObject error = response.getJSONObject("error");
+                    return new WeatherResult(null, WeatherResult.ERROR_API, error.getString("description"), null);
+                }
+                JSONObject query = response.getJSONObject("query");
+                if(query.getInt("count") == 0) {
+                    return new WeatherResult(null, WeatherResult.ERROR_API, "No results found for that location.", null);
+                }
+
+                JSONObject channel = query.getJSONObject("results").getJSONObject("channel");
                 JSONObject units = channel.getJSONObject("units");
                 JSONObject condition = channel.getJSONObject("item").getJSONObject("condition");
                 JSONObject astronomy = channel.getJSONObject("astronomy");
@@ -103,22 +113,24 @@ final class WeatherUtil {
 
                 String owmCode = convertYahooCode(code, date, sunrise, sunset);
 
-                return new WeatherData(temp, text, owmCode, latitude, longitude, location, new Date(), Source.YAHOO);
+                return new WeatherResult(new WeatherData(
+                        temp, text, owmCode, latitude, longitude, location, new Date(), Source.YAHOO
+                ), WeatherResult.ERROR_NONE, null, null);
             } finally {
                 connection.disconnect();
             }
         } catch (Exception ex) {
-            Log.wtf(TAG, ex);
-            return null;
+            return new WeatherResult(null, WeatherResult.ERROR_THROWABLE, ex.getMessage(), ex);
         }
     }
 
-    private static WeatherData getWeatherFromOWM(double latitude, double longitude, String location) {
+    private static WeatherResult getWeatherFromOWM(double latitude, double longitude, String location) {
         try {
             String query;
             if(latitude == Double.MIN_VALUE && longitude == Double.MIN_VALUE) {
                 if(location == null) {
-                    throw new IllegalArgumentException("No valid location parameters.");
+                    return new WeatherResult(null, WeatherResult.ERROR_THROWABLE,
+                            "No valid location parameters.", new IllegalArgumentException());
                 }
                 query = "q=" + URLEncoder.encode(location, "UTF-8");
             } else {
@@ -130,9 +142,11 @@ final class WeatherUtil {
             HttpURLConnection connection = (HttpURLConnection)url.openConnection();
             try {
                 JSONObject response = new JSONObject(IOUtils.toString(connection.getInputStream()));
-                if(response.getInt("cod") != 200) {
-                    // Error
-                    return null;
+                if(response.getInt("cod") != HttpURLConnection.HTTP_OK) {
+                    // OWM has HTTP error codes that are passed through an API field, the actual HTTP
+                    // error code is always 200...
+                    return new WeatherResult(null, WeatherResult.ERROR_API,
+                            response.getString("cod") + ": " + response.getString("message"), null);
                 }
 
                 JSONObject weather = response.getJSONArray("weather").getJSONObject(0);
@@ -142,13 +156,14 @@ final class WeatherUtil {
                 String condition = weather.getString("description").trim();
                 String image = weather.getString("icon");
 
-                return new WeatherData(temp, condition, image, latitude, longitude, location, new Date(), Source.OPEN_WEATHER_MAP);
+                return new WeatherResult(new WeatherData(
+                        temp, condition, image, latitude, longitude, location, new Date(), Source.OPEN_WEATHER_MAP
+                ), WeatherResult.ERROR_NONE, null, null);
             } finally {
                 connection.disconnect();
             }
         } catch (Exception ex) {
-            Log.wtf(TAG, ex);
-            return null;
+            return new WeatherResult(null, WeatherResult.ERROR_THROWABLE, ex.getMessage(), ex);
         }
     }
 
@@ -278,6 +293,24 @@ final class WeatherUtil {
     enum Source {
         OPEN_WEATHER_MAP,
         YAHOO
+    }
+
+    final static class WeatherResult {
+        final static int ERROR_NONE = 0;
+        final static int ERROR_API = 1;
+        final static int ERROR_THROWABLE = 2;
+
+        final WeatherData data; // null unless error = ERROR_NONE
+        final int error; // corresponds to the above error codes or ERROR_NONE for no error
+        final String msg; // null if ERROR_NONE, may or may not be null if there's an error
+        final Throwable throwable; // null unless error = ERROR_THROWABLE
+
+        WeatherResult(WeatherData data, int error, String msg, Throwable throwable) {
+            this.data = data;
+            this.error = error;
+            this.msg = msg;
+            this.throwable = throwable;
+        }
     }
 
     final static class WeatherData implements Serializable {
