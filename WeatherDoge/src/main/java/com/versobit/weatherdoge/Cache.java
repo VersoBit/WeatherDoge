@@ -99,7 +99,7 @@ final class Cache {
             if(location == null) {
                 throw new IllegalArgumentException();
             }
-            if(!data.place.equals(location)) {
+            if(data.place == null || !data.place.equals(location)) {
                 return true;
             }
         } else {
