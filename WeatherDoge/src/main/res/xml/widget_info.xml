@@ -17,11 +17,12 @@
     You should have received a copy of the GNU General Public License
     along with Weather Doge.  If not, see <http://www.gnu.org/licenses/>.
 -->
-<resources>
-
-    <!-- Default screen margins, per the Android Design guidelines. -->
-    <dimen name="activity_horizontal_margin">16dp</dimen>
-    <dimen name="activity_vertical_margin">16dp</dimen>
-    <dimen name="widget_margin">8dp</dimen>
-
-</resources>
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="250dp"
+    android:minHeight="110dp"
+    android:updatePeriodMillis="0"
+    android:previewImage="@drawable/widget_preview"
+    android:initialLayout="@layout/widget"
+    android:resizeMode="vertical"
+    android:widgetCategory="home_screen|keyguard"
+    android:initialKeyguardLayout="@layout/widget" />
