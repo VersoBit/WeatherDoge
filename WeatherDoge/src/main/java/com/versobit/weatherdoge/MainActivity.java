@@ -295,10 +295,8 @@ final public class MainActivity extends Activity implements
         currentBackgroundId = resId;
 
         // Manually resize/crop the sky background because god forbid if Android can do this well on its own
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inScaled = false;
         // Load in the full bitmap
-        Bitmap theSky = BitmapFactory.decodeResource(getResources(), resId, options);
+        Bitmap theSky = BitmapFactory.decodeResource(getResources(), resId);
         // Get display info
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
