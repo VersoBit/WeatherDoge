@@ -19,7 +19,7 @@
 -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
-    <solid android:color="#FF006DD9" />
-    <corners android:bottomLeftRadius="5dp"
-        android:bottomRightRadius="5dp" />
+    <solid android:color="@color/wiget_bottom_bar" />
+    <corners android:bottomLeftRadius="@dimen/widget_corner_radius"
+        android:bottomRightRadius="@dimen/widget_corner_radius" />
 </shape>

@@ -24,12 +24,15 @@ import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.View;
 import android.widget.RemoteViews;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -46,7 +49,7 @@ public class WidgetService extends IntentService implements
         GooglePlayServicesClient.ConnectionCallbacks,
         GooglePlayServicesClient.OnConnectionFailedListener {
 
-    private static final String TAG = MainActivity.class.getSimpleName();
+    private static final String TAG = WidgetService.class.getSimpleName();
     static final String ACTION_REFRESH = "action_refresh";
 
     private final CountDownLatch locationLatch = new CountDownLatch(1);
@@ -81,6 +84,7 @@ public class WidgetService extends IntentService implements
                 return;
             }
             Location location = locationClient.getLastLocation();
+            locationClient.disconnect();
             data = Cache.getWeatherData(this, location.getLatitude(),location.getLongitude());
 
             if(data == null) {
@@ -133,14 +137,46 @@ public class WidgetService extends IntentService implements
         tempFormat.setMaximumFractionDigits(0);
         tempFormat.setDecimalSeparatorAlwaysShown(false);
         tempFormat.setGroupingUsed(false);
+        String formattedTemp = tempFormat.format(temp) + "°";
 
-        RemoteViews views = new RemoteViews(BuildConfig.APPLICATION_ID, R.layout.widget);
-        WidgetProvider.updateFontBitmaps(this, views, tempFormat.format(temp) + "°", data.condition, locationName + "   y", "just now");
-        views.setImageViewResource(R.id.widget_dogeimg, WeatherDoge.dogeSelect(data.image));
-        views.setImageViewResource(R.id.widget_sky, WeatherDoge.skySelect(data.image));
+        int dogeImg = WeatherDoge.dogeSelect(data.image);
+        int skyImg = WeatherDoge.skySelect(data.image);
+
+        // Generate the common text bitmaps
+        Bitmap[] textBitmaps = WidgetProvider.getTextBitmaps(this, formattedTemp, data.condition, locationName, "just now");
+
+        // Apply to a base/template RemoteViews
+        RemoteViews baseViews = new RemoteViews(BuildConfig.APPLICATION_ID, R.layout.widget);
+        baseViews.setImageViewResource(R.id.widget_dogeimg, dogeImg);
+        baseViews.setImageViewBitmap(R.id.widget_tempimg, textBitmaps[0]);
+        baseViews.setImageViewBitmap(R.id.widget_descimg, textBitmaps[1]);
+        baseViews.setImageViewBitmap(R.id.widget_locationimg, textBitmaps[2]);
+        baseViews.setImageViewBitmap(R.id.widget_last_updated_img, textBitmaps[3]);
 
         AppWidgetManager widgetManager = AppWidgetManager.getInstance(this);
-        widgetManager.updateAppWidget(new ComponentName(this, WidgetProvider.class), views);
+        ComponentName componentName = new ComponentName(this, WidgetProvider.class);
+        for(int widget : widgetManager.getAppWidgetIds(componentName)) {
+            // Clone the template RemoteViews and add the instance-specific bitmap
+            RemoteViews instanceViews = baseViews.clone();
+            Bitmap sky = null;
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                Bundle options = widgetManager.getAppWidgetOptions(widget);
+                sky = WidgetProvider.getSkyBitmap(this, options, skyImg);
+                instanceViews.setImageViewBitmap(R.id.widget_sky, sky);
+            } else {
+                instanceViews.setInt(R.id.widget_sky, "setVisibility", View.GONE);
+                instanceViews.setInt(R.id.widget_sky_compat, "setVisibility", View.VISIBLE);
+                instanceViews.setImageViewResource(R.id.widget_sky_compat, skyImg);
+            }
+            widgetManager.updateAppWidget(widget, instanceViews);
+            if(sky != null) {
+                sky.recycle();
+            }
+        }
+
+        for(Bitmap b : textBitmaps) {
+            b.recycle();
+        }
     }
 
     @Override

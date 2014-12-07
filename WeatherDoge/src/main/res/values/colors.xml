@@ -41,4 +41,5 @@
         <item>0xFFFF4DFF</item>
         <item>0xFF00CCFF</item>
     </integer-array>
+    <color name="wiget_bottom_bar">#FF006DD9</color>
 </resources>

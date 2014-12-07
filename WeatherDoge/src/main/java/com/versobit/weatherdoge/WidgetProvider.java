@@ -19,6 +19,7 @@
 
 package com.versobit.weatherdoge;
 
+import android.annotation.TargetApi;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
@@ -27,12 +28,18 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.RectF;
+import android.graphics.Shader;
 import android.graphics.Typeface;
-import android.util.Log;
+import android.os.Build;
+import android.os.Bundle;
 import android.util.TypedValue;
 import android.widget.RemoteViews;
 
@@ -69,68 +76,117 @@ public final class WidgetProvider extends AppWidgetProvider {
         RemoteViews views = new RemoteViews(ctx.getPackageName(), R.layout.widget);
         //views.setOnClickPendingIntent(R.id.widget_root, PendingIntent.getActivity(ctx, 0, new Intent(ctx, MainActivity.class), 0));
         views.setOnClickPendingIntent(R.id.widget_root, getServiceIntent(ctx));
-        updateFontBitmaps(ctx, views, "-4°", "Mist", "Calgary", "last updated an hour ago");
+        //getTextBitmaps(ctx, views, "-4°", "Mist", "Calgary", "last updated an hour ago");
         // Instruct the widget manager to update the widget
         appWidgetManager.updateAppWidget(appWidgetId, views);
     }
 
-    static void updateFontBitmaps(Context ctx, RemoteViews views, String temp, String description, String location, String lastUpdated) {
-        Resources r = ctx.getResources();
-        Typeface font = Typeface.createFromAsset(ctx.getAssets(), "comic.ttf");
-        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.LINEAR_TEXT_FLAG);
-        paint.setTypeface(font);
-        paint.setColor(Color.WHITE);
-        paint.setStyle(Paint.Style.FILL);
-        paint.setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 40, r.getDisplayMetrics()));
-        paint.setTextAlign(Paint.Align.CENTER);
-        paint.setShadowLayer(1, 3, 3, Color.BLACK);
+    static Bitmap[] getTextBitmaps(Context ctx, String temp, String description, String location, String lastUpdated) {
+        Bitmap[] bitmaps = { null, null, null, null };
+        Resources res = ctx.getResources();
+        Typeface primaryFont = Typeface.createFromAsset(ctx.getAssets(), "comic.ttf");
+        Typeface secondaryFont = Typeface.createFromAsset(ctx.getAssets(), "RobotoCondensed-Regular.ttf");
 
-        Rect bounds = new Rect();
-        paint.getTextBounds(temp, 0, temp.length(), bounds);
-        Log.e("LOL", bounds.width() + " " + bounds.height());
+        // Configure text painter
+        Paint textPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.LINEAR_TEXT_FLAG);
+        textPaint.setTypeface(primaryFont);
+        textPaint.setColor(Color.WHITE);
+        textPaint.setStyle(Paint.Style.FILL);
+        textPaint.setTextSize(res.getDimension(R.dimen.widget_temp_font_size));
+        textPaint.setTextAlign(Paint.Align.CENTER);
+        textPaint.setShadowLayer(1, 3, 3, Color.BLACK);
+
+        //
+        Rect textBounds = new Rect();
+        textPaint.getTextBounds(temp, 0, temp.length(), textBounds);
+
+        bitmaps[0] = Bitmap.createBitmap(textBounds.width() + 4, textBounds.height() + 6, Bitmap.Config.ARGB_8888);
+        Canvas c = new Canvas(bitmaps[0]);
+        c.drawText(temp, textBounds.width() / 2f, textBounds.height(), textPaint);
 
 
-        Bitmap b = Bitmap.createBitmap(bounds.width() + 4, bounds.height() + 6, Bitmap.Config.ARGB_8888);
-        Canvas c = new Canvas(b);
-        //c.drawColor(Color.BLUE);
-        c.drawText(temp, bounds.width() / 2f, bounds.height(), paint);
-
-        views.setImageViewBitmap(R.id.widget_tempimg, b);
-
-        // FIXME: Compensate for below-the-line characters
-        paint.setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 22, r.getDisplayMetrics()));
-        bounds = new Rect();
-        paint.getTextBounds(description, 0, description.length(), bounds);
-
-        b = Bitmap.createBitmap(bounds.width() + 4, bounds.height() + 6, Bitmap.Config.ARGB_8888);
-        c = new Canvas(b);
-        //c.drawColor(Color.BLUE);
-        c.drawText(description, bounds.width() / 2f, bounds.height(), paint);
-        views.setImageViewBitmap(R.id.widget_descimg, b);
-
-        paint.setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 13, r.getDisplayMetrics()));
-        paint.setTypeface(Typeface.createFromAsset(ctx.getAssets(), "RobotoCondensed-Regular.ttf"));
-        paint.setShadowLayer(0, 0, 0, Color.BLACK);
-
-        bounds = new Rect();
-        paint.getTextBounds(location, 0, location.length(), bounds);
-
+        textPaint.setTextSize(res.getDimension(R.dimen.widget_desc_font_size));
+        textBounds = new Rect();
+        textPaint.getTextBounds(description, 0, description.length(), textBounds);
         Rect b2 = new Rect();
-        paint.getTextBounds("a", 0, 1, b2);
+        textPaint.getTextBounds("a", 0, 1, b2);
 
-        b = Bitmap.createBitmap(bounds.width(), bounds.height(), Bitmap.Config.ARGB_8888);
-        c = new Canvas(b);
-        //c.drawColor(Color.RED);
-        c.drawText(location, c.getWidth() / 2f, (c.getHeight() + b2.height()) / 2f, paint);
-        views.setImageViewBitmap(R.id.widget_locationimg, b);
+        //b = Bitmap.createBitmap(textBounds.width() + 4, textBounds.height() + 6, Bitmap.Config.ARGB_8888);
+        bitmaps[1] = Bitmap.createBitmap(textBounds.width(), textBounds.height(), Bitmap.Config.ARGB_8888);
+        c = new Canvas(bitmaps[1]);
+        c.drawText(description, textBounds.width() / 2f, (textBounds.height() + b2.height()) / 2f, textPaint);
 
-        bounds = new Rect();
-        paint.getTextBounds(lastUpdated, 0, lastUpdated.length(), bounds);
+        textPaint.setTextSize(res.getDimension(R.dimen.widget_bottom_bar_font_size));
+        textPaint.setTypeface(Typeface.createFromAsset(ctx.getAssets(), "RobotoCondensed-Regular.ttf"));
+        textPaint.setShadowLayer(0, 0, 0, Color.BLACK);
 
-        b = Bitmap.createBitmap(bounds.width(), bounds.height(), Bitmap.Config.ARGB_8888);
-        c = new Canvas(b);
-        //c.drawColor(Color.RED);
-        c.drawText(lastUpdated, c.getWidth() / 2f, (c.getHeight() + b2.height()) / 2f, paint);
-        views.setImageViewBitmap(R.id.widget_last_updated_img, b);
+        textBounds = new Rect();
+        textPaint.getTextBounds(location, 0, location.length(), textBounds);
+
+        b2 = new Rect();
+        textPaint.getTextBounds("a", 0, 1, b2);
+
+        bitmaps[2] = Bitmap.createBitmap(textBounds.width(), textBounds.height(), Bitmap.Config.ARGB_8888);
+        c = new Canvas(bitmaps[2]);
+        c.drawText(location, c.getWidth() / 2f, (c.getHeight() + b2.height()) / 2f, textPaint);
+
+        textBounds = new Rect();
+        textPaint.getTextBounds(lastUpdated, 0, lastUpdated.length(), textBounds);
+
+        bitmaps[3] = Bitmap.createBitmap(textBounds.width(), textBounds.height(), Bitmap.Config.ARGB_8888);
+        c = new Canvas(bitmaps[3]);
+        c.drawText(lastUpdated, c.getWidth() / 2f, (c.getHeight() + b2.height()) / 2f, textPaint);
+
+        return bitmaps;
+    }
+
+    // Updates the sky bitmap for a single app widget instance
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    static Bitmap getSkyBitmap(Context ctx, Bundle options, int skyId) {
+        Resources res = ctx.getResources();
+        Bitmap originalSky = BitmapFactory.decodeResource(res, skyId);
+
+        // Obtain (approximate?) size of widget (and by extension the image view)
+        float viewW = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH), res.getDisplayMetrics());
+        float viewH = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT) - 30, res.getDisplayMetrics());
+        // Obtain size of sky bitmap
+        float bmpW = originalSky.getWidth(), bmpH = originalSky.getHeight();
+
+        // Implement ImageView's CENTER_CROP scale type
+        Matrix skyMatrix = new Matrix();
+        {
+            float scale;
+            float dx = 0, dy = 0;
+            if (bmpW * viewH > viewW * bmpH) {
+                scale = viewH / bmpH;
+                dx = (viewW - bmpW * scale) * 0.5f;
+            } else {
+                scale = viewW / bmpW;
+                dy = (viewH - bmpH * scale) * 0.5f;
+            }
+            skyMatrix.setScale(scale, scale);
+            skyMatrix.postTranslate((int) (dx + 0.5f), (int) (dy + 0.5f));
+        }
+
+        // Create a new bitmap/canvas pair at the size we need and draw on it
+        Bitmap scaledSky = Bitmap.createBitmap((int) viewW, (int) viewH, Bitmap.Config.ARGB_8888);
+        Canvas scaledCanvas = new Canvas(scaledSky);
+        scaledCanvas.drawBitmap(originalSky, skyMatrix, new Paint());
+        originalSky.recycle();
+
+        // Rounded corner time! We need to round the top two corners.
+        float radius = res.getDimension(R.dimen.widget_corner_radius);
+        BitmapShader shader = new BitmapShader(scaledSky, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+        Paint cornerPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        cornerPaint.setShader(shader);
+        Bitmap roundedSky = Bitmap.createBitmap(scaledSky.getWidth(), scaledSky.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas roundedCanvas = new Canvas(roundedSky);
+        roundedCanvas.drawRoundRect(new RectF(0, 0, scaledSky.getWidth(), scaledSky.getHeight()),
+                radius, radius, cornerPaint);
+        scaledSky.recycle();
+
+        return roundedSky;
     }
 }

@@ -27,6 +27,14 @@
         android:layout_height="match_parent"
         android:id="@+id/widget_sky"
         android:src="@drawable/sky_50n"
+        android:scaleType="matrix" />
+
+    <ImageView
+        android:layout_above="@+id/widget_bottom_bar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/widget_sky_compat"
+        android:visibility="gone"
         android:scaleType="centerCrop" />
 
     <ImageView
@@ -107,8 +115,8 @@
     <RelativeLayout
         android:id="@id/widget_bottom_bar"
         android:layout_width="fill_parent"
-        android:layout_height="30dp"
-        android:background="@drawable/widget_round_rect_shape"
+        android:layout_height="@dimen/widget_bottom_bar_height"
+        android:background="@drawable/widget_round_rect_shape_bottom"
         android:layout_alignParentBottom="true">
 
         <TextView
@@ -127,9 +135,9 @@
             android:layout_alignParentStart="false"
             android:layout_alignParentLeft="true"
             android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="fill_parent"
+            android:scaleType="centerInside"
             android:id="@+id/widget_locationimg" />
 
         <TextView
@@ -148,9 +156,9 @@
             android:layout_alignParentEnd="false"
             android:layout_alignParentRight="true"
             android:layout_marginRight="8dp"
-            android:layout_marginTop="8dp"
+            android:scaleType="centerInside"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="fill_parent"
             android:id="@+id/widget_last_updated_img" />
     </RelativeLayout>
 </RelativeLayout>

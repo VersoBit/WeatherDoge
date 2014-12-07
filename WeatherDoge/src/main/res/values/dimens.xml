@@ -23,5 +23,10 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="widget_margin">8dp</dimen>
+    <dimen name="widget_corner_radius">3dp</dimen>
+    <dimen name="widget_temp_font_size">40sp</dimen>
+    <dimen name="widget_desc_font_size">22sp</dimen>
+    <dimen name="widget_bottom_bar_font_size">13sp</dimen>
+    <dimen name="widget_bottom_bar_height">30dp</dimen>
 
 </resources>
