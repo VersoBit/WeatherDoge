@@ -148,11 +148,21 @@ public final class WidgetProvider extends AppWidgetProvider {
 
         // Obtain (approximate?) size of widget (and by extension the image view)
         float viewW = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-                options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH), res.getDisplayMetrics());
+                options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH),
+                res.getDisplayMetrics());
         float viewH = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-                options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT) - 30, res.getDisplayMetrics());
+                options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT),
+                res.getDisplayMetrics());
         // Obtain size of sky bitmap
         float bmpW = originalSky.getWidth(), bmpH = originalSky.getHeight();
+
+        // For some reason the calculated view height is too small by about a pixel or so. Let's
+        // compensate for that and while we're at it increase the height by the radius of the
+        // rounded edges to hide the edges behind the bottom bar
+        float bottomBarHeight = res.getDimension(R.dimen.widget_bottom_bar_height);
+        float radius = res.getDimension(R.dimen.widget_corner_radius);
+        float extra = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1, res.getDisplayMetrics());
+        viewH += extra + radius - bottomBarHeight;
 
         // Implement ImageView's CENTER_CROP scale type
         Matrix skyMatrix = new Matrix();
@@ -177,7 +187,6 @@ public final class WidgetProvider extends AppWidgetProvider {
         originalSky.recycle();
 
         // Rounded corner time! We need to round the top two corners.
-        float radius = res.getDimension(R.dimen.widget_corner_radius);
         BitmapShader shader = new BitmapShader(scaledSky, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
         Paint cornerPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         cornerPaint.setShader(shader);
