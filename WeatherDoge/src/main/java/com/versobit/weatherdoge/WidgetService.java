@@ -36,8 +36,8 @@ import android.view.View;
 import android.widget.RemoteViews;
 
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesClient;
-import com.google.android.gms.location.LocationClient;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -46,8 +46,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 public final class WidgetService extends IntentService implements
-        GooglePlayServicesClient.ConnectionCallbacks,
-        GooglePlayServicesClient.OnConnectionFailedListener {
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener {
 
     private static final String TAG = WidgetService.class.getSimpleName();
     static final String ACTION_REFRESH = "action_refresh";
@@ -72,7 +72,11 @@ public final class WidgetService extends IntentService implements
         WeatherUtil.WeatherData data;
         String locationName = "";
         if(forceLocation.isEmpty()) {
-            LocationClient locationClient = new LocationClient(this, this, this);
+            GoogleApiClient locationClient = new GoogleApiClient.Builder(this)
+                    .addApi(LocationServices.API)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .build();
             locationClient.connect();
             try {
                 locationLatch.await(5, TimeUnit.SECONDS);
@@ -83,7 +87,7 @@ public final class WidgetService extends IntentService implements
             if(!locationClient.isConnected()) {
                 return;
             }
-            Location location = locationClient.getLastLocation();
+            Location location = LocationServices.FusedLocationApi.getLastLocation(locationClient);
             locationClient.disconnect();
             data = Cache.getWeatherData(this, location.getLatitude(),location.getLongitude());
 
@@ -197,7 +201,7 @@ public final class WidgetService extends IntentService implements
     }
 
     @Override
-    public void onDisconnected() {
+    public void onConnectionSuspended(int i) {
         //
     }
 

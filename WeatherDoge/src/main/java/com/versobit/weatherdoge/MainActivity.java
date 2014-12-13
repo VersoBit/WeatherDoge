@@ -59,11 +59,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.google.android.gms.location.LocationClient;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 
 import java.text.DecimalFormat;
 import java.util.ArrayDeque;
@@ -74,8 +74,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 final public class MainActivity extends Activity implements
-        GooglePlayServicesClient.ConnectionCallbacks,
-        GooglePlayServicesClient.OnConnectionFailedListener,
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener,
         LocationListener {
 
     private static final int REQUEST_PLAY_ERR_DIAG = 52000000;
@@ -106,7 +106,8 @@ final public class MainActivity extends Activity implements
     private TextView suchLocation;
     private ImageView suchShare;
     private ImageView suchOptions;
-    private LocationClient wowClient;
+    //private LocationClient wowClient;
+    private GoogleApiClient wowClient;
     private Location whereIsDoge;
     private Typeface wowComicSans;
 
@@ -149,7 +150,7 @@ final public class MainActivity extends Activity implements
                 if(!forceLocation.isEmpty()) {
                     new GetWeather().execute();
                 } else if(wowClient != null && wowClient.isConnected()) {
-                    whereIsDoge = wowClient.getLastLocation();
+                    whereIsDoge = LocationServices.FusedLocationApi.getLastLocation(wowClient);
                     new GetWeather().execute(whereIsDoge);
                 }
             }
@@ -211,7 +212,11 @@ final public class MainActivity extends Activity implements
         if(!forceLocation.isEmpty()) {
             new GetWeather().execute();
         } else if(playServicesAvailable()) {
-            wowClient = new LocationClient(this, this, this);
+            wowClient = new GoogleApiClient.Builder(this)
+                    .addApi(LocationServices.API)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .build();
         }
         setBackground(R.drawable.sky_01d);
     }
@@ -371,7 +376,7 @@ final public class MainActivity extends Activity implements
     @Override
     protected void onStop() {
         if(wowClient != null && wowClient.isConnected()) {
-            wowClient.removeLocationUpdates(this);
+            LocationServices.FusedLocationApi.removeLocationUpdates(wowClient, this);
             wowClient.disconnect();
         }
         overlayTimer.cancel();
@@ -394,14 +399,18 @@ final public class MainActivity extends Activity implements
         }
         if(forceLocation.isEmpty()) {
             if(wowClient == null) {
-                wowClient = new LocationClient(this, this, this);
+                wowClient = new GoogleApiClient.Builder(this)
+                        .addApi(LocationServices.API)
+                        .addConnectionCallbacks(this)
+                        .addOnConnectionFailedListener(this)
+                        .build();
             }
             if(!wowClient.isConnected() && !wowClient.isConnecting()) {
                 wowClient.connect();
             }
         } else {
             if(wowClient != null && wowClient.isConnected()) {
-                wowClient.removeLocationUpdates(this);
+                LocationServices.FusedLocationApi.removeLocationUpdates(wowClient, this);
                 wowClient.disconnect();
             }
             new GetWeather().execute();
@@ -473,8 +482,8 @@ final public class MainActivity extends Activity implements
         request.setPriority(LocationRequest.PRIORITY_LOW_POWER);
         request.setInterval(5000);
         request.setFastestInterval(1000);
-        wowClient.requestLocationUpdates(request, this);
-        whereIsDoge = wowClient.getLastLocation();
+        LocationServices.FusedLocationApi.requestLocationUpdates(wowClient, request, this);
+        whereIsDoge = LocationServices.FusedLocationApi.getLastLocation(wowClient);
         if(whereIsDoge == null) {
             Log.e(TAG, "dunno where this shibe is");
             return;
@@ -483,8 +492,8 @@ final public class MainActivity extends Activity implements
     }
 
     @Override
-    public void onDisconnected() {
-        Log.d(TAG, "Play Services Disconnected");
+    public void onConnectionSuspended(int i) {
+        //
     }
 
     @Override
