@@ -145,38 +145,50 @@ public final class WidgetService extends IntentService implements
         // Generate the common text bitmaps
         Bitmap[] textBitmaps = WidgetProvider.getTextBitmaps(this, formattedTemp, data.condition, locationName, "just now");
 
-        // Apply to a base/template RemoteViews
-        RemoteViews baseViews = new RemoteViews(BuildConfig.APPLICATION_ID, R.layout.widget);
-        baseViews.setImageViewResource(R.id.widget_dogeimg, dogeImg);
-        baseViews.setImageViewBitmap(R.id.widget_tempimg, textBitmaps[0]);
-        baseViews.setImageViewBitmap(R.id.widget_descimg, textBitmaps[1]);
-        baseViews.setImageViewBitmap(R.id.widget_locationimg, textBitmaps[2]);
-        baseViews.setImageViewBitmap(R.id.widget_last_updated_img, textBitmaps[3]);
-
         AppWidgetManager widgetManager = AppWidgetManager.getInstance(this);
-        ComponentName componentName = new ComponentName(this, WidgetProvider.class);
-        for(int widget : widgetManager.getAppWidgetIds(componentName)) {
-            // Clone the template RemoteViews and add the instance-specific bitmap
-            RemoteViews instanceViews = baseViews.clone();
+
+        for(int widget : widgetManager.getAppWidgetIds(new ComponentName(this, WidgetProvider.class))) {
+            RemoteViews views = new RemoteViews(BuildConfig.APPLICATION_ID, R.layout.widget);
             Bitmap sky = null;
+            boolean failed = false;
+
+            views.setImageViewResource(R.id.widget_dogeimg, dogeImg);
+            views.setImageViewBitmap(R.id.widget_tempimg, textBitmaps[0]);
+            views.setImageViewBitmap(R.id.widget_descimg, textBitmaps[1]);
+            views.setImageViewBitmap(R.id.widget_locationimg, textBitmaps[2]);
+            views.setImageViewBitmap(R.id.widget_last_updated_img, textBitmaps[3]);
+
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                Bundle options = widgetManager.getAppWidgetOptions(widget);
-                sky = WidgetProvider.getSkyBitmap(this, options, skyImg);
-                instanceViews.setImageViewBitmap(R.id.widget_sky, sky);
-            } else {
-                instanceViews.setInt(R.id.widget_sky, "setVisibility", View.GONE);
-                instanceViews.setInt(R.id.widget_sky_compat, "setVisibility", View.VISIBLE);
-                instanceViews.setImageViewResource(R.id.widget_sky_compat, skyImg);
+                try {
+                    Bundle options = widgetManager.getAppWidgetOptions(widget);
+                    sky = WidgetProvider.getSkyBitmap(this, options, skyImg);
+                    views.setImageViewBitmap(R.id.widget_sky, sky);
+                    views.setInt(R.id.widget_sky, "setVisibility", View.VISIBLE);
+                    views.setInt(R.id.widget_sky_compat, "setVisibility", View.GONE);
+                } catch (Exception ex) {
+                    Log.wtf(TAG, ex);
+                    failed = true;
+                }
             }
-            widgetManager.updateAppWidget(widget, instanceViews);
-            if(sky != null) {
+            if(Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN || failed) {
+                views.setInt(R.id.widget_sky, "setVisibility", View.GONE);
+                views.setInt(R.id.widget_sky_compat, "setVisibility", View.VISIBLE);
+                views.setImageViewResource(R.id.widget_sky_compat, skyImg);
+            }
+
+            widgetManager.updateAppWidget(widget, views);
+
+            if(sky != null && !sky.isRecycled()) {
                 sky.recycle();
             }
         }
 
         for(Bitmap b : textBitmaps) {
-            b.recycle();
+            if(b != null && !b.isRecycled()) {
+                b.recycle();
+            }
         }
+
     }
 
     @Override
