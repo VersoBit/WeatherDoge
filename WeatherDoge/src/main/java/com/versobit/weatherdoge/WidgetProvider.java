@@ -56,7 +56,7 @@ public final class WidgetProvider extends AppWidgetProvider {
 
     private static PendingIntent getServiceIntent(Context ctx) {
         return PendingIntent.getService(ctx, 0,
-                new Intent(ctx, WidgetService.class).setAction(WidgetService.ACTION_REFRESH), 0);
+                new Intent(ctx, WidgetService.class).setAction(WidgetService.ACTION_REFRESH_ALL), 0);
     }
 
     @Override
@@ -69,6 +69,15 @@ public final class WidgetProvider extends AppWidgetProvider {
     public void onDisabled(Context ctx) {
         AlarmManager am = (AlarmManager)ctx.getSystemService(Context.ALARM_SERVICE);
         am.cancel(getServiceIntent(ctx));
+    }
+
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    @Override
+    public void onAppWidgetOptionsChanged(Context ctx, AppWidgetManager appWidgetManager, int appWidgetId, Bundle newOptions) {
+        super.onAppWidgetOptionsChanged(ctx, appWidgetManager, appWidgetId, newOptions);
+        ctx.startService(new Intent(ctx, WidgetService.class)
+                .setAction(WidgetService.ACTION_REFRESH_ONE)
+                .putExtra(WidgetService.EXTRA_WIDGET_ID, appWidgetId));
     }
 
     private static void updateAppWidget(Context ctx, AppWidgetManager appWidgetManager,

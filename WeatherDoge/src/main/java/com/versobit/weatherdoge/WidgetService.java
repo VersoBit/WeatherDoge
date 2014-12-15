@@ -50,20 +50,18 @@ public final class WidgetService extends IntentService implements
         GoogleApiClient.OnConnectionFailedListener {
 
     private static final String TAG = WidgetService.class.getSimpleName();
-    static final String ACTION_REFRESH = "action_refresh";
+    static final String ACTION_REFRESH_ALL = "refresh_all";
+    static final String ACTION_REFRESH_ONE = "refresh_one";
+    static final String EXTRA_WIDGET_ID = "widget_id";
 
     private final CountDownLatch locationLatch = new CountDownLatch(1);
 
     public WidgetService() {
-        super("WidgetService");
+        super(TAG);
     }
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        if(!ACTION_REFRESH.equals(intent.getAction())) {
-            return;
-        }
-
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         boolean forceMetric = prefs.getBoolean(OptionsActivity.PREF_FORCE_METRIC, false);
         String forceLocation = prefs.getString(OptionsActivity.PREF_FORCE_LOCATION, "");
@@ -89,6 +87,10 @@ public final class WidgetService extends IntentService implements
             }
             Location location = LocationServices.FusedLocationApi.getLastLocation(locationClient);
             locationClient.disconnect();
+            if(location == null) {
+                Log.e(TAG, "Unable to retrieve location. (null)");
+                return;
+            }
             data = Cache.getWeatherData(this, location.getLatitude(),location.getLongitude());
 
             if(data == null) {
@@ -147,11 +149,21 @@ public final class WidgetService extends IntentService implements
         int skyImg = WeatherDoge.skySelect(data.image);
 
         // Generate the common text bitmaps
+        // FIXME: Prevent width/height exceptions from being thrown by checking params
         Bitmap[] textBitmaps = WidgetProvider.getTextBitmaps(this, formattedTemp, data.condition, locationName, "just now");
 
         AppWidgetManager widgetManager = AppWidgetManager.getInstance(this);
+        int[] widgets;
+        if(ACTION_REFRESH_ALL.equals(intent.getAction())) {
+            widgets = widgetManager.getAppWidgetIds(new ComponentName(this, WidgetProvider.class));
+        } else if(ACTION_REFRESH_ONE.equals(intent.getAction())) {
+            widgets = new int[] { intent.getIntExtra(EXTRA_WIDGET_ID, 0) };
+        } else {
+            Log.wtf(TAG, "Unknown action: " + intent.getAction());
+            return;
+        }
 
-        for(int widget : widgetManager.getAppWidgetIds(new ComponentName(this, WidgetProvider.class))) {
+        for(int widget : widgets) {
             RemoteViews views = new RemoteViews(BuildConfig.APPLICATION_ID, R.layout.widget);
             Bitmap sky = null;
             boolean failed = false;
