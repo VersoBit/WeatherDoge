@@ -82,7 +82,7 @@ final class WeatherUtil {
                 yqlText = String.valueOf(latitude) + ", " + String.valueOf(longitude);
             }
             URL url = new URL("https://query.yahooapis.com/v1/public/yql?q="
-                    + URLEncoder.encode("select units, item.condition, astronomy from weather.forecast where woeid in (select woeid from geo.placefinder where text = \""
+                    + URLEncoder.encode("select location.city, units, item.condition, astronomy from weather.forecast where woeid in (select woeid from geo.placefinder where text = \""
                     + yqlText + "\" and gflags = \"R\" limit 1) limit 1", "UTF-8") + "&format=json");
             HttpsURLConnection connection = (HttpsURLConnection)url.openConnection();
             try {
@@ -112,6 +112,10 @@ final class WeatherUtil {
                 String sunset = astronomy.getString("sunset");
 
                 String owmCode = convertYahooCode(code, date, sunrise, sunset);
+
+                if(location == null || location.isEmpty()) {
+                    location = channel.getJSONObject("location").getString("city");
+                }
 
                 return new WeatherResult(new WeatherData(
                         temp, text, owmCode, latitude, longitude, location, new Date(), Source.YAHOO
@@ -155,6 +159,10 @@ final class WeatherUtil {
                 double temp = main.getDouble("temp") - 273.15d;
                 String condition = weather.getString("description").trim();
                 String image = weather.getString("icon");
+
+                if(location == null || location.isEmpty()) {
+                    location = response.getString("name");
+                }
 
                 return new WeatherResult(new WeatherData(
                         temp, condition, image, latitude, longitude, location, new Date(), Source.OPEN_WEATHER_MAP

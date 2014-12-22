@@ -547,7 +547,10 @@ final public class MainActivity extends Activity implements
 
             Log.d(TAG, data.toString());
 
-            Address addr = data.place != null ? null : getAddress(data.latitude, data.longitude);
+            Address addr = null;
+            if(forceLocation.isEmpty()) {
+                addr = getAddress(data.latitude, data.longitude);
+            }
 
             return new Object[] { data, addr };
         }
@@ -617,9 +620,9 @@ final public class MainActivity extends Activity implements
             }
 
             currentlyAnim = true;
-            if(data.place == null) {
-                Address addr = (Address)result[1];
-                currentLocation = addr == null ? "" : addr.getLocality();
+            if(forceLocation.isEmpty() && result[1] != null) {
+                String locality = ((Address)result[1]).getLocality();
+                currentLocation = locality == null ? data.place : locality;
             } else {
                 currentLocation = data.place;
             }

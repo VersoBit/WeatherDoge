@@ -148,6 +148,10 @@ public final class WidgetService extends IntentService implements
         int dogeImg = WeatherDoge.dogeSelect(data.image);
         int skyImg = WeatherDoge.skySelect(data.image);
 
+        if(locationName == null || locationName.isEmpty()) {
+            locationName = data.place;
+        }
+
         // Generate the common text bitmaps
         // FIXME: Prevent width/height exceptions from being thrown by checking params
         Bitmap[] textBitmaps = WidgetProvider.getTextBitmaps(this, formattedTemp, data.condition, locationName, "just now");
