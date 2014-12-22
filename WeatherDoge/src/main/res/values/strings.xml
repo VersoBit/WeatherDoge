@@ -29,7 +29,7 @@
     <string name="placeholder_description">wow loading</string>
     <string name="placeholder_temperature">dunno</string>
     <string name="placeholder_location">srsly dunno</string>
-    <string name="many_degree">&#176;</string>
+    <string name="many_degree">°</string>
     <string name="very_negative">-</string>
 
     <string name="wow">wow</string>
@@ -54,7 +54,7 @@
     <string name="contribute_name">Contribute</string>
     <string name="contribute_desc">Help support Weather Doge!</string>
 
-    <string name="dialog_about_copyright">Copyright &#169; 2014 VersoBit Ltd.</string>
+    <string name="dialog_about_copyright">Copyright © 2014 VersoBit Ltd.</string>
     <string name="dialog_about_text1">Crafted by the fine shibes over at VersoBit and our wow-worthy open-source collaborators.</string>
     <string name="dialog_about_text2">Based on <a href="http://dogeweather.com/">dogeweather.com</a>, which is probably one of the most awesome things on the planet.</string>
     <string name="dialog_about_contact">Contact us on Twitter!</string>
@@ -113,7 +113,7 @@
         <item>climate change</item>
         <item>popsicle</item>
     </string-array>
-    
+
     <string-array name="weather_notokay">
         <item>icy</item>
         <item>winter</item>
@@ -123,7 +123,7 @@
         <item>cool</item>
         <item>not okay</item>
     </string-array>
-    
+
     <string-array name="weather_chilly">
         <item>icy</item>
         <item>frost</item>
@@ -133,7 +133,7 @@
         <item>chilly</item>
         <item>below freezing point</item>
     </string-array>
-    
+
     <string-array name="weather_concern">
         <item>chilly</item>
         <item>concern</item>
@@ -143,7 +143,7 @@
         <item>brrrr</item>
         <item>almost freezing</item>
     </string-array>
-    
+
     <string-array name="weather_whatever">
         <item>moderate</item>
         <item>mild</item>
@@ -153,7 +153,7 @@
         <item>whatever</item>
         <item>brisk</item>
     </string-array>
-    
+
     <string-array name="weather_warmth">
         <item>heat</item>
         <item>warmth</item>
@@ -163,7 +163,7 @@
         <item>nice day</item>
         <item>ambient</item>
     </string-array>
-    
+
     <string-array name="weather_globalwarming">
         <item>boiling</item>
         <item>bake</item>
@@ -173,7 +173,7 @@
         <item>global warming</item>
         <item>tropical heat</item>
     </string-array>
-    
+
     <string-array name="weather_wow">
         <item>concern</item>
         <item>climate</item>
@@ -183,7 +183,7 @@
         <item>celsius</item>
         <item>fahrenheit</item>
     </string-array>
-    
+
     <!-- Background related descriptors -->
     <string-array name="bg_01d">
         <item>clear</item>
@@ -207,7 +207,7 @@
         <item>dark</item>
         <item>weather</item>
     </string-array>
-    
+
     <string-array name="bg_02d">
         <item>cloud</item>
         <item>okay</item>
