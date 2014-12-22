@@ -62,6 +62,27 @@ public final class WidgetService extends IntentService implements
 
     @Override
     protected void onHandleIntent(Intent intent) {
+        AppWidgetManager widgetManager = AppWidgetManager.getInstance(this);
+        int[] widgets;
+        if(ACTION_REFRESH_ALL.equals(intent.getAction())) {
+            widgets = widgetManager.getAppWidgetIds(new ComponentName(this, WidgetProvider.class));
+        } else if(ACTION_REFRESH_ONE.equals(intent.getAction())) {
+            widgets = new int[] { intent.getIntExtra(EXTRA_WIDGET_ID, 0) };
+        } else {
+            Log.wtf(TAG, "Unknown action: " + intent.getAction());
+            return;
+        }
+
+        if(Build.VERSION.SDK_INT > Build.VERSION_CODES.GINGERBREAD_MR1) {
+            Bitmap loading = WidgetProvider.getLoadingBitmap(this);
+            for(int widget : widgets) {
+                RemoteViews views = new RemoteViews(BuildConfig.APPLICATION_ID, R.layout.widget);
+                views.setImageViewBitmap(R.id.widget_locationimg, loading);
+                widgetManager.partiallyUpdateAppWidget(widget, views);
+            }
+            loading.recycle();
+        }
+
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         boolean forceMetric = prefs.getBoolean(OptionsActivity.PREF_FORCE_METRIC, false);
         String forceLocation = prefs.getString(OptionsActivity.PREF_FORCE_LOCATION, "");
@@ -155,17 +176,6 @@ public final class WidgetService extends IntentService implements
         // Generate the common text bitmaps
         // FIXME: Prevent width/height exceptions from being thrown by checking params
         Bitmap[] textBitmaps = WidgetProvider.getTextBitmaps(this, formattedTemp, data.condition, locationName, "just now");
-
-        AppWidgetManager widgetManager = AppWidgetManager.getInstance(this);
-        int[] widgets;
-        if(ACTION_REFRESH_ALL.equals(intent.getAction())) {
-            widgets = widgetManager.getAppWidgetIds(new ComponentName(this, WidgetProvider.class));
-        } else if(ACTION_REFRESH_ONE.equals(intent.getAction())) {
-            widgets = new int[] { intent.getIntExtra(EXTRA_WIDGET_ID, 0) };
-        } else {
-            Log.wtf(TAG, "Unknown action: " + intent.getAction());
-            return;
-        }
 
         for(int widget : widgets) {
             RemoteViews views = new RemoteViews(BuildConfig.APPLICATION_ID, R.layout.widget);

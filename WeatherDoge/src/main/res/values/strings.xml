@@ -31,6 +31,7 @@
     <string name="placeholder_location">srsly dunno</string>
     <string name="many_degree">°</string>
     <string name="very_negative">-</string>
+    <string name="loading">Loading…</string>
 
     <string name="wow">wow</string>
     <string name="cancel">Cancel</string>

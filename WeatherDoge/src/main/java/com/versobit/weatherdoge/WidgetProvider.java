@@ -149,6 +149,28 @@ public final class WidgetProvider extends AppWidgetProvider {
         return bitmaps;
     }
 
+    static Bitmap getLoadingBitmap(Context ctx) {
+        String loadingText = ctx.getString(R.string.loading);
+        Typeface roboto = Typeface.createFromAsset(ctx.getAssets(), "RobotoCondensed-Regular.ttf");
+        Paint textPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.LINEAR_TEXT_FLAG);
+        textPaint.setTypeface(roboto);
+        textPaint.setColor(Color.WHITE);
+        textPaint.setStyle(Paint.Style.FILL);
+        textPaint.setTextAlign(Paint.Align.CENTER);
+        textPaint.setTextSize(ctx.getResources().getDimension(R.dimen.widget_bottom_bar_font_size));
+
+        Rect textBounds = new Rect();
+        textPaint.getTextBounds(loadingText, 0, loadingText.length(), textBounds);
+        Rect baselineBounds = new Rect();
+        textPaint.getTextBounds("a", 0, 1, baselineBounds);
+
+        Bitmap loading = Bitmap.createBitmap(textBounds.width(), textBounds.height(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(loading);
+        canvas.drawText(loadingText, canvas.getWidth() / 2f, (canvas.getHeight() + baselineBounds.height()) / 2f, textPaint);
+
+        return loading;
+    }
+
     // Updates the sky bitmap for a single app widget instance
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     static Bitmap getSkyBitmap(Context ctx, Bundle options, int skyId) {
