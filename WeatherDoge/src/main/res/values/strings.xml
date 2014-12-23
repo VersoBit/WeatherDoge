@@ -83,6 +83,15 @@
 
     <string name="dialog_dropshadow_adjectives">Use shadow for doge-isms</string>
 
+    <string name="widget_error_geocoder">Weather Doge: Geocoder failed.</string>
+    <string name="widget_error_location">Weather Doge: Location failed.</string>
+    <string name="widget_error_gms_connect">Weather Doge: GMS connection failed.</string>
+    <string name="widget_error_unknown">Weather Doge: Unknown error.</string>
+    <string name="widget_error_no_gms">Weather Doge: GMS unavailable.</string>
+    <string name="widget_error_action">Weather Doge: Unknown action.</string>
+    <string name="widget_error_api">Weather Doge: API error.</string>
+    <string name="widget_error_weather_util">Weather Doge: WeatherUtil error.</string>
+
     <string-array name="wows">
         <item>wow</item>
         <item>so wow</item>

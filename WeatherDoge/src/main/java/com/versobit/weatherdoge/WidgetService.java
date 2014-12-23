@@ -34,8 +34,10 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 
@@ -70,6 +72,7 @@ public final class WidgetService extends IntentService implements
             widgets = new int[] { intent.getIntExtra(EXTRA_WIDGET_ID, 0) };
         } else {
             Log.wtf(TAG, "Unknown action: " + intent.getAction());
+            Toast.makeText(this, R.string.widget_error_action, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -81,6 +84,13 @@ public final class WidgetService extends IntentService implements
                 widgetManager.partiallyUpdateAppWidget(widget, views);
             }
             loading.recycle();
+        }
+
+        int gmsCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+        if(gmsCode != ConnectionResult.SUCCESS) {
+            GooglePlayServicesUtil.showErrorNotification(gmsCode, this);
+            Toast.makeText(this, R.string.widget_error_no_gms, Toast.LENGTH_SHORT).show();
+            return;
         }
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -101,15 +111,18 @@ public final class WidgetService extends IntentService implements
                 locationLatch.await(5, TimeUnit.SECONDS);
             } catch (InterruptedException ex) {
                 Log.wtf(TAG, ex);
+                Toast.makeText(this, R.string.widget_error_unknown, Toast.LENGTH_SHORT).show();
                 return;
             }
             if(!locationClient.isConnected()) {
+                Toast.makeText(this, R.string.widget_error_gms_connect, Toast.LENGTH_SHORT).show();
                 return;
             }
             Location location = LocationServices.FusedLocationApi.getLastLocation(locationClient);
             locationClient.disconnect();
             if(location == null) {
                 Log.e(TAG, "Unable to retrieve location. (null)");
+                Toast.makeText(this, R.string.widget_error_location, Toast.LENGTH_SHORT).show();
                 return;
             }
             data = Cache.getWeatherData(this, location.getLatitude(),location.getLongitude());
@@ -128,6 +141,8 @@ public final class WidgetService extends IntentService implements
                 }
             } catch (IOException ex) {
                 Log.wtf(TAG, ex);
+                Toast.makeText(this, R.string.widget_error_geocoder, Toast.LENGTH_SHORT).show();
+                return;
             }
         } else {
             locationName = forceLocation;
@@ -139,6 +154,8 @@ public final class WidgetService extends IntentService implements
 
         if(data == null) {
             if(result == null) {
+                Log.wtf(TAG, "Both data and result are null.");
+                Toast.makeText(this, R.string.widget_error_unknown, Toast.LENGTH_SHORT).show();
                 return;
             }
             switch (result.error) {
@@ -147,10 +164,16 @@ public final class WidgetService extends IntentService implements
                     Cache.putWeatherData(this, data);
                     break;
                 case WeatherUtil.WeatherResult.ERROR_API:
+                    Log.e(TAG, "ERROR_API: " + (result.msg == null ? "null" : result.msg));
+                    Toast.makeText(this, R.string.widget_error_api, Toast.LENGTH_SHORT).show();
                     return;
                 case WeatherUtil.WeatherResult.ERROR_THROWABLE:
+                    Log.e(TAG, "ERROR_THROWABLE: " + (result.msg == null ? "null" : result.msg), result.throwable);
+                    Toast.makeText(this, R.string.widget_error_weather_util, Toast.LENGTH_SHORT).show();
                     return;
                 default:
+                    Log.wtf(TAG, "Unhandled WeatherResult: " + result.error);
+                    Toast.makeText(this, R.string.widget_error_unknown, Toast.LENGTH_SHORT).show();
                     return;
             }
         }
