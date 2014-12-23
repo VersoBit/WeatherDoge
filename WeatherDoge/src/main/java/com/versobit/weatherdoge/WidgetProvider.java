@@ -95,6 +95,12 @@ public final class WidgetProvider extends AppWidgetProvider {
         Resources res = ctx.getResources();
         Typeface primaryFont = Typeface.createFromAsset(ctx.getAssets(), "comic.ttf");
         Typeface secondaryFont = Typeface.createFromAsset(ctx.getAssets(), "RobotoCondensed-Regular.ttf");
+        float shadowRadius = res.getDimension(R.dimen.widget_text_shadow_radius);
+        // Odd results with fractional offsets
+        float shadowXY = Math.round(res.getDimension(R.dimen.widget_text_shadow_xy));
+        // Better to have more padding than not enough
+        int shadowPadX = (int)Math.ceil(res.getDimension(R.dimen.widget_text_shadow_padding_width));
+        int shadowPadY = (int)Math.ceil(res.getDimension(R.dimen.widget_text_shadow_padding_height));
 
         // Configure text painter
         Paint textPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.LINEAR_TEXT_FLAG);
@@ -103,13 +109,13 @@ public final class WidgetProvider extends AppWidgetProvider {
         textPaint.setStyle(Paint.Style.FILL);
         textPaint.setTextSize(res.getDimension(R.dimen.widget_temp_font_size));
         textPaint.setTextAlign(Paint.Align.CENTER);
-        textPaint.setShadowLayer(1, 3, 3, Color.BLACK);
+        textPaint.setShadowLayer(shadowRadius, shadowXY, shadowXY, Color.BLACK);
 
         //
         Rect textBounds = new Rect();
         textPaint.getTextBounds(temp, 0, temp.length(), textBounds);
 
-        bitmaps[0] = Bitmap.createBitmap(textBounds.width() + 4, textBounds.height() + 6, Bitmap.Config.ARGB_8888);
+        bitmaps[0] = Bitmap.createBitmap(textBounds.width() + shadowPadX, textBounds.height() + shadowPadY, Bitmap.Config.ARGB_8888);
         Canvas c = new Canvas(bitmaps[0]);
         c.drawText(temp, textBounds.width() / 2f, textBounds.height(), textPaint);
 
@@ -120,8 +126,7 @@ public final class WidgetProvider extends AppWidgetProvider {
         Rect b2 = new Rect();
         textPaint.getTextBounds("a", 0, 1, b2);
 
-        //b = Bitmap.createBitmap(textBounds.width() + 4, textBounds.height() + 6, Bitmap.Config.ARGB_8888);
-        bitmaps[1] = Bitmap.createBitmap(textBounds.width(), textBounds.height(), Bitmap.Config.ARGB_8888);
+        bitmaps[1] = Bitmap.createBitmap(textBounds.width() + shadowPadX, textBounds.height() + shadowPadY, Bitmap.Config.ARGB_8888);
         c = new Canvas(bitmaps[1]);
         c.drawText(description, textBounds.width() / 2f, (textBounds.height() + b2.height()) / 2f, textPaint);
 

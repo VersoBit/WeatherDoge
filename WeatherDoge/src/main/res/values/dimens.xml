@@ -28,5 +28,9 @@
     <dimen name="widget_desc_font_size">22sp</dimen>
     <dimen name="widget_bottom_bar_font_size">13sp</dimen>
     <dimen name="widget_bottom_bar_height">30dp</dimen>
+    <dimen name="widget_text_shadow_padding_width">2dp</dimen>
+    <dimen name="widget_text_shadow_padding_height">2.5dp</dimen>
+    <dimen name="widget_text_shadow_xy">1dp</dimen>
+    <dimen name="widget_text_shadow_radius">0.33333dp</dimen>
 
 </resources>
