@@ -228,12 +228,12 @@ final class WeatherUtil {
                 owmCode = "13";
                 break;
             // Rain
-            case 6: case 10: case 11: case 12: case 35:
-                owmCode = "10";
-                break;
-            // Light Rain
-            case 8: case 9: case 40:
+            case 6: case 10: case 35:
                 owmCode = "09";
+                break;
+            // Light-ish Rain
+            case 8: case 9: case 11: case 12: case 40:
+                owmCode = "10";
                 break;
             // Fog
             case 19: case 20: case 21: case 22:
