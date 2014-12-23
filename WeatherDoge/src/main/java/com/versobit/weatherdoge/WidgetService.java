@@ -197,8 +197,10 @@ public final class WidgetService extends IntentService implements
         }
 
         // Generate the common text bitmaps
-        // FIXME: Prevent width/height exceptions from being thrown by checking params
-        Bitmap[] textBitmaps = WidgetProvider.getTextBitmaps(this, formattedTemp, data.condition, locationName, "just now");
+        formattedTemp = formattedTemp.isEmpty() ? " " : formattedTemp;
+        String condition = data.condition.isEmpty() ? " " : data.condition;
+        locationName = locationName.isEmpty() ? " " : locationName;
+        Bitmap[] textBitmaps = WidgetProvider.getTextBitmaps(this, formattedTemp, condition, locationName, "just now");
 
         for(int widget : widgets) {
             RemoteViews views = new RemoteViews(BuildConfig.APPLICATION_ID, R.layout.widget);
