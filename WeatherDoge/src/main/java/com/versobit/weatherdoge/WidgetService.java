@@ -128,7 +128,7 @@ public final class WidgetService extends IntentService implements
                     .build();
             locationClient.connect();
             try {
-                locationLatch.await(5, TimeUnit.SECONDS);
+                locationLatch.await(15, TimeUnit.SECONDS);
             } catch (InterruptedException ex) {
                 Log.wtf(TAG, ex);
                 showToast(R.string.widget_error_unknown);
