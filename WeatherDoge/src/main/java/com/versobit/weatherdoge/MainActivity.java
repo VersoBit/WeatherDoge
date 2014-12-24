@@ -131,7 +131,6 @@ final public class MainActivity extends Activity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        PreferenceManager.setDefaultValues(this, R.xml.pref_general, false);
         loadOptions();
 
         dogefixes = getResources().getStringArray(R.array.dogefix);
@@ -225,12 +224,12 @@ final public class MainActivity extends Activity implements
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
         forceMetric = sp.getBoolean(OptionsActivity.PREF_FORCE_METRIC, false);
         forceLocation = sp.getString(OptionsActivity.PREF_FORCE_LOCATION, "");
-        useNeue = sp.getBoolean(OptionsActivity.PREF_USE_COMIC_NEUE, false);
-        shadowR = sp.getFloat(OptionsActivity.PREF_DROP_SHADOW + "_radius", 1f);
-        shadowX = sp.getFloat(OptionsActivity.PREF_DROP_SHADOW + "_x", 3f);
-        shadowY = sp.getFloat(OptionsActivity.PREF_DROP_SHADOW + "_y", 3f);
-        shadowAdjs = sp.getBoolean(OptionsActivity.PREF_DROP_SHADOW + "_adjs", false);
-        textOnTop = sp.getBoolean(OptionsActivity.PREF_TEXT_ON_TOP, false);
+        useNeue = sp.getBoolean(OptionsActivity.PREF_APP_USE_COMIC_NEUE, false);
+        shadowR = sp.getFloat(OptionsActivity.PREF_APP_DROP_SHADOW + "_radius", 1f);
+        shadowX = sp.getFloat(OptionsActivity.PREF_APP_DROP_SHADOW + "_x", 3f);
+        shadowY = sp.getFloat(OptionsActivity.PREF_APP_DROP_SHADOW + "_y", 3f);
+        shadowAdjs = sp.getBoolean(OptionsActivity.PREF_APP_DROP_SHADOW + "_adjs", false);
+        textOnTop = sp.getBoolean(OptionsActivity.PREF_APP_TEXT_ON_TOP, false);
     }
 
     private void initOverlayTimer() {

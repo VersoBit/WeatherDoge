@@ -19,6 +19,8 @@
 
 package com.versobit.weatherdoge;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -41,17 +43,31 @@ final public class OptionsActivity extends PreferenceActivity {
 
     static final String PREF_FORCE_METRIC = "pref_force_metric";
     static final String PREF_FORCE_LOCATION = "pref_force_location";
-    static final String PREF_USE_COMIC_NEUE = "pref_use_comic_neue";
-    static final String PREF_DROP_SHADOW = "pref_drop_shadow";
-    static final String PREF_TEXT_ON_TOP = "pref_text_on_top";
+    static final String PREF_APP_USE_COMIC_NEUE = "pref_use_comic_neue";
+    static final String PREF_APP_DROP_SHADOW = "pref_drop_shadow";
+    static final String PREF_APP_TEXT_ON_TOP = "pref_text_on_top";
+    static final String PREF_WIDGET_REFRESH = "pref_widget_refresh";
+    static final String PREF_WIDGET_TAP_TO_REFRESH = "pref_widget_tap_refresh";
+    static final String PREF_WIDGET_USE_COMIC_NEUE = "pref_widget_use_comic_neue";
+    static final String PREF_WIDGET_BACKGROUND_FIX = "pref_widget_background_fix";
     static final String PREF_ABOUT_VERSION = "pref_about_version";
     static final String PREF_ABOUT_CONTRIBUTE = "pref_about_contribute";
     static final String PREF_ABOUT_ADD_CREDITS = "pref_about_additional_credits";
+
+    String widgetRefreshInterval = "1800";
+    boolean widgetTapToRefresh = false;
+    boolean widgetComicNeue = false;
+    boolean widgetBackgroundFix = false;
 
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        widgetRefreshInterval = prefs.getString(PREF_WIDGET_REFRESH, widgetRefreshInterval);
+        widgetTapToRefresh = prefs.getBoolean(PREF_WIDGET_TAP_TO_REFRESH, widgetTapToRefresh);
+        widgetComicNeue = prefs.getBoolean(PREF_WIDGET_USE_COMIC_NEUE, widgetComicNeue);
+        widgetBackgroundFix = prefs.getBoolean(PREF_WIDGET_BACKGROUND_FIX, widgetBackgroundFix);
         setupSimplePreferencesScreen();
     }
 
@@ -67,7 +83,13 @@ final public class OptionsActivity extends PreferenceActivity {
 
         // Add 'general' preferences.
         addPreferencesFromResource(R.xml.pref_general);
-        findPreference(PREF_DROP_SHADOW).setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+
+        // Add 'app' preferences, and a corresponding header.
+        PreferenceCategory fakeHeader = new PreferenceCategory(this);
+        fakeHeader.setTitle(R.string.pref_app_header);
+        getPreferenceScreen().addPreference(fakeHeader);
+        addPreferencesFromResource(R.xml.pref_app);
+        findPreference(PREF_APP_DROP_SHADOW).setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
                 new DropShadowDialog(OptionsActivity.this).show();
@@ -75,8 +97,14 @@ final public class OptionsActivity extends PreferenceActivity {
             }
         });
 
+        // Add 'widget' preferences, and a corresponding header.
+        fakeHeader = new PreferenceCategory(this);
+        fakeHeader.setTitle(R.string.pref_widget_header);
+        getPreferenceScreen().addPreference(fakeHeader);
+        addPreferencesFromResource(R.xml.pref_widget);
+
         // Add 'about' preferences, and a corresponding header.
-        PreferenceCategory fakeHeader = new PreferenceCategory(this);
+        fakeHeader = new PreferenceCategory(this);
         fakeHeader.setTitle(R.string.about);
         getPreferenceScreen().addPreference(fakeHeader);
         addPreferencesFromResource(R.xml.pref_about);
@@ -110,6 +138,27 @@ final public class OptionsActivity extends PreferenceActivity {
         // their values. When their values change, their summaries are updated
         // to reflect the new value, per the Android Design guidelines.
         bindPreferenceSummaryToValue(findPreference(PREF_FORCE_LOCATION));
+        bindPreferenceSummaryToValue(findPreference(PREF_WIDGET_REFRESH));
+    }
+
+    @Override
+    protected void onStop() {
+        // Refresh widget options if they've changed
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        String newWidgetRefreshInterval = prefs.getString(PREF_WIDGET_REFRESH, widgetRefreshInterval);
+        boolean newWidgetTapToRefresh = prefs.getBoolean(PREF_WIDGET_TAP_TO_REFRESH, widgetTapToRefresh);
+        boolean newWidgetComicNeue = prefs.getBoolean(PREF_WIDGET_USE_COMIC_NEUE, widgetComicNeue);
+        boolean newWidgetBackgroundFix = prefs.getBoolean(PREF_WIDGET_BACKGROUND_FIX, widgetBackgroundFix);
+        if(newWidgetTapToRefresh != widgetTapToRefresh ||
+                newWidgetComicNeue != widgetComicNeue ||
+                newWidgetBackgroundFix != widgetBackgroundFix) {
+            startService(new Intent(this, WidgetService.class)
+                    .setAction(WidgetService.ACTION_REFRESH_ALL));
+        }
+        if(!newWidgetRefreshInterval.equals(widgetRefreshInterval)) {
+            WidgetProvider.resetAlarm(this);
+        }
+        super.onStop();
     }
 
     /**

@@ -37,16 +37,40 @@
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
 
+    <string name="pref_app_header">App</string>
     <string name="such_metric_name">Such Metric</string>
     <string name="such_metric_desc">Force metric units in the US, Liberia, and Burma.</string>
-    <string name="force_location_name">Always use this location</string>
+    <string name="force_location_name">Constant Location</string>
     <string name="unset">Wow unset</string>
     <string name="very_neue_name">Very Neue</string>
     <string name="very_neue_desc">Use Comic Neue!</string>
     <string name="much_shadow_name">Much Shadow</string>
     <string name="much_shadow_desc">Customize text drop shadow</string>
-    <string name="text_on_top_name">Text on top</string>
+    <string name="text_on_top_name">Text-on-Top</string>
     <string name="text_on_top_desc">Display doge-isms over weather info</string>
+
+    <string name="pref_widget_header">Widget</string>
+    <string name="pref_widget_refresh_name">Refresh Interval</string>
+    <string-array name="pref_widget_refresh_options">
+        <item>15 minutes</item>
+        <item>30 minutes</item>
+        <item>1 hour</item>
+        <item>6 hours</item>
+        <item>12 hours</item>
+        <item>1 day</item>
+    </string-array>
+    <string-array name="pref_widget_refresh_values">
+        <item>900</item>
+        <item>1800</item>
+        <item>3600</item>
+        <item>21600</item>
+        <item>43200</item>
+        <item>86400</item>
+    </string-array>
+    <string name="pref_widget_tap_refresh_name">Tap-to-Refresh</string>
+    <string name="pref_widget_tap_refresh_desc">Refresh instead of opening the app.</string>
+    <string name="pref_widget_bg_fix_name">Background Fix</string>
+    <string name="pref_widget_bg_fix_desc">Enable this if the sky does not completely cover the widget even after it has finished loading.</string>
 
     <string name="about">About</string>
     <string name="made_with_love">Made with ♥ by VersoBit</string>

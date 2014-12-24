@@ -20,6 +20,7 @@
 package com.versobit.weatherdoge;
 
 import android.app.IntentService;
+import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -54,6 +55,7 @@ public final class WidgetService extends IntentService implements
 
     private static final String TAG = WidgetService.class.getSimpleName();
     static final String ACTION_REFRESH_ALL = "refresh_all";
+    static final String ACTION_REFRESH_MULTIPLE = "refresh_multiple";
     static final String ACTION_REFRESH_ONE = "refresh_one";
     static final String EXTRA_WIDGET_ID = "widget_id";
 
@@ -76,6 +78,8 @@ public final class WidgetService extends IntentService implements
         int[] widgets;
         if(ACTION_REFRESH_ALL.equals(intent.getAction())) {
             widgets = widgetManager.getAppWidgetIds(new ComponentName(this, WidgetProvider.class));
+        } else if(ACTION_REFRESH_MULTIPLE.equals(intent.getAction())) {
+            widgets = intent.getIntArrayExtra(EXTRA_WIDGET_ID);
         } else if(ACTION_REFRESH_ONE.equals(intent.getAction())) {
             widgets = new int[] { intent.getIntExtra(EXTRA_WIDGET_ID, 0) };
         } else {
@@ -104,6 +108,8 @@ public final class WidgetService extends IntentService implements
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         boolean forceMetric = prefs.getBoolean(OptionsActivity.PREF_FORCE_METRIC, false);
         String forceLocation = prefs.getString(OptionsActivity.PREF_FORCE_LOCATION, "");
+        boolean tapToRefresh = prefs.getBoolean(OptionsActivity.PREF_WIDGET_TAP_TO_REFRESH, false);
+        boolean backgroundFix = prefs.getBoolean(OptionsActivity.PREF_WIDGET_BACKGROUND_FIX, false);
 
         WeatherUtil.WeatherResult result = null;
         WeatherUtil.WeatherData data;
@@ -210,18 +216,29 @@ public final class WidgetService extends IntentService implements
         locationName = locationName.isEmpty() ? " " : locationName;
         Bitmap[] textBitmaps = WidgetProvider.getTextBitmaps(this, formattedTemp, condition, locationName, "just now");
 
+        PendingIntent pIntent;
+        if(tapToRefresh) {
+            pIntent = PendingIntent.getService(this, 0,
+                    new Intent(this, WidgetService.class).setAction(ACTION_REFRESH_ALL),
+                    PendingIntent.FLAG_UPDATE_CURRENT);
+        } else {
+            pIntent = PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class),
+                    PendingIntent.FLAG_UPDATE_CURRENT);
+        }
+
         for(int widget : widgets) {
             RemoteViews views = new RemoteViews(BuildConfig.APPLICATION_ID, R.layout.widget);
             Bitmap sky = null;
             boolean failed = false;
 
+            views.setOnClickPendingIntent(R.id.widget_root, pIntent);
             views.setImageViewResource(R.id.widget_dogeimg, dogeImg);
             views.setImageViewBitmap(R.id.widget_tempimg, textBitmaps[0]);
             views.setImageViewBitmap(R.id.widget_descimg, textBitmaps[1]);
             views.setImageViewBitmap(R.id.widget_locationimg, textBitmaps[2]);
             views.setImageViewBitmap(R.id.widget_last_updated_img, textBitmaps[3]);
 
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN && !backgroundFix) {
                 try {
                     Bundle options = widgetManager.getAppWidgetOptions(widget);
                     sky = WidgetProvider.getSkyBitmap(this, options, skyImg);
@@ -233,7 +250,7 @@ public final class WidgetService extends IntentService implements
                     failed = true;
                 }
             }
-            if(Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN || failed) {
+            if(Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN || failed || backgroundFix) {
                 views.setInt(R.id.widget_sky, "setVisibility", View.GONE);
                 views.setInt(R.id.widget_sky_compat, "setVisibility", View.VISIBLE);
                 views.setImageViewResource(R.id.widget_sky_compat, skyImg);

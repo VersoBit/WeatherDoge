@@ -26,6 +26,7 @@ import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -40,35 +41,30 @@ import android.graphics.Shader;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.TypedValue;
-import android.widget.RemoteViews;
 
 public final class WidgetProvider extends AppWidgetProvider {
 
+    // Will only be called once (on widget startup)
     @Override
     public void onUpdate(Context ctx, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-        // There may be multiple widgets active, so update all of them
-        final int N = appWidgetIds.length;
-        for (int appWidgetId : appWidgetIds) {
-            updateAppWidget(ctx, appWidgetManager, appWidgetId);
-        }
-    }
-
-    private static PendingIntent getServiceIntent(Context ctx) {
-        return PendingIntent.getService(ctx, 0,
-                new Intent(ctx, WidgetService.class).setAction(WidgetService.ACTION_REFRESH_ALL), 0);
+        resetAlarm(ctx);
+        ctx.startService(new Intent(ctx, WidgetService.class)
+                .setAction(WidgetService.ACTION_REFRESH_MULTIPLE)
+                .putExtra(WidgetService.EXTRA_WIDGET_ID, appWidgetIds));
     }
 
     @Override
     public void onEnabled(Context ctx) {
-        AlarmManager am = (AlarmManager)ctx.getSystemService(Context.ALARM_SERVICE);
-        am.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, 0, 300000, getServiceIntent(ctx));
+        resetAlarm(ctx);
     }
 
     @Override
     public void onDisabled(Context ctx) {
         AlarmManager am = (AlarmManager)ctx.getSystemService(Context.ALARM_SERVICE);
-        am.cancel(getServiceIntent(ctx));
+        am.cancel(PendingIntent.getService(ctx, 0, new Intent(ctx, WidgetService.class)
+                .setAction(WidgetService.ACTION_REFRESH_ALL), 0));
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -80,20 +76,24 @@ public final class WidgetProvider extends AppWidgetProvider {
                 .putExtra(WidgetService.EXTRA_WIDGET_ID, appWidgetId));
     }
 
-    private static void updateAppWidget(Context ctx, AppWidgetManager appWidgetManager,
-                                int appWidgetId) {
-        RemoteViews views = new RemoteViews(ctx.getPackageName(), R.layout.widget);
-        //views.setOnClickPendingIntent(R.id.widget_root, PendingIntent.getActivity(ctx, 0, new Intent(ctx, MainActivity.class), 0));
-        views.setOnClickPendingIntent(R.id.widget_root, getServiceIntent(ctx));
-        //getTextBitmaps(ctx, views, "-4°", "Mist", "Calgary", "last updated an hour ago");
-        // Instruct the widget manager to update the widget
-        appWidgetManager.updateAppWidget(appWidgetId, views);
+    static void resetAlarm(Context ctx) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+        long interval = Integer.parseInt(prefs.getString(OptionsActivity.PREF_WIDGET_REFRESH, "1800"))
+                * 1000l;
+        AlarmManager am = (AlarmManager)ctx.getSystemService(Context.ALARM_SERVICE);
+        PendingIntent pIntent = PendingIntent.getService(ctx, 0,
+                new Intent(ctx, WidgetService.class).setAction(WidgetService.ACTION_REFRESH_ALL), 0);
+        am.cancel(pIntent);
+        am.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, 0, interval, pIntent);
     }
 
     static Bitmap[] getTextBitmaps(Context ctx, String temp, String description, String location, String lastUpdated) {
         Bitmap[] bitmaps = { null, null, null, null };
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+        boolean useComicNeue = prefs.getBoolean(OptionsActivity.PREF_WIDGET_USE_COMIC_NEUE, false);
         Resources res = ctx.getResources();
-        Typeface primaryFont = Typeface.createFromAsset(ctx.getAssets(), "comic.ttf");
+        Typeface primaryFont = Typeface.createFromAsset(ctx.getAssets(), useComicNeue ?
+                "ComicNeue-Regular.ttf" : "comic.ttf");
         Typeface secondaryFont = Typeface.createFromAsset(ctx.getAssets(), "RobotoCondensed-Regular.ttf");
         float shadowRadius = res.getDimension(R.dimen.widget_text_shadow_radius);
         // Odd results with fractional offsets

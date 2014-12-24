@@ -23,12 +23,21 @@ import android.app.Application;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.preference.PreferenceManager;
 
 import java.lang.reflect.Array;
 import java.util.Random;
 
 
 final public class WeatherDoge extends Application {
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        PreferenceManager.setDefaultValues(this, R.xml.pref_general, false);
+        PreferenceManager.setDefaultValues(this, R.xml.pref_app, false);
+        PreferenceManager.setDefaultValues(this, R.xml.pref_widget, false);
+    }
 
     static int skySelect(String icon) {
         int img = Integer.parseInt(icon.substring(0, 2));

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (C) 2014 VersoBit Ltd
+
+    This file is part of Weather Doge.
+
+    Weather Doge is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Weather Doge is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Weather Doge.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ListPreference
+        android:key="pref_widget_refresh"
+        android:title="@string/pref_widget_refresh_name"
+        android:defaultValue="1800"
+        android:entries="@array/pref_widget_refresh_options"
+        android:entryValues="@array/pref_widget_refresh_values"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null" />
+    <CheckBoxPreference
+        android:key="pref_widget_tap_refresh"
+        android:title="@string/pref_widget_tap_refresh_name"
+        android:defaultValue="false"
+        android:summary="@string/pref_widget_tap_refresh_desc" />
+    <CheckBoxPreference
+        android:key="pref_widget_use_comic_neue"
+        android:title="@string/very_neue_name"
+        android:defaultValue="false"
+        android:summary="@string/very_neue_desc" />
+    <CheckBoxPreference
+        android:key="pref_widget_background_fix"
+        android:title="@string/pref_widget_bg_fix_name"
+        android:defaultValue="false"
+        android:summary="@string/pref_widget_bg_fix_desc" />
+
+</PreferenceScreen>

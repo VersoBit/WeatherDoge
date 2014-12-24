@@ -20,14 +20,16 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <CheckBoxPreference
-        android:key="pref_force_metric"
-        android:title="@string/such_metric_name"
-        android:summary="@string/such_metric_desc"
-        android:defaultValue="false" />
-    <EditTextPreference
-        android:key="pref_force_location"
-        android:title="@string/force_location_name"
-        android:defaultValue=""
-        android:summary="@string/unset" />
+        android:key="pref_use_comic_neue"
+        android:title="@string/very_neue_name"
+        android:defaultValue="false"
+        android:summary="@string/very_neue_desc" />
+    <Preference android:key="pref_drop_shadow"
+        android:title="@string/much_shadow_name"
+        android:summary="@string/much_shadow_desc" />
+    <CheckBoxPreference android:key="pref_text_on_top"
+        android:title="@string/text_on_top_name"
+        android:defaultValue="false"
+        android:summary="@string/text_on_top_desc" />
 
 </PreferenceScreen>

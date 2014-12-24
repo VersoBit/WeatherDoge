@@ -64,7 +64,7 @@ final class DropShadowDialog extends AlertDialog {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         final SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
-        boolean useNeue = sp.getBoolean(OptionsActivity.PREF_USE_COMIC_NEUE, false);
+        boolean useNeue = sp.getBoolean(OptionsActivity.PREF_APP_USE_COMIC_NEUE, false);
         View v = getLayoutInflater().inflate(R.layout.dialog_dropshadow, null);
 
         preview = (TextView)v.findViewById(R.id.dialog_dropshadow_txtpreview);
@@ -96,10 +96,10 @@ final class DropShadowDialog extends AlertDialog {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 sp.edit()
-                .putFloat(OptionsActivity.PREF_DROP_SHADOW + "_radius", radius)
-                .putFloat(OptionsActivity.PREF_DROP_SHADOW + "_x", x)
-                .putFloat(OptionsActivity.PREF_DROP_SHADOW + "_y", y)
-                .putBoolean(OptionsActivity.PREF_DROP_SHADOW + "_adjs", adjs)
+                .putFloat(OptionsActivity.PREF_APP_DROP_SHADOW + "_radius", radius)
+                .putFloat(OptionsActivity.PREF_APP_DROP_SHADOW + "_x", x)
+                .putFloat(OptionsActivity.PREF_APP_DROP_SHADOW + "_y", y)
+                .putBoolean(OptionsActivity.PREF_APP_DROP_SHADOW + "_adjs", adjs)
                 .apply();
             }
         });
@@ -122,10 +122,10 @@ final class DropShadowDialog extends AlertDialog {
         txtX.setLayoutParams(widthHeight);
         txtY.setLayoutParams(widthHeight);
 
-        radius = sp.getFloat(OptionsActivity.PREF_DROP_SHADOW + "_radius", 1f);
-        x = sp.getFloat(OptionsActivity.PREF_DROP_SHADOW + "_x", 3f);
-        y = sp.getFloat(OptionsActivity.PREF_DROP_SHADOW + "_y", 3f);
-        adjs = sp.getBoolean(OptionsActivity.PREF_DROP_SHADOW + "_adjs", false);
+        radius = sp.getFloat(OptionsActivity.PREF_APP_DROP_SHADOW + "_radius", 1f);
+        x = sp.getFloat(OptionsActivity.PREF_APP_DROP_SHADOW + "_x", 3f);
+        y = sp.getFloat(OptionsActivity.PREF_APP_DROP_SHADOW + "_y", 3f);
+        adjs = sp.getBoolean(OptionsActivity.PREF_APP_DROP_SHADOW + "_adjs", false);
 
         seekR.setProgress((int)map(radius, 0, 25, 0, 100));
         seekX.setProgress((int)map(x, -25, 25, 0, 100));
