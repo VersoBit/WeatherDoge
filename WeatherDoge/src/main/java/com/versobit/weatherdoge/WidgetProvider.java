@@ -131,7 +131,7 @@ public final class WidgetProvider extends AppWidgetProvider {
         c.drawText(description, textBounds.width() / 2f, (textBounds.height() + b2.height()) / 2f, textPaint);
 
         textPaint.setTextSize(res.getDimension(R.dimen.widget_bottom_bar_font_size));
-        textPaint.setTypeface(Typeface.createFromAsset(ctx.getAssets(), "RobotoCondensed-Regular.ttf"));
+        textPaint.setTypeface(secondaryFont);
         textPaint.setShadowLayer(0, 0, 0, Color.BLACK);
 
         textBounds = new Rect();
