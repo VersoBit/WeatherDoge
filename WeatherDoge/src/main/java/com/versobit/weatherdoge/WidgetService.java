@@ -33,6 +33,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
@@ -214,7 +215,9 @@ public final class WidgetService extends IntentService implements
         formattedTemp = formattedTemp.isEmpty() ? " " : formattedTemp;
         String condition = data.condition.isEmpty() ? " " : data.condition;
         locationName = locationName.isEmpty() ? " " : locationName;
-        Bitmap[] textBitmaps = WidgetProvider.getTextBitmaps(this, formattedTemp, condition, locationName, "just now");
+        Bitmap[] textBitmaps = WidgetProvider.getTextBitmaps(this,
+                formattedTemp, condition, locationName,
+                DateFormat.getTimeFormat(this).format(data.time));
 
         PendingIntent pIntent;
         if(tapToRefresh) {
