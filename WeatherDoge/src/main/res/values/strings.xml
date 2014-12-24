@@ -42,6 +42,15 @@
     <string name="such_metric_desc">Force metric units in the US, Liberia, and Burma.</string>
     <string name="force_location_name">Constant Location</string>
     <string name="unset">Wow unset</string>
+    <string name="pref_weather_source_name">Weather Source</string>
+    <string-array name="pref_weather_source_options">
+        <item>OpenWeatherMap</item>
+        <item>Yahoo</item>
+    </string-array>
+    <string-array name="pref_weather_source_values">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
     <string name="very_neue_name">Very Neue</string>
     <string name="very_neue_desc">Use Comic Neue!</string>
     <string name="much_shadow_name">Much Shadow</string>

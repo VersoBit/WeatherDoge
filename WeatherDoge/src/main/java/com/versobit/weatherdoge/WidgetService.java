@@ -110,6 +110,10 @@ public final class WidgetService extends IntentService implements
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         boolean forceMetric = prefs.getBoolean(OptionsActivity.PREF_FORCE_METRIC, false);
         String forceLocation = prefs.getString(OptionsActivity.PREF_FORCE_LOCATION, "");
+        WeatherUtil.Source weatherSource = WeatherUtil.Source.OPEN_WEATHER_MAP;
+        if(prefs.getString(OptionsActivity.PREF_WEATHER_SOURCE, "0").equals("1")) {
+            weatherSource = WeatherUtil.Source.YAHOO;
+        }
         boolean tapToRefresh = prefs.getBoolean(OptionsActivity.PREF_WIDGET_TAP_TO_REFRESH, false);
         boolean backgroundFix = prefs.getBoolean(OptionsActivity.PREF_WIDGET_BACKGROUND_FIX, false);
 
@@ -145,7 +149,7 @@ public final class WidgetService extends IntentService implements
 
             if(data == null) {
                 result = WeatherUtil.getWeather(location.getLatitude(), location.getLongitude(),
-                        WeatherUtil.Source.YAHOO);
+                        weatherSource);
             }
 
             Geocoder geocoder = new Geocoder(this);
@@ -164,7 +168,7 @@ public final class WidgetService extends IntentService implements
             locationName = forceLocation;
             data = Cache.getWeatherData(this, forceLocation);
             if(data == null) {
-                result = WeatherUtil.getWeather(forceLocation, WeatherUtil.Source.YAHOO);
+                result = WeatherUtil.getWeather(forceLocation, weatherSource);
             }
         }
 

@@ -43,6 +43,7 @@ final public class OptionsActivity extends PreferenceActivity {
 
     static final String PREF_FORCE_METRIC = "pref_force_metric";
     static final String PREF_FORCE_LOCATION = "pref_force_location";
+    static final String PREF_WEATHER_SOURCE = "pref_weather_source";
     static final String PREF_APP_USE_COMIC_NEUE = "pref_use_comic_neue";
     static final String PREF_APP_DROP_SHADOW = "pref_drop_shadow";
     static final String PREF_APP_TEXT_ON_TOP = "pref_text_on_top";
@@ -138,6 +139,7 @@ final public class OptionsActivity extends PreferenceActivity {
         // their values. When their values change, their summaries are updated
         // to reflect the new value, per the Android Design guidelines.
         bindPreferenceSummaryToValue(findPreference(PREF_FORCE_LOCATION));
+        bindPreferenceSummaryToValue(findPreference(PREF_WEATHER_SOURCE));
         bindPreferenceSummaryToValue(findPreference(PREF_WIDGET_REFRESH));
     }
 

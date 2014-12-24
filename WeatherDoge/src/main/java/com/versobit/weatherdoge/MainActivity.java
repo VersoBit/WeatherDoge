@@ -85,6 +85,7 @@ final public class MainActivity extends Activity implements
 
     private boolean forceMetric = false;
     private String forceLocation = "";
+    private WeatherUtil.Source weatherSource = WeatherUtil.Source.OPEN_WEATHER_MAP;
     private boolean useNeue = false;
     private float shadowR = 1f;
     private float shadowX = 3f;
@@ -106,7 +107,6 @@ final public class MainActivity extends Activity implements
     private TextView suchLocation;
     private ImageView suchShare;
     private ImageView suchOptions;
-    //private LocationClient wowClient;
     private GoogleApiClient wowClient;
     private Location whereIsDoge;
     private Typeface wowComicSans;
@@ -224,6 +224,12 @@ final public class MainActivity extends Activity implements
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
         forceMetric = sp.getBoolean(OptionsActivity.PREF_FORCE_METRIC, false);
         forceLocation = sp.getString(OptionsActivity.PREF_FORCE_LOCATION, "");
+        String strSource = sp.getString(OptionsActivity.PREF_WEATHER_SOURCE, "0");
+        if(strSource.equals("0")) {
+            weatherSource = WeatherUtil.Source.OPEN_WEATHER_MAP;
+        } else {
+            weatherSource = WeatherUtil.Source.YAHOO;
+        }
         useNeue = sp.getBoolean(OptionsActivity.PREF_APP_USE_COMIC_NEUE, false);
         shadowR = sp.getFloat(OptionsActivity.PREF_APP_DROP_SHADOW + "_radius", 1f);
         shadowX = sp.getFloat(OptionsActivity.PREF_APP_DROP_SHADOW + "_x", 3f);
@@ -530,12 +536,12 @@ final public class MainActivity extends Activity implements
                 data = Cache.getWeatherData(MainActivity.this, forceLocation);
             }
 
-            if(data == null) {
+            if(data == null || data.source != weatherSource) {
                 WeatherUtil.WeatherResult result;
                 if(forceLocation.isEmpty()) {
-                    result = WeatherUtil.getWeather(params[0].getLatitude(), params[0].getLongitude(), WeatherUtil.Source.YAHOO);
+                    result = WeatherUtil.getWeather(params[0].getLatitude(), params[0].getLongitude(), weatherSource);
                 } else {
-                    result = WeatherUtil.getWeather(forceLocation, WeatherUtil.Source.YAHOO);
+                    result = WeatherUtil.getWeather(forceLocation, weatherSource);
                 }
                 if(result.error != WeatherUtil.WeatherResult.ERROR_NONE) {
                     return new Object[] { result };

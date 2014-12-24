@@ -29,5 +29,13 @@
         android:title="@string/force_location_name"
         android:defaultValue=""
         android:summary="@string/unset" />
+    <ListPreference
+        android:key="pref_weather_source"
+        android:title="@string/pref_weather_source_name"
+        android:entries="@array/pref_weather_source_options"
+        android:entryValues="@array/pref_weather_source_values"
+        android:defaultValue="0"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null" />
 
 </PreferenceScreen>
