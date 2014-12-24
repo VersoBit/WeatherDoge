@@ -60,7 +60,7 @@ public final class WidgetService extends IntentService implements
     static final String ACTION_REFRESH_ONE = "refresh_one";
     static final String EXTRA_WIDGET_ID = "widget_id";
 
-    private final CountDownLatch locationLatch = new CountDownLatch(1);
+    private CountDownLatch locationLatch = new CountDownLatch(1);
     private Handler uiHandler;
 
     public WidgetService() {
@@ -75,6 +75,7 @@ public final class WidgetService extends IntentService implements
 
     @Override
     protected void onHandleIntent(Intent intent) {
+        locationLatch = new CountDownLatch(1);
         AppWidgetManager widgetManager = AppWidgetManager.getInstance(this);
         int[] widgets;
         if(ACTION_REFRESH_ALL.equals(intent.getAction())) {

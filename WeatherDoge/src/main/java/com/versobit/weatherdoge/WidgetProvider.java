@@ -84,7 +84,7 @@ public final class WidgetProvider extends AppWidgetProvider {
         PendingIntent pIntent = PendingIntent.getService(ctx, 0,
                 new Intent(ctx, WidgetService.class).setAction(WidgetService.ACTION_REFRESH_ALL), 0);
         am.cancel(pIntent);
-        am.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, 0, interval, pIntent);
+        am.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, interval, interval, pIntent);
     }
 
     static Bitmap[] getTextBitmaps(Context ctx, String temp, String description, String location, String lastUpdated) {
