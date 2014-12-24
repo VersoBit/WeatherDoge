@@ -224,7 +224,7 @@ public final class WidgetService extends IntentService implements
         locationName = locationName.isEmpty() ? " " : locationName;
         Bitmap[] textBitmaps = WidgetProvider.getTextBitmaps(this,
                 formattedTemp, condition, locationName,
-                DateFormat.getTimeFormat(this).format(data.time) + " ");
+                " " + DateFormat.getTimeFormat(this).format(data.time) + " ");
 
         PendingIntent pIntent;
         if(tapToRefresh) {
