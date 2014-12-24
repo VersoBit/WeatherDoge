@@ -149,7 +149,7 @@ public final class WidgetProvider extends AppWidgetProvider {
 
         bitmaps[3] = Bitmap.createBitmap(textBounds.width(), textBounds.height(), Bitmap.Config.ARGB_8888);
         c = new Canvas(bitmaps[3]);
-        c.drawText(lastUpdated, c.getWidth() / 2f, (c.getHeight() + b2.height()) / 2f, textPaint);
+        c.drawText(lastUpdated, c.getWidth() / 2f, (c.getHeight() + b2.height()) / 2f + 1, textPaint);
 
         return bitmaps;
     }
