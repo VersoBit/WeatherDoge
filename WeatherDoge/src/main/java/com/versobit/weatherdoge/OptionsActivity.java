@@ -54,6 +54,7 @@ final public class OptionsActivity extends PreferenceActivity {
     static final String PREF_ABOUT_VERSION = "pref_about_version";
     static final String PREF_ABOUT_CONTRIBUTE = "pref_about_contribute";
     static final String PREF_ABOUT_ADD_CREDITS = "pref_about_additional_credits";
+    static final String PREF_INTERNAL_LAST_VERSION = "pref_internal_last_version";
 
     boolean genForceMetric = false;
     String genForceLocation = "";

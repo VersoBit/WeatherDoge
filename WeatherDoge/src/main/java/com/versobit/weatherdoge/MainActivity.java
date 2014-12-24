@@ -92,6 +92,7 @@ final public class MainActivity extends Activity implements
     private float shadowY = 3f;
     private boolean shadowAdjs = false;
     private boolean textOnTop = false;
+    private int lastVersion = 0;
 
     private RelativeLayout suchLayout;
     private ImageView suchBg;
@@ -218,6 +219,13 @@ final public class MainActivity extends Activity implements
                     .build();
         }
         setBackground(R.drawable.sky_01d);
+
+        if(BuildConfig.VERSION_CODE > lastVersion) {
+            lastVersion = BuildConfig.VERSION_CODE;
+            SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+            sp.edit().putInt(OptionsActivity.PREF_INTERNAL_LAST_VERSION, lastVersion).apply();
+            new WhatsNewDialog(new ContextThemeWrapper(this, R.style.AppTheme_Options)).show();
+        }
     }
 
     private void loadOptions() {
@@ -236,6 +244,7 @@ final public class MainActivity extends Activity implements
         shadowY = sp.getFloat(OptionsActivity.PREF_APP_DROP_SHADOW + "_y", 3f);
         shadowAdjs = sp.getBoolean(OptionsActivity.PREF_APP_DROP_SHADOW + "_adjs", false);
         textOnTop = sp.getBoolean(OptionsActivity.PREF_APP_TEXT_ON_TOP, false);
+        lastVersion = sp.getInt(OptionsActivity.PREF_INTERNAL_LAST_VERSION, lastVersion);
     }
 
     private void initOverlayTimer() {
