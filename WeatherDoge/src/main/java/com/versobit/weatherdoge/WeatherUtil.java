@@ -22,6 +22,7 @@ package com.versobit.weatherdoge;
 import android.util.Log;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.text.WordUtils;
 import org.json.JSONObject;
 
 import java.io.Serializable;
@@ -157,7 +158,7 @@ final class WeatherUtil {
                 JSONObject main = response.getJSONObject("main");
 
                 double temp = main.getDouble("temp") - 273.15d;
-                String condition = weather.getString("description").trim();
+                String condition = WordUtils.capitalize(weather.getString("description").trim());
                 String image = weather.getString("icon");
 
                 if(location == null || location.isEmpty()) {
