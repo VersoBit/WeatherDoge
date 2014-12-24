@@ -55,6 +55,9 @@ final public class OptionsActivity extends PreferenceActivity {
     static final String PREF_ABOUT_CONTRIBUTE = "pref_about_contribute";
     static final String PREF_ABOUT_ADD_CREDITS = "pref_about_additional_credits";
 
+    boolean genForceMetric = false;
+    String genForceLocation = "";
+    WeatherUtil.Source genWeatherSource = WeatherUtil.Source.OPEN_WEATHER_MAP;
     String widgetRefreshInterval = "1800";
     boolean widgetTapToRefresh = false;
     boolean widgetComicNeue = false;
@@ -65,6 +68,13 @@ final public class OptionsActivity extends PreferenceActivity {
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        genForceMetric = prefs.getBoolean(PREF_FORCE_METRIC, genForceMetric);
+        genForceLocation = prefs.getString(PREF_FORCE_LOCATION, genForceLocation);
+        String strSource = prefs.getString(PREF_WEATHER_SOURCE, "0");
+        genWeatherSource = WeatherUtil.Source.OPEN_WEATHER_MAP;
+        if(strSource.equals("1")) {
+            genWeatherSource = WeatherUtil.Source.YAHOO;
+        }
         widgetRefreshInterval = prefs.getString(PREF_WIDGET_REFRESH, widgetRefreshInterval);
         widgetTapToRefresh = prefs.getBoolean(PREF_WIDGET_TAP_TO_REFRESH, widgetTapToRefresh);
         widgetComicNeue = prefs.getBoolean(PREF_WIDGET_USE_COMIC_NEUE, widgetComicNeue);
@@ -147,11 +157,21 @@ final public class OptionsActivity extends PreferenceActivity {
     protected void onStop() {
         // Refresh widget options if they've changed
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean newGenForceMetric = prefs.getBoolean(PREF_FORCE_METRIC, genForceMetric);
+        String newGenForceLocation = prefs.getString(PREF_FORCE_LOCATION, genForceLocation);
+        String strSource = prefs.getString(PREF_WEATHER_SOURCE, "0");
+        WeatherUtil.Source newGenWeatherSource = WeatherUtil.Source.OPEN_WEATHER_MAP;
+        if(strSource.equals("1")) {
+            newGenWeatherSource = WeatherUtil.Source.YAHOO;
+        }
         String newWidgetRefreshInterval = prefs.getString(PREF_WIDGET_REFRESH, widgetRefreshInterval);
         boolean newWidgetTapToRefresh = prefs.getBoolean(PREF_WIDGET_TAP_TO_REFRESH, widgetTapToRefresh);
         boolean newWidgetComicNeue = prefs.getBoolean(PREF_WIDGET_USE_COMIC_NEUE, widgetComicNeue);
         boolean newWidgetBackgroundFix = prefs.getBoolean(PREF_WIDGET_BACKGROUND_FIX, widgetBackgroundFix);
-        if(newWidgetTapToRefresh != widgetTapToRefresh ||
+        if(newGenForceMetric != genForceMetric ||
+                !newGenForceLocation.equals(genForceLocation) ||
+                newGenWeatherSource != genWeatherSource ||
+                newWidgetTapToRefresh != widgetTapToRefresh ||
                 newWidgetComicNeue != widgetComicNeue ||
                 newWidgetBackgroundFix != widgetBackgroundFix) {
             startService(new Intent(this, WidgetService.class)

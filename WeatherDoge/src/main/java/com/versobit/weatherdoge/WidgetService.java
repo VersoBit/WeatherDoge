@@ -147,7 +147,7 @@ public final class WidgetService extends IntentService implements
             }
             data = Cache.getWeatherData(this, location.getLatitude(),location.getLongitude());
 
-            if(data == null) {
+            if(data == null || data.source != weatherSource) {
                 result = WeatherUtil.getWeather(location.getLatitude(), location.getLongitude(),
                         weatherSource);
             }
@@ -167,14 +167,16 @@ public final class WidgetService extends IntentService implements
         } else {
             locationName = forceLocation;
             data = Cache.getWeatherData(this, forceLocation);
-            if(data == null) {
+            if(data == null || data.source != weatherSource) {
                 result = WeatherUtil.getWeather(forceLocation, weatherSource);
             }
         }
 
-        if(data == null) {
+        if(data == null || data.source != weatherSource) {
             if(result == null) {
-                Log.wtf(TAG, "Both data and result are null.");
+                Log.wtf(TAG, "data: " + (data == null ? "null" : data) + ", data.source: " +
+                        ((data == null || data.source == null) ? "null" : data.source) +
+                        ", weatherSource: " + weatherSource);
                 showToast(R.string.widget_error_unknown);
                 return;
             }
