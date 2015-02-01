@@ -535,12 +535,16 @@ final public class MainActivity extends Activity implements
         @Override
         protected Object[] doInBackground(Location... params) {
             if(!Geocoder.isPresent() && forceLocation.isEmpty()) {
-                return new Object[] { new UnsupportedOperationException("No Geocoder is present on this device.") };
+                return new Object[] { new UnsupportedOperationException(getString(R.string.geocoder_error_code)) };
             }
 
             WeatherUtil.WeatherData data;
             if(forceLocation.isEmpty()) {
-                data = Cache.getWeatherData(MainActivity.this, params[0].getLatitude(), params[0].getLongitude());
+                if(params[0] != null) {
+                    data = Cache.getWeatherData(MainActivity.this, params[0].getLatitude(), params[0].getLongitude());
+                } else {
+                    return new Object[] { new RuntimeException(getString(R.string.error_ensure_location_settings)) };
+                }
             } else {
                 data = Cache.getWeatherData(MainActivity.this, forceLocation);
             }

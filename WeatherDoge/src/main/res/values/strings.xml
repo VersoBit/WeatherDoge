@@ -113,6 +113,9 @@
 
     <string name="geocoder_error_title">Geocoder Error</string>
     <string name="geocoder_error_msg">Oh noes. There\'s a known problem with the Android geocoding service that causes it to stop functioning properly. A reboot usually fixes this problem. Sorry.</string>
+    <string name="geocoder_error_code">No Geocoder is present on this device.</string>
+
+    <string name="error_ensure_location_settings">Set location settings to &quot;Battery Saving&quot; or &quot;High Accuracy&quot; or set location in app settings.</string>
 
     <string name="dialog_dropshadow_adjectives">Use shadow for doge-isms</string>
 
