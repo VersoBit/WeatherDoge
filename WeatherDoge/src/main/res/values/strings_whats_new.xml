@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Copyright (C) 2014 VersoBit Ltd
+    Copyright (C) 2014-2015 VersoBit Ltd
 
     This file is part of Weather Doge.
 
@@ -18,12 +18,15 @@
     along with Weather Doge.  If not, see <http://www.gnu.org/licenses/>.
 -->
 <resources>
-    <string name="dialog_whats_new_title">Very Merry Christmas</string>
-    <string name="dialog_whats_new_text_1">Hello there fellow shibes! Here\'s a quick rundown of what\'s new in v1.2 of Weather Doge:</string>
-    <string name="dialog_whats_new_text_2">• Android Lollipop support\n• Option for Yahoo Weather\n• A nifty widget!\n• Bug fixes\n• Better performance\n• Lots of under-the-hood stuff</string>
-    <string name="dialog_whats_new_text_3">You can add the widget to your home screen just like any other! It\'ll look a little something like this:</string>
-    <string name="dialog_whats_new_text_4">If you\'re having trouble finding the widget in your launcher, give your device a reboot. That usually fixes this odd bug.\n\nWe\'ve put in a lot of time and energy to make this widget work and look great on as many devices as possible. If the widget looks like this we have a fix for you:</string>
-    <string name="dialog_whats_new_text_5">See how the sky background is all weird? Check the \"Background Fix\" option in the app to enable a shady workaround!\n\nIf you\'re still experiencing problems with the app or widget don\'t hesitate to send us an email (support@versobit.com) or talk to us on Twitter (@VersoBit).\n\nWe\'re proud to be the highest-rated, #1, and most professionally crafted Doge-themed weather app for Android! Thank you for making this possible.</string>
-    <string name="dialog_whats_new_text_6">Merry Christmas and\na Happy New Year from</string>
-    <string name="dialog_whats_new_text_7">By the way, we found that awesome doge santa image by searching for \"doge santa\" on Google Images. We couldn\'t track down who created the photo and if we knew we would\'ve given them credit. Thank you, whoever you are!</string>
+    <string name="dialog_whats_new_title">v1.3 - many bug</string>
+    <string name="dialog_whats_new_text_1">Hello there fellow shibes! Here\'s what\'s waiting for you in v1.3 of Weather Doge:</string>
+    <string name="dialog_whats_new_text_2">Fixed spontaneous app crashing</string>
+    <string name="dialog_whats_new_text_3">The app should no longer crash on launch or when reloading location information. This issue occurred when Weather Doge could not find some shibes.\n\nTo ensure Weather Doge has the ability to find you make sure you set your device\'s location settings to \"High accuracy\" or \"Battery saving.\" The app will not receive location info from your device if it is set to \"Device only\" or \"Off.\"\n\nIf turning location services on is not an option for you, Weather Doge has a constant location setting.</string>
+    <string name="dialog_whats_new_text_4">\nHorizontal widget resizing</string>
+    <string name="dialog_whats_new_text_5">The widget can now be resized horizontally for devices and launchers that support it!</string>
+    <string name="dialog_whats_new_text_6">\nIf things aren\'t going the way you\'d like please do not hesitate to send us an email via support@versobit.com.</string>
+    <string name="dialog_whats_new_text_7">Made with ♥ from</string>
+
+    <string name="dialog_whats_new_email_subject">Help with Weather Doge</string>
+    <string name="dialog_whats_new_email_chooser">Contact VersoBit</string>
 </resources>

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 VersoBit Ltd
+ * Copyright (C) 2014-2015 VersoBit Ltd
  *
  * This file is part of Weather Doge.
  *
@@ -42,6 +42,17 @@ final class WhatsNewDialog extends AlertDialog {
         });
         setTitle(getContext().getString(R.string.dialog_whats_new_title));
         View v = getLayoutInflater().inflate(R.layout.dialog_whats_new, null);
+        v.findViewById(R.id.dialog_whats_new_email).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent email = new Intent(Intent.ACTION_SENDTO,
+                        Uri.fromParts("mailto", "support@versobit.com", null));
+                email.putExtra(Intent.EXTRA_SUBJECT,
+                        getContext().getString(R.string.dialog_whats_new_email_subject));
+                getContext().startActivity(Intent.createChooser(email,
+                        getContext().getString(R.string.dialog_whats_new_email_chooser)));
+            }
+        });
         v.findViewById(R.id.dialog_whats_new_versobit).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
