@@ -124,10 +124,9 @@ public final class WidgetProvider extends AppWidgetProvider {
         Canvas c = new Canvas(bitmaps[0]);
         c.drawText(temp, textBounds.width() / 2f, textBounds.height(), textPaint);
 
-
         textPaint.setTextSize(res.getDimension(R.dimen.widget_desc_font_size));
         textBounds = new Rect();
-        textPaint.getTextBounds(description, 0, description.length(), textBounds);
+        textPaint.getTextBounds(description + "g", 0, description.length() + 1, textBounds);
         Rect b2 = new Rect();
         textPaint.getTextBounds("a", 0, 1, b2);
 
