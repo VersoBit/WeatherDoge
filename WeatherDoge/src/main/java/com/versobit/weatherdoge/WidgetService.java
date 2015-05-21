@@ -98,13 +98,6 @@ public final class WidgetService extends IntentService implements
         }
         loading.recycle();
 
-        int gmsCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
-        if(gmsCode != ConnectionResult.SUCCESS) {
-            GooglePlayServicesUtil.showErrorNotification(gmsCode, this);
-            showToast(R.string.widget_error_no_gms);
-            return;
-        }
-
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         boolean forceMetric = prefs.getBoolean(OptionsActivity.PREF_FORCE_METRIC, false);
         String forceLocation = prefs.getString(OptionsActivity.PREF_FORCE_LOCATION, "");
@@ -114,6 +107,15 @@ public final class WidgetService extends IntentService implements
         }
         boolean tapToRefresh = prefs.getBoolean(OptionsActivity.PREF_WIDGET_TAP_TO_REFRESH, false);
         boolean backgroundFix = prefs.getBoolean(OptionsActivity.PREF_WIDGET_BACKGROUND_FIX, false);
+
+        if(forceLocation == null || forceLocation.isEmpty()) {
+            int gmsCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+            if(gmsCode != ConnectionResult.SUCCESS) {
+                GooglePlayServicesUtil.showErrorNotification(gmsCode, this);
+                showToast(R.string.widget_error_no_gms);
+                return;
+            }
+        }
 
         WeatherUtil.WeatherResult result = null;
         WeatherUtil.WeatherData data;
