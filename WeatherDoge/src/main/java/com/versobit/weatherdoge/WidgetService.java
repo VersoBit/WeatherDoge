@@ -237,6 +237,7 @@ public final class WidgetService extends IntentService implements
         for(int widget : widgets) {
             RemoteViews views = new RemoteViews(BuildConfig.APPLICATION_ID, R.layout.widget);
             Bitmap sky = null;
+            Bitmap wowLayer = null;
             boolean failed = false;
 
             views.setOnClickPendingIntent(R.id.widget_root, pIntent);
@@ -246,13 +247,17 @@ public final class WidgetService extends IntentService implements
             views.setImageViewBitmap(R.id.widget_locationimg, textBitmaps[2]);
             views.setImageViewBitmap(R.id.widget_last_updated_img, textBitmaps[3]);
 
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN && !backgroundFix) {
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                 try {
                     Bundle options = widgetManager.getAppWidgetOptions(widget);
-                    sky = WidgetProvider.getSkyBitmap(this, options, skyImg);
-                    views.setImageViewBitmap(R.id.widget_sky, sky);
-                    views.setInt(R.id.widget_sky, "setVisibility", View.VISIBLE);
-                    views.setInt(R.id.widget_sky_compat, "setVisibility", View.GONE);
+                    if(!backgroundFix) {
+                        sky = WidgetProvider.getSkyBitmap(this, options, skyImg);
+                        views.setImageViewBitmap(R.id.widget_sky, sky);
+                        views.setInt(R.id.widget_sky, "setVisibility", View.VISIBLE);
+                        views.setInt(R.id.widget_sky_compat, "setVisibility", View.GONE);
+                    }
+                    wowLayer = WidgetProvider.getWowLayer(this, options, data.image, (int)data.temperature);
+                    views.setImageViewBitmap(R.id.widget_wowlayer, wowLayer);
                 } catch (Exception ex) {
                     Log.wtf(TAG, ex);
                     failed = true;
@@ -268,6 +273,10 @@ public final class WidgetService extends IntentService implements
 
             if(sky != null && !sky.isRecycled()) {
                 sky.recycle();
+            }
+
+            if(wowLayer != null && !wowLayer.isRecycled()) {
+                wowLayer.recycle();
             }
         }
 

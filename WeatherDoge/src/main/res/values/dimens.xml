@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Copyright (C) 2014 VersoBit Ltd
+    Copyright (C) 2014-2015 VersoBit Ltd
 
     This file is part of Weather Doge.
 
@@ -22,10 +22,17 @@
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
+
     <dimen name="widget_margin">8dp</dimen>
     <dimen name="widget_corner_radius">3dp</dimen>
     <dimen name="widget_temp_font_size">40sp</dimen>
     <dimen name="widget_desc_font_size">22sp</dimen>
+    <dimen name="widget_wowlayer_font_size">14sp</dimen>
+    <dimen name="widget_wowlayer_font_size_neue">16sp</dimen>
+    <dimen name="widget_wowlayer_shadow_xy">0.2dp</dimen>
+    <dimen name="widget_wowlayer_shadow_radius">0.1dp</dimen>
+    <dimen name="widget_wowlayer_rect_top">92dp</dimen>
+    <dimen name="widget_wowlayer_rect_right">100dp</dimen>
     <dimen name="widget_bottom_bar_font_size">13sp</dimen>
     <dimen name="widget_bottom_bar_height">30dp</dimen>
     <dimen name="widget_text_shadow_padding_width">2dp</dimen>

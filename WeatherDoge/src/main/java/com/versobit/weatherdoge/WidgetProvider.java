@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 VersoBit Ltd
+ * Copyright (C) 2014-2015 VersoBit Ltd
  *
  * This file is part of Weather Doge.
  *
@@ -42,7 +42,12 @@ import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.DisplayMetrics;
 import android.util.TypedValue;
+
+import org.apache.commons.lang3.ArrayUtils;
+
+import java.util.Random;
 
 public final class WidgetProvider extends AppWidgetProvider {
 
@@ -176,6 +181,16 @@ public final class WidgetProvider extends AppWidgetProvider {
         return loading;
     }
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    private static float[] getWidgetSize(DisplayMetrics metrics, Bundle options) {
+        return new float[] {
+                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                        options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH), metrics),
+                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                        options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT), metrics)
+        };
+    }
+
     // Updates the sky bitmap for a single app widget instance
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     static Bitmap getSkyBitmap(Context ctx, Bundle options, int skyId) {
@@ -183,12 +198,8 @@ public final class WidgetProvider extends AppWidgetProvider {
         Bitmap originalSky = BitmapFactory.decodeResource(res, skyId);
 
         // Obtain (approximate?) size of widget (and by extension the image view)
-        float viewW = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-                options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH),
-                res.getDisplayMetrics());
-        float viewH = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-                options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT),
-                res.getDisplayMetrics());
+        float[] widgetSize = getWidgetSize(res.getDisplayMetrics(), options);
+        float viewW = widgetSize[0], viewH = widgetSize[1];
         // Obtain size of sky bitmap
         float bmpW = originalSky.getWidth(), bmpH = originalSky.getHeight();
 
@@ -233,5 +244,107 @@ public final class WidgetProvider extends AppWidgetProvider {
         scaledSky.recycle();
 
         return roundedSky;
+    }
+
+    static Bitmap getWowLayer(Context ctx, Bundle options, String image, int temp) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+        boolean useComicNeue = prefs.getBoolean(OptionsActivity.PREF_WIDGET_USE_COMIC_NEUE, false);
+
+        Resources res = ctx.getResources();
+
+        // Find the size in pixels of the widget
+        float[] widgetSize = getWidgetSize(res.getDisplayMetrics(), options);
+        // Subtract out the bottom bar so now we have the rough size of the wowlayer
+        widgetSize[1] -= res.getDimension(R.dimen.widget_bottom_bar_height);
+
+        // Text shadow radius for wow text
+        float shadowRadius = res.getDimension(R.dimen.widget_wowlayer_shadow_radius);
+        // Odd results with fractional offsets
+        float shadowXY = Math.max(1, Math.round(res.getDimension(R.dimen.widget_wowlayer_shadow_xy)));
+
+        // Create a bitmap + canvas the size of the wowlayer to draw wows on
+        Bitmap bitmap = Bitmap.createBitmap((int) widgetSize[0], (int) widgetSize[1], Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+
+        // Setup the initial text painter
+        Paint textPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.LINEAR_TEXT_FLAG);
+        textPaint.setTypeface(Typeface.createFromAsset(ctx.getAssets(), useComicNeue ?
+                "ComicNeue-Regular.ttf" : "comic.ttf"));
+        textPaint.setStyle(Paint.Style.FILL);
+        textPaint.setTextAlign(Paint.Align.LEFT);
+        textPaint.setTextSize(res.getDimension(useComicNeue ? R.dimen.widget_wowlayer_font_size_neue
+                : R.dimen.widget_wowlayer_font_size));
+        textPaint.setShadowLayer(shadowRadius, shadowXY, shadowXY, Color.BLACK);
+
+        // Initialize the random number generator
+        Random r = new Random();
+
+        // Find the colors, and text to use for our dogeisms
+        int[] colors = res.getIntArray(R.array.wow_colors);
+        String[] wows = res.getStringArray(R.array.wows);
+        String[] dogefixes = res.getStringArray(R.array.dogefix);
+        String[] weatherAdjs = ArrayUtils.addAll(
+                res.getStringArray(WeatherDoge.getTempAdjectives(temp)),
+                res.getStringArray(WeatherDoge.getBgAdjectives(image))
+        );
+
+        // Calculate how many dogeisms to display for a given density independent widget area
+        double area = (widgetSize[0] / res.getDisplayMetrics().density) *
+                (widgetSize[1] / res.getDisplayMetrics().density);
+        int total = (int)Math.max(1, Math.round(0.000066156726853611d * area + 1.1833074350128d));
+
+        // Store our drawn rectangles so we can avoid text overlaps
+        Rect[] drawnRects = new Rect[total + 1];
+        // Prevent text from drawing underneath the temperature display at the bottom left
+        drawnRects[total] = new Rect(0,
+                (int)(widgetSize[1] - res.getDimension(R.dimen.widget_wowlayer_rect_top)),
+                (int)res.getDimension(R.dimen.widget_wowlayer_rect_right), (int)widgetSize[1]);
+
+        // Loop over all the dogeisms we're going to create
+        for(int i = 0; i < total; i++) {
+            Rect textBounds = new Rect();
+            // The rectangle which represents the text's actual position on the canvas
+            Rect realRect = new Rect();
+            textPaint.setColor(colors[r.nextInt(colors.length)]);
+
+            // The text to draw
+            String ism = WeatherDoge.getDogeism(wows, dogefixes, weatherAdjs);
+
+            // Find the bounding rectangle of the text
+            textPaint.getTextBounds(ism, 0, ism.length(), textBounds);
+            // Prevent the text from going offscreen
+            int xMax = (int)widgetSize[0] - textBounds.width();
+            int yMax = (int)widgetSize[1] - textBounds.height();
+            do {
+                // Create the real rectangle using a random origin
+                realRect.left = r.nextInt(xMax);
+                realRect.right = realRect.left + textBounds.width();
+                realRect.bottom = r.nextInt(yMax);
+                realRect.top = realRect.bottom - textBounds.height();
+                // Continue to loop until we find a valid in-bounds rectangle.
+                // Since the drawText origin is the bottom left we need to make certain that
+                // our text will not clip off the top edge of the widget.
+                // We also need to check if this rectangle intersects any previously drawn
+                // text rectangles. We don't want text-on-text.
+            } while(realRect.bottom < textBounds.height() || intersects(realRect, drawnRects));
+
+            // realRect is valid. Draw it out.
+            canvas.drawText(ism, realRect.left, realRect.bottom, textPaint);
+
+            // Store it for intersection checks
+            drawnRects[i] = realRect;
+        }
+
+        return bitmap;
+    }
+
+    // Searches a Rect array for an intersection with a given Rect
+    private static boolean intersects(Rect needle, Rect[] haystack) {
+        for(Rect r : haystack) {
+            if(r != null && Rect.intersects(r, needle)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

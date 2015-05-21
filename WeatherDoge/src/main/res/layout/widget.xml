@@ -46,6 +46,13 @@
         android:src="@drawable/doge_01d"
         android:layout_centerVertical="true" />
 
+    <ImageView
+        android:layout_above="@+id/widget_bottom_bar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/widget_wowlayer"
+        android:scaleType="matrix" />
+
     <LinearLayout
         android:layout_marginBottom="15dp"
         android:layout_marginLeft="15dp"
@@ -69,7 +76,7 @@
     </LinearLayout>
 
     <RelativeLayout
-        android:id="@id/widget_bottom_bar"
+        android:id="@+id/widget_bottom_bar"
         android:layout_width="fill_parent"
         android:layout_height="@dimen/widget_bottom_bar_height"
         android:background="@drawable/widget_round_rect_shape_bottom"
