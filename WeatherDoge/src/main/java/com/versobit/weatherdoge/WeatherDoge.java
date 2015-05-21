@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 VersoBit Ltd
+ * Copyright (C) 2014-2015 VersoBit Ltd
  *
  * This file is part of Weather Doge.
  *
@@ -170,21 +170,6 @@ final public class WeatherDoge extends Application {
                 break;
         }
         return resId;
-    }
-
-    // concat = very no
-    static <T> T[] condoge(T[]... arrays) {
-        int totalLength = 0;
-        for(T[] s : arrays) {
-            totalLength += s.length;
-        }
-        T[] full = (T[]) Array.newInstance(arrays[0].getClass().getComponentType(), totalLength);
-        int pos = 0;
-        for(T[] s : arrays) {
-            System.arraycopy(s, 0, full, pos, s.length);
-            pos += s.length;
-        }
-        return full;
     }
 
     static String getDogeism(String[] wows, String[] dogefixes, String[] weatherAdjectives) {

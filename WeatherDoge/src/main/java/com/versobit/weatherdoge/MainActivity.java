@@ -66,6 +66,8 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.versobit.weatherdoge.dialogs.WhatsNewDialog;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import java.text.DecimalFormat;
 import java.util.ArrayDeque;
 import java.util.List;
@@ -648,7 +650,7 @@ final public class MainActivity extends Activity implements
             final String description = getString(R.string.wow) + " " + data.condition.trim().toLowerCase();
             String[] tempAdjs = getResources().getStringArray(WeatherDoge.getTempAdjectives((int)data.temperature));
             String[] bgAdjs = getResources().getStringArray(WeatherDoge.getBgAdjectives(data.image));
-            weatherAdjectives = WeatherDoge.condoge(tempAdjs, bgAdjs);
+            weatherAdjectives = ArrayUtils.addAll(tempAdjs, bgAdjs);
 
             setDoge(WeatherDoge.dogeSelect(data.image));
             setBackground(WeatherDoge.skySelect(data.image));
