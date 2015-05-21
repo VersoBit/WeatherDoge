@@ -17,10 +17,11 @@
  * along with Weather Doge.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.versobit.weatherdoge;
+package com.versobit.weatherdoge.dialogs;
 
 import android.app.AlertDialog;
-import android.content.Context;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -37,9 +38,14 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.versobit.weatherdoge.OptionsActivity;
+import com.versobit.weatherdoge.R;
+
 import java.text.DecimalFormat;
 
-final class DropShadowDialog extends AlertDialog {
+public final class DropShadowDialog extends DialogFragment {
+
+    public static final String FRAGMENT_TAG = "fragment_dialog_dropshadow";
 
     private float radius;
     private float x;
@@ -59,19 +65,15 @@ final class DropShadowDialog extends AlertDialog {
 
     private DecimalFormat df = (DecimalFormat)DecimalFormat.getInstance();
 
-    DropShadowDialog(Context ctx) {
-        super(ctx);
-    }
-
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        final SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        final SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
         boolean useNeue = sp.getBoolean(OptionsActivity.PREF_APP_USE_COMIC_NEUE, false);
-        ContextThemeWrapper wrapper = new ContextThemeWrapper(getContext(), R.style.AppTheme_Dialog_Light);
+        ContextThemeWrapper wrapper = new ContextThemeWrapper(getActivity(), R.style.AppTheme_Dialog_Light);
         View v = LayoutInflater.from(wrapper).inflate(R.layout.dialog_dropshadow, null);
 
         preview = (TextView)v.findViewById(R.id.dialog_dropshadow_txtpreview);
-        preview.setTypeface(Typeface.createFromAsset(getContext().getAssets(), useNeue ? "ComicNeue-Regular.ttf" : "comic.ttf"));
+        preview.setTypeface(Typeface.createFromAsset(getActivity().getAssets(), useNeue ? "ComicNeue-Regular.ttf" : "comic.ttf"));
 
         txtR = (TextView)v.findViewById(R.id.dialog_dropshadow_txtradius);
         txtX = (TextView)v.findViewById(R.id.dialog_dropshadow_txtx);
@@ -88,24 +90,6 @@ final class DropShadowDialog extends AlertDialog {
         seekY.setOnSeekBarChangeListener(onSeek);
 
         chkAdjs.setOnCheckedChangeListener(onCheck);
-
-        setButton(DialogInterface.BUTTON_NEGATIVE, getContext().getString(R.string.cancel), new OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dismiss();
-            }
-        });
-        setButton(DialogInterface.BUTTON_POSITIVE, getContext().getString(R.string.save), new OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                sp.edit()
-                .putFloat(OptionsActivity.PREF_APP_DROP_SHADOW + "_radius", radius)
-                .putFloat(OptionsActivity.PREF_APP_DROP_SHADOW + "_x", x)
-                .putFloat(OptionsActivity.PREF_APP_DROP_SHADOW + "_y", y)
-                .putBoolean(OptionsActivity.PREF_APP_DROP_SHADOW + "_adjs", adjs)
-                .apply();
-            }
-        });
 
         df.setDecimalSeparatorAlwaysShown(true);
         df.setMaximumFractionDigits(2);
@@ -131,12 +115,30 @@ final class DropShadowDialog extends AlertDialog {
         adjs = sp.getBoolean(OptionsActivity.PREF_APP_DROP_SHADOW + "_adjs", false);
 
         seekR.setProgress((int)map(radius, 0, 25, 0, 100));
-        seekX.setProgress((int)map(x, -25, 25, 0, 100));
-        seekY.setProgress((int)map(y, -25, 25, 0, 100));
+        seekX.setProgress((int) map(x, -25, 25, 0, 100));
+        seekY.setProgress((int) map(y, -25, 25, 0, 100));
         chkAdjs.setChecked(adjs);
 
-        setView(v);
-        super.onCreate(savedInstanceState);
+        return new AlertDialog.Builder(getActivity(), getTheme())
+                .setView(v)
+                .setNeutralButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .setPositiveButton(R.string.save, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        sp.edit()
+                                .putFloat(OptionsActivity.PREF_APP_DROP_SHADOW + "_radius", radius)
+                                .putFloat(OptionsActivity.PREF_APP_DROP_SHADOW + "_x", x)
+                                .putFloat(OptionsActivity.PREF_APP_DROP_SHADOW + "_y", y)
+                                .putBoolean(OptionsActivity.PREF_APP_DROP_SHADOW + "_adjs", adjs)
+                                .apply();
+                    }
+                })
+                .create();
     }
 
     private SeekBar.OnSeekBarChangeListener onSeek = new SeekBar.OnSeekBarChangeListener() {

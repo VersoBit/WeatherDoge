@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 VersoBit Ltd
+ * Copyright (C) 2014-2015 VersoBit Ltd
  *
  * This file is part of Weather Doge.
  *
@@ -17,31 +17,34 @@
  * along with Weather Doge.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.versobit.weatherdoge;
+package com.versobit.weatherdoge.dialogs;
 
 import android.app.AlertDialog;
-import android.content.Context;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.webkit.WebView;
 
-final class OtherShibesDialog extends AlertDialog {
-    OtherShibesDialog(Context ctx) {
-        super(ctx);
-    }
+import com.versobit.weatherdoge.R;
+
+public final class OtherShibesDialog extends DialogFragment {
+
+    public static final String FRAGMENT_TAG = "fragment_dialog_othershibes";
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        setButton(BUTTON_NEUTRAL, getContext().getString(R.string.wow), new OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dismiss();
-            }
-        });
-        WebView wv = new WebView(getContext());
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        WebView wv = new WebView(getActivity());
         wv.getSettings().setDefaultTextEncodingName("utf-8");
         wv.loadUrl("file:///android_asset/othershibes.html");
-        setView(wv);
-        super.onCreate(savedInstanceState);
+        return new AlertDialog.Builder(getActivity(), getTheme())
+                .setView(wv)
+                .setPositiveButton(R.string.wow, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .create();
     }
 }

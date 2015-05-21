@@ -17,49 +17,55 @@
  * along with Weather Doge.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.versobit.weatherdoge;
+package com.versobit.weatherdoge.dialogs;
 
 import android.app.AlertDialog;
-import android.content.Context;
+import android.app.Dialog;
+import android.app.DialogFragment;
+import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 
-final class WhatsNewDialog extends AlertDialog {
-    WhatsNewDialog(Context ctx) {
-        super(ctx);
-    }
+import com.versobit.weatherdoge.R;
+
+public final class WhatsNewDialog extends DialogFragment {
+
+    public static final String FRAGMENT_TAG = "fragment_dialog_whatsnew";
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        setButton(BUTTON_NEUTRAL, getContext().getString(R.string.wow), new OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dismiss();
-            }
-        });
-        setTitle(getContext().getString(R.string.dialog_whats_new_title));
-        View v = getLayoutInflater().inflate(R.layout.dialog_whats_new, null);
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        ContextWrapper wrapper = new ContextWrapper(getActivity());
+        View v = LayoutInflater.from(wrapper).inflate(R.layout.dialog_whats_new, null);
         v.findViewById(R.id.dialog_whats_new_email).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent email = new Intent(Intent.ACTION_SENDTO,
                         Uri.fromParts("mailto", "support@versobit.com", null));
                 email.putExtra(Intent.EXTRA_SUBJECT,
-                        getContext().getString(R.string.dialog_whats_new_email_subject));
-                getContext().startActivity(Intent.createChooser(email,
-                        getContext().getString(R.string.dialog_whats_new_email_chooser)));
+                        getString(R.string.dialog_whats_new_email_subject));
+                startActivity(Intent.createChooser(email,
+                        getString(R.string.dialog_whats_new_email_chooser)));
             }
         });
         v.findViewById(R.id.dialog_whats_new_versobit).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://versobit.com/")));
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://versobit.com/")));
             }
         });
-        setView(v);
-        super.onCreate(savedInstanceState);
+        return new AlertDialog.Builder(getActivity(), R.style.AppTheme_Options)
+                .setTitle(R.string.dialog_whats_new_title)
+                .setView(v)
+                .setPositiveButton(R.string.wow, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .create();
     }
 }

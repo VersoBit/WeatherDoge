@@ -64,6 +64,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.versobit.weatherdoge.dialogs.WhatsNewDialog;
 
 import java.text.DecimalFormat;
 import java.util.ArrayDeque;
@@ -224,7 +225,7 @@ final public class MainActivity extends Activity implements
             lastVersion = BuildConfig.VERSION_CODE;
             SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
             sp.edit().putInt(OptionsActivity.PREF_INTERNAL_LAST_VERSION, lastVersion).apply();
-            new WhatsNewDialog(new ContextThemeWrapper(this, R.style.AppTheme_Options)).show();
+            new WhatsNewDialog().show(getFragmentManager(), WhatsNewDialog.FRAGMENT_TAG);
         }
     }
 

@@ -50,7 +50,6 @@
         <activity
             android:theme="@style/AppTheme.Options"
             android:name="com.versobit.weatherdoge.OptionsActivity"
-            android:screenOrientation="portrait"
             android:label="@string/action_options" >
         </activity>
 
