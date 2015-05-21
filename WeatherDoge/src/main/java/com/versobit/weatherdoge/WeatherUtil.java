@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 VersoBit Ltd
+ * Copyright (C) 2014-2015 VersoBit Ltd
  *
  * This file is part of Weather Doge.
  *
@@ -19,6 +19,7 @@
 
 package com.versobit.weatherdoge;
 
+import android.annotation.SuppressLint;
 import android.util.Log;
 
 import org.apache.commons.io.IOUtils;
@@ -44,6 +45,7 @@ final class WeatherUtil {
     private static final String TAG = WeatherUtil.class.getSimpleName();
 
     private static final Pattern YAHOO_TIME = Pattern.compile("([0-9]{1,2}):([0-9]{2}) (am|pm)");
+    @SuppressLint("SimpleDateFormat")
     private static final SimpleDateFormat YAHOO_DATE_FORMAT = new SimpleDateFormat("EEE, d MMM yyyy h:m a zzz");
 
     private WeatherUtil() {
@@ -316,18 +318,16 @@ final class WeatherUtil {
                 return false;
             }
             final WeatherData other = (WeatherData)o;
-            if((this.temperature != other.temperature) || !this.condition.equals(other.condition)
+            return !((this.temperature != other.temperature) || !this.condition.equals(other.condition)
                     || !this.image.equals(other.image) || (this.latitude != other.latitude)
                     || (this.longitude != other.longitude) || !this.place.equals(other.place)
-                    || !this.time.equals(other.time) || (this.source != other.source)) {
-                return false;
-            }
-            return true;
+                    || !this.time.equals(other.time) || (this.source != other.source));
         }
 
         @Override
         public String toString() {
-            StringBuilder sb = new StringBuilder(getClass().getSimpleName());
+            @SuppressWarnings("StringBufferReplaceableByString")
+            StringBuilder sb = new StringBuilder(WeatherData.class.getSimpleName());
             sb.append("[temperature=").append(temperature).append(", condition=").append(condition)
                     .append(", image=").append(image).append(", latitude=").append(latitude)
                     .append(", longitude=").append(longitude).append(", place=").append(place)
