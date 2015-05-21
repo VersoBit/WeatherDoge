@@ -45,7 +45,7 @@ android {
 }
 
 dependencies {
-    compile 'com.google.android.gms:play-services:7.3.0'
+    compile 'com.google.android.gms:play-services-location:7.3.0'
     compile 'commons-io:commons-io:2.4'
     compile 'org.apache.commons:commons-lang3:3.3.2'
 }
