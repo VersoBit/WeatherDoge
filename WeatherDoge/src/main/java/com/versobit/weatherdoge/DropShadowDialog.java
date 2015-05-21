@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 VersoBit Ltd
+ * Copyright (C) 2014-2015 VersoBit Ltd
  *
  * This file is part of Weather Doge.
  *
@@ -27,6 +27,8 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.view.ContextThemeWrapper;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
@@ -65,7 +67,8 @@ final class DropShadowDialog extends AlertDialog {
     protected void onCreate(Bundle savedInstanceState) {
         final SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
         boolean useNeue = sp.getBoolean(OptionsActivity.PREF_APP_USE_COMIC_NEUE, false);
-        View v = getLayoutInflater().inflate(R.layout.dialog_dropshadow, null);
+        ContextThemeWrapper wrapper = new ContextThemeWrapper(getContext(), R.style.AppTheme_Dialog_Light);
+        View v = LayoutInflater.from(wrapper).inflate(R.layout.dialog_dropshadow, null);
 
         preview = (TextView)v.findViewById(R.id.dialog_dropshadow_txtpreview);
         preview.setTypeface(Typeface.createFromAsset(getContext().getAssets(), useNeue ? "ComicNeue-Regular.ttf" : "comic.ttf"));

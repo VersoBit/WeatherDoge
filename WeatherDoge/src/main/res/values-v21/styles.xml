@@ -30,4 +30,8 @@
         <item name="android:colorAccent">@color/accent</item>
     </style>
 
+    <style name="AppTheme.Dialog.Light">
+        <item name="android:colorAccent">@color/primary</item>
+    </style>
+
 </resources>
