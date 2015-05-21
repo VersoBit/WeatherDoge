@@ -109,7 +109,7 @@ public final class WidgetService extends IntentService implements
         boolean forceMetric = prefs.getBoolean(OptionsActivity.PREF_FORCE_METRIC, false);
         String forceLocation = prefs.getString(OptionsActivity.PREF_FORCE_LOCATION, "");
         WeatherUtil.Source weatherSource = WeatherUtil.Source.OPEN_WEATHER_MAP;
-        if(prefs.getString(OptionsActivity.PREF_WEATHER_SOURCE, "0").equals("1")) {
+        if("1".equals(prefs.getString(OptionsActivity.PREF_WEATHER_SOURCE, "0"))) {
             weatherSource = WeatherUtil.Source.YAHOO;
         }
         boolean tapToRefresh = prefs.getBoolean(OptionsActivity.PREF_WIDGET_TAP_TO_REFRESH, false);
@@ -118,7 +118,7 @@ public final class WidgetService extends IntentService implements
         WeatherUtil.WeatherResult result = null;
         WeatherUtil.WeatherData data;
         String locationName = "";
-        if(forceLocation.isEmpty()) {
+        if(forceLocation == null || forceLocation.isEmpty()) {
             GoogleApiClient locationClient = new GoogleApiClient.Builder(this)
                     .addApi(LocationServices.API)
                     .addConnectionCallbacks(this)

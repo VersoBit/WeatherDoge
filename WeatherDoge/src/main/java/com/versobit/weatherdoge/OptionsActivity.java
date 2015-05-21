@@ -86,7 +86,7 @@ final public class OptionsActivity extends PreferenceActivity {
             genForceLocation = prefs.getString(PREF_FORCE_LOCATION, genForceLocation);
             String strSource = prefs.getString(PREF_WEATHER_SOURCE, "0");
             genWeatherSource = WeatherUtil.Source.OPEN_WEATHER_MAP;
-            if (strSource.equals("1")) {
+            if ("1".equals(strSource)) {
                 genWeatherSource = WeatherUtil.Source.YAHOO;
             }
             widgetRefreshInterval = prefs.getString(PREF_WIDGET_REFRESH, widgetRefreshInterval);
@@ -163,7 +163,7 @@ final public class OptionsActivity extends PreferenceActivity {
             String newGenForceLocation = prefs.getString(PREF_FORCE_LOCATION, genForceLocation);
             String strSource = prefs.getString(PREF_WEATHER_SOURCE, "0");
             WeatherUtil.Source newGenWeatherSource = WeatherUtil.Source.OPEN_WEATHER_MAP;
-            if (strSource.equals("1")) {
+            if ("1".equals(strSource)) {
                 newGenWeatherSource = WeatherUtil.Source.YAHOO;
             }
             String newWidgetRefreshInterval = prefs.getString(PREF_WIDGET_REFRESH, widgetRefreshInterval);
@@ -171,7 +171,7 @@ final public class OptionsActivity extends PreferenceActivity {
             boolean newWidgetComicNeue = prefs.getBoolean(PREF_WIDGET_USE_COMIC_NEUE, widgetComicNeue);
             boolean newWidgetBackgroundFix = prefs.getBoolean(PREF_WIDGET_BACKGROUND_FIX, widgetBackgroundFix);
             if (newGenForceMetric != genForceMetric ||
-                    !newGenForceLocation.equals(genForceLocation) ||
+                    !genForceLocation.equals(newGenForceLocation) ||
                     newGenWeatherSource != genWeatherSource ||
                     newWidgetTapToRefresh != widgetTapToRefresh ||
                     newWidgetComicNeue != widgetComicNeue ||
@@ -179,7 +179,7 @@ final public class OptionsActivity extends PreferenceActivity {
                 getActivity().startService(new Intent(getActivity(), WidgetService.class)
                         .setAction(WidgetService.ACTION_REFRESH_ALL));
             }
-            if (!newWidgetRefreshInterval.equals(widgetRefreshInterval)) {
+            if (!widgetRefreshInterval.equals(newWidgetRefreshInterval)) {
                 WidgetProvider.resetAlarm(getActivity());
             }
             super.onStop();
