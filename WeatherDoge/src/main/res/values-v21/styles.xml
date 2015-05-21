@@ -19,6 +19,13 @@
 -->
 <resources>
 
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="@android:style/Theme.NoTitleBar">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:colorPrimary">@color/primary</item>
+    </style>
+
     <style name="AppTheme.Options" parent="android:Theme.Material.Light">
         <item name="android:colorPrimary">@color/primary</item>
         <item name="android:colorPrimaryDark">@color/primary_dark</item>
