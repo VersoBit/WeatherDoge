@@ -25,7 +25,9 @@ def getVersionName = { ->
         return null;
     }
 }
+
 apply plugin: 'com.android.application'
+apply from: 'signing.gradle'
 
 android {
     compileSdkVersion 21
@@ -35,7 +37,6 @@ android {
         targetSdkVersion 21
         versionCode getVersionCode()
         versionName getVersionName()
-        buildConfigField "String", "OWM_APPID", '""'
     }
     packagingOptions {
         exclude "META-INF/LICENSE.txt"
