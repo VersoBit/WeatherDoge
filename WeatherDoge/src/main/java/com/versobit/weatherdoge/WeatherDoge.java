@@ -173,7 +173,10 @@ final public class WeatherDoge extends Application {
     }
 
     static String getDogeism(String[] wows, String[] dogefixes, String[] weatherAdjectives) {
-        Random r = new Random();
+        return getDogeism(new Random(), wows, dogefixes, weatherAdjectives);
+    }
+
+    static String getDogeism(Random r, String[] wows, String[] dogefixes, String[] weatherAdjectives) {
         // We need to treat so wow and wow as individual dogeisms, not overrepresented top-level dogefixes
         int wowOrNot = r.nextInt(weatherAdjectives.length + wows.length);
         if(wowOrNot >= weatherAdjectives.length) {

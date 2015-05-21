@@ -262,7 +262,7 @@ final public class MainActivity extends Activity implements
                         }
                         TextView tv = new TextView(MainActivity.this);
                         Random r = new Random();
-                        tv.setText(WeatherDoge.getDogeism(wows, dogefixes, weatherAdjectives));
+                        tv.setText(WeatherDoge.getDogeism(r, wows, dogefixes, weatherAdjectives));
                         tv.setTypeface(wowComicSans);
                         tv.setTextColor(colors[r.nextInt(colors.length)]);
                         tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, r.nextInt(15) + 25);

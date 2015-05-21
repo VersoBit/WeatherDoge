@@ -307,7 +307,7 @@ public final class WidgetProvider extends AppWidgetProvider {
             textPaint.setColor(colors[r.nextInt(colors.length)]);
 
             // The text to draw
-            String ism = WeatherDoge.getDogeism(wows, dogefixes, weatherAdjs);
+            String ism = WeatherDoge.getDogeism(r, wows, dogefixes, weatherAdjs);
 
             // Find the bounding rectangle of the text
             textPaint.getTextBounds(ism, 0, ism.length(), textBounds);
