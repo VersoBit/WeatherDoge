@@ -79,8 +79,8 @@ final public class OptionsActivity extends PreferenceActivity {
         boolean widgetBackgroundFix = false;
 
         @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
+        public void onResume() {
+            super.onResume();
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
             genForceMetric = prefs.getBoolean(PREF_FORCE_METRIC, genForceMetric);
             genForceLocation = prefs.getString(PREF_FORCE_LOCATION, genForceLocation);
@@ -93,7 +93,11 @@ final public class OptionsActivity extends PreferenceActivity {
             widgetTapToRefresh = prefs.getBoolean(PREF_WIDGET_TAP_TO_REFRESH, widgetTapToRefresh);
             widgetComicNeue = prefs.getBoolean(PREF_WIDGET_USE_COMIC_NEUE, widgetComicNeue);
             widgetBackgroundFix = prefs.getBoolean(PREF_WIDGET_BACKGROUND_FIX, widgetBackgroundFix);
+        }
 
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
             // Add 'general' preferences.
             addPreferencesFromResource(R.xml.pref_general);
 
