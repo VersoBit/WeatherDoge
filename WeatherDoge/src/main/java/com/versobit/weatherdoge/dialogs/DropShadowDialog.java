@@ -22,10 +22,12 @@ package com.versobit.weatherdoge.dialogs;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.ContextThemeWrapper;
@@ -35,6 +37,7 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -69,8 +72,11 @@ public final class DropShadowDialog extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         final SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
         boolean useNeue = sp.getBoolean(OptionsActivity.PREF_APP_USE_COMIC_NEUE, false);
-        ContextThemeWrapper wrapper = new ContextThemeWrapper(getActivity(), R.style.AppTheme_Dialog_Light);
-        View v = LayoutInflater.from(wrapper).inflate(R.layout.dialog_dropshadow, null);
+        Context ctx = getActivity();
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            ctx = new ContextThemeWrapper(getActivity(), R.style.AppTheme_Dialog_Light);
+        }
+        View v = LayoutInflater.from(ctx).inflate(R.layout.dialog_dropshadow, null);
 
         preview = (TextView)v.findViewById(R.id.dialog_dropshadow_txtpreview);
         preview.setTypeface(Typeface.createFromAsset(getActivity().getAssets(), useNeue ? "ComicNeue-Regular.ttf" : "comic.ttf"));
@@ -114,10 +120,18 @@ public final class DropShadowDialog extends DialogFragment {
         y = sp.getFloat(OptionsActivity.PREF_APP_DROP_SHADOW + "_y", 3f);
         adjs = sp.getBoolean(OptionsActivity.PREF_APP_DROP_SHADOW + "_adjs", false);
 
-        seekR.setProgress((int)map(radius, 0, 25, 0, 100));
+        seekR.setProgress((int) map(radius, 0, 25, 0, 100));
         seekX.setProgress((int) map(x, -25, 25, 0, 100));
         seekY.setProgress((int) map(y, -25, 25, 0, 100));
         chkAdjs.setChecked(adjs);
+
+        // Fix background image height
+        View scrollView = v.findViewById(R.id.dialog_dropshadow_scroll);
+        scrollView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+        v.findViewById(R.id.dialog_dropshadow_bg).setLayoutParams(
+                new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,
+                        scrollView.getMeasuredHeight())
+        );
 
         return new AlertDialog.Builder(getActivity(), getTheme())
                 .setView(v)
