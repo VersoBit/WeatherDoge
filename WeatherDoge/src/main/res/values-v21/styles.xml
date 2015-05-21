@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Copyright (C) 2014 VersoBit Ltd
+    Copyright (C) 2014-2015 VersoBit Ltd
 
     This file is part of Weather Doge.
 
@@ -20,7 +20,14 @@
 <resources>
 
     <style name="AppTheme.Options" parent="android:Theme.Material.Light">
-        <!-- Material! -->
+        <item name="android:colorPrimary">@color/primary</item>
+        <item name="android:colorPrimaryDark">@color/primary_dark</item>
+        <item name="android:colorAccent">@color/accent</item>
+        <item name="android:alertDialogTheme">@style/AppTheme.Dialog</item>
+    </style>
+
+    <style name="AppTheme.Dialog" parent="android:Theme.Material.Light.Dialog.Alert">
+        <item name="android:colorAccent">@color/accent</item>
     </style>
 
 </resources>
