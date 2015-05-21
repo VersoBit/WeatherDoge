@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Copyright (C) 2014 VersoBit Ltd
+    Copyright (C) 2014-2015 VersoBit Ltd
 
     This file is part of Weather Doge.
 
@@ -85,7 +85,8 @@
                     android:text="@string/very_negative"
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
-                    android:visibility="invisible" />
+                    android:visibility="invisible"
+                    tools:ignore="RtlHardcoded" />
                 <TextView
                     android:layout_centerHorizontal="true"
                     android:lineSpacingExtra="-20dp"
@@ -106,7 +107,8 @@
                     android:layout_height="wrap_content"
                     android:visibility="invisible"
                     android:paddingLeft="2sp"
-                    android:paddingRight="2sp" />
+                    android:paddingRight="2sp"
+                    tools:ignore="RtlHardcoded" />
             </RelativeLayout>
 
             <TextView
@@ -135,7 +137,8 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
         android:background="@drawable/round_rect_shape"
-        android:gravity="center_vertical|center_horizontal">
+        android:gravity="center_vertical|center_horizontal"
+        tools:ignore="RtlHardcoded">
 
         <ImageView
             android:layout_width="0dp"

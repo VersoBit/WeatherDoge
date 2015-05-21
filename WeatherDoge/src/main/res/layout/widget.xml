@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Copyright (C) 2014 VersoBit Ltd
+    Copyright (C) 2014-2015 VersoBit Ltd
 
     This file is part of Weather Doge.
 
@@ -42,12 +42,14 @@
         android:layout_height="200dp"
         android:id="@+id/widget_dogeimg"
         android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
         android:src="@drawable/doge_01d"
         android:layout_centerVertical="true" />
 
     <LinearLayout
         android:layout_marginBottom="15dp"
         android:layout_marginLeft="15dp"
+        android:layout_marginStart="15dp"
         android:layout_above="@+id/widget_bottom_bar"
         android:orientation="vertical"
         android:layout_width="wrap_content"
@@ -77,6 +79,7 @@
             android:layout_alignParentStart="false"
             android:layout_alignParentLeft="true"
             android:layout_marginLeft="8dp"
+            android:layout_marginStart="8dp"
             android:layout_width="wrap_content"
             android:layout_height="fill_parent"
             android:scaleType="centerInside"
@@ -86,6 +89,7 @@
             android:layout_alignParentEnd="false"
             android:layout_alignParentRight="true"
             android:layout_marginRight="8dp"
+            android:layout_marginEnd="8dp"
             android:scaleType="centerInside"
             android:layout_width="wrap_content"
             android:layout_height="fill_parent"
