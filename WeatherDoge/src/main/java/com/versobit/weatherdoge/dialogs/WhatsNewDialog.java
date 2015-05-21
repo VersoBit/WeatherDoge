@@ -27,6 +27,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -38,8 +39,7 @@ public final class WhatsNewDialog extends DialogFragment {
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        ContextWrapper wrapper = new ContextWrapper(getActivity());
-        View v = LayoutInflater.from(wrapper).inflate(R.layout.dialog_whats_new, null);
+        View v = getActivity().getLayoutInflater().inflate(R.layout.dialog_whats_new, null);
         v.findViewById(R.id.dialog_whats_new_email).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -57,7 +57,7 @@ public final class WhatsNewDialog extends DialogFragment {
                 startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://versobit.com/")));
             }
         });
-        return new AlertDialog.Builder(getActivity(), R.style.AppTheme_Options)
+        return new AlertDialog.Builder(getActivity(), getTheme())
                 .setTitle(R.string.dialog_whats_new_title)
                 .setView(v)
                 .setPositiveButton(R.string.wow, new DialogInterface.OnClickListener() {
