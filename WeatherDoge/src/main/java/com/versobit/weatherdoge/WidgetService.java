@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 VersoBit Ltd
+ * Copyright (C) 2014-2015 VersoBit Ltd
  *
  * This file is part of Weather Doge.
  *
@@ -90,15 +90,13 @@ public final class WidgetService extends IntentService implements
             return;
         }
 
-        if(Build.VERSION.SDK_INT > Build.VERSION_CODES.GINGERBREAD_MR1) {
-            Bitmap loading = WidgetProvider.getLoadingBitmap(this);
-            for(int widget : widgets) {
-                RemoteViews views = new RemoteViews(BuildConfig.APPLICATION_ID, R.layout.widget);
-                views.setImageViewBitmap(R.id.widget_locationimg, loading);
-                widgetManager.partiallyUpdateAppWidget(widget, views);
-            }
-            loading.recycle();
+        Bitmap loading = WidgetProvider.getLoadingBitmap(this);
+        for(int widget : widgets) {
+            RemoteViews views = new RemoteViews(BuildConfig.APPLICATION_ID, R.layout.widget);
+            views.setImageViewBitmap(R.id.widget_locationimg, loading);
+            widgetManager.partiallyUpdateAppWidget(widget, views);
         }
+        loading.recycle();
 
         int gmsCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
         if(gmsCode != ConnectionResult.SUCCESS) {

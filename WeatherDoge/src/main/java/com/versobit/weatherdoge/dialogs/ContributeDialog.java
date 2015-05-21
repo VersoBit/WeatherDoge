@@ -19,15 +19,15 @@
 
 package com.versobit.weatherdoge.dialogs;
 
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
@@ -72,16 +72,9 @@ public final class ContributeDialog extends DialogFragment {
                 .create();
     }
 
-    @SuppressLint("NewApi")
-    @SuppressWarnings("deprecation")
     private void copyToClipboard(String text) {
-        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
-            android.text.ClipboardManager cbm = (android.text.ClipboardManager)getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
-            cbm.setText(text);
-            return;
-        }
-        android.content.ClipData clip = android.content.ClipData.newPlainText(getString(R.string.app_name), text);
-        android.content.ClipboardManager cbm = (android.content.ClipboardManager)getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = android.content.ClipData.newPlainText(getString(R.string.app_name), text);
+        ClipboardManager cbm = (android.content.ClipboardManager)getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
         cbm.setPrimaryClip(clip);
     }
 }
