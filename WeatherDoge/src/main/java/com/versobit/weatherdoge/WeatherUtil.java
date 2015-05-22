@@ -161,6 +161,8 @@ final class WeatherUtil {
 
                 double temp = main.getDouble("temp") - 273.15d;
                 String condition = WordUtils.capitalize(weather.getString("description").trim());
+                // Sky Is Clear -> Sky is Clear
+                condition = condition.replaceAll("(?<=[^\\w])Is(?=[^\\w]?)", "is");
                 String image = weather.getString("icon");
 
                 if(location == null || location.isEmpty()) {
