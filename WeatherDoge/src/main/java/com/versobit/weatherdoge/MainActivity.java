@@ -261,7 +261,6 @@ final public class MainActivity extends Activity implements
         lastVersion = sp.getInt(OptionsActivity.PREF_INTERNAL_LAST_VERSION, lastVersion);
     }
 
-    private int globalConflictCounter = 0;
     private void initOverlayTimer() {
         TimerTask handleOverlayText = new TimerTask() {
             @Override
@@ -274,13 +273,11 @@ final public class MainActivity extends Activity implements
                         }
 
                         WowText wowText;
-                        int localConflictCounter = 0;
 
                         // Set up the RNG
                         Random r = new Random();
 
                         // Continue to loop until we come out the other side with a valid wowText
-                        long start = System.nanoTime();
                         while(true) {
                             // Create the new view
                             wowText = new WowText(null, new TextView(MainActivity.this));
@@ -329,8 +326,6 @@ final public class MainActivity extends Activity implements
                             wowText.view.setGravity(Gravity.CENTER); // Text is centered within the now padded view
 
                             if(checkWowTextConflict(wowText)) {
-                                localConflictCounter++;
-                                globalConflictCounter++;
                                 continue;
                             }
                             break;
@@ -349,10 +344,6 @@ final public class MainActivity extends Activity implements
                             suchOverlay.addView(wowText.view, wowText.params);
                         }
                         overlays.add(wowText);
-
-                        Log.e("ASD", "ms -> " + ((System.nanoTime() - start) / 1000000l));
-                        Log.e("ASD", "localConflictCounter -> " + localConflictCounter);
-                        Log.e("ASD", "globalConflictCounter -> " + globalConflictCounter);
                     }
                 });
             }
