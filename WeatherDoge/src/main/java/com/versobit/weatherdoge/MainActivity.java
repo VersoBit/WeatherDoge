@@ -32,6 +32,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -125,10 +126,20 @@ final public class MainActivity extends Activity implements
     private String[] weatherAdjectives;
     private int[] colors;
     private Timer overlayTimer;
-    private Queue<TextView> overlays = new ArrayDeque<>();
+    private Queue<WowText> overlays = new ArrayDeque<>();
     private int currentBackgroundId = Integer.MIN_VALUE;
     private int currentDogeId = R.drawable.doge_01d;
     private boolean currentlyAnim = false;
+
+    private static final class WowText {
+        private RelativeLayout.LayoutParams params;
+        private TextView view;
+
+        private WowText(RelativeLayout.LayoutParams params, TextView view) {
+            this.params = params;
+            this.view = view;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -250,6 +261,7 @@ final public class MainActivity extends Activity implements
         lastVersion = sp.getInt(OptionsActivity.PREF_INTERNAL_LAST_VERSION, lastVersion);
     }
 
+    private int globalConflictCounter = 0;
     private void initOverlayTimer() {
         TimerTask handleOverlayText = new TimerTask() {
             @Override
@@ -260,54 +272,114 @@ final public class MainActivity extends Activity implements
                         if(weatherAdjectives == null) {
                             return;
                         }
-                        TextView tv = new TextView(MainActivity.this);
+
+                        WowText wowText;
+                        int localConflictCounter = 0;
+
+                        // Set up the RNG
                         Random r = new Random();
-                        tv.setText(WeatherDoge.getDogeism(r, wows, dogefixes, weatherAdjectives));
-                        tv.setTypeface(wowComicSans);
-                        tv.setTextColor(colors[r.nextInt(colors.length)]);
-                        tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, r.nextInt(15) + 25);
-                        int[] layoutDim = { suchOverlay.getWidth(), suchOverlay.getHeight() };
-                        tv.measure(layoutDim[0], layoutDim[1]);
-                        int[] textDim = { tv.getMeasuredWidth(), tv.getMeasuredHeight() };
-                        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(textDim[0], textDim[1]);
-                        int[] absPos = { layoutDim[0] - textDim[0], layoutDim[1] - textDim[1] };
-                        if(absPos[0] < 0 || absPos[1] < 0) {
-                            return; // Can't fit with that dogeism, text size, and layout dimensions
+
+                        // Continue to loop until we come out the other side with a valid wowText
+                        long start = System.nanoTime();
+                        while(true) {
+                            // Create the new view
+                            wowText = new WowText(null, new TextView(MainActivity.this));
+
+                            // 15sp is a magic padding number I've tested with
+                            int padding = (int)Math.ceil(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 15, getResources().getDisplayMetrics()));
+
+                            // Set up the view with the basics
+                            wowText.view.setTypeface(wowComicSans);
+                            if(shadowAdjs) {
+                                wowText.view.setShadowLayer(shadowR, shadowX, shadowY, Color.BLACK);
+                            }
+
+                            // How big is the overlay layer?
+                            int[] layoutDim = { suchOverlay.getWidth(), suchOverlay.getHeight() };
+
+                            wowText.view.setText(WeatherDoge.getDogeism(r, wows, dogefixes, weatherAdjectives));
+                            wowText.view.setTextColor(colors[r.nextInt(colors.length)]);
+                            wowText.view.setTextSize(TypedValue.COMPLEX_UNIT_SP, r.nextInt(15) + 25);
+
+                            // How big is this textview going to be?
+                            wowText.view.measure(layoutDim[0], layoutDim[1]);
+                            int[] textDim = { wowText.view.getMeasuredWidth(), wowText.view.getMeasuredHeight() };
+
+                            // Set a fixed width and height
+                            wowText.params = new RelativeLayout.LayoutParams(textDim[0], textDim[1]);
+
+                            // Find the maximum left and top margins
+                            int[] absPos = { layoutDim[0] - textDim[0], layoutDim[1] - textDim[1] };
+
+                            // Can we fit this text on the screen?
+                            if(absPos[0] < 0 || absPos[1] < 0) {
+                                continue; // Can't fit with that dogeism, text size, and layout dimensions
+                            }
+
+                            wowText.params.leftMargin = absPos[0] == 0 ? 0 : r.nextInt(absPos[0]);
+                            wowText.params.topMargin = absPos[1] == 0 ? 0 : r.nextInt(absPos[1]);
+
+                            wowText.params.width += padding * 2; // left + right
+                            wowText.params.height += padding * 2; // top + bottom
+                            // Padding is subtracted from top/left margins so the measured values are still accurate
+                            // We don't care if the shadow clips on the edge of the screen
+                            // abs prevents possibly dangerous negative margins
+                            wowText.params.leftMargin = Math.abs(wowText.params.leftMargin - padding);
+                            wowText.params.topMargin = Math.abs(wowText.params.topMargin - padding);
+                            wowText.view.setGravity(Gravity.CENTER); // Text is centered within the now padded view
+
+                            if(checkWowTextConflict(wowText)) {
+                                localConflictCounter++;
+                                globalConflictCounter++;
+                                continue;
+                            }
+                            break;
                         }
-                        params.leftMargin = absPos[0] == 0 ? 0 : r.nextInt(absPos[0]);
-                        params.topMargin = absPos[1] == 0 ? 0 : r.nextInt(absPos[1]);
+
                         if(overlays.size() == 4) {
                             // If the view doesn't exist in the particular overlay it will not throw an exception
-                            View v = overlays.remove();
+                            View v = overlays.remove().view;
                             suchOverlay.removeView(v);
                             suchTopOverlay.removeView(v);
                         }
-                        if(shadowAdjs) {
-                            tv.setShadowLayer(shadowR, shadowX, shadowY, Color.BLACK);
-                        }
-                        // 15sp is a magic padding number I've tested with
-                        int padding = (int)Math.ceil(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 15, getResources().getDisplayMetrics()));
-                        params.width += padding * 2; // left + right
-                        params.height += padding * 2; // top + bottom
-                        // Padding is subtracted from top/left margins so the measured values are still accurate
-                        // We don't care if the shadow clips on the edge of the screen
-                        // abs prevents possibly dangerous negative margins
-                        params.leftMargin = Math.abs(params.leftMargin - padding);
-                        params.topMargin = Math.abs(params.topMargin - padding);
-                        tv.setGravity(Gravity.CENTER); // Text is centered within the now padded view
+                        overlays.add(wowText);
 
-                        overlays.add(tv);
                         if(textOnTop) {
-                            suchTopOverlay.addView(tv, params);
+                            suchTopOverlay.addView(wowText.view, wowText.params);
                             return;
                         }
-                        suchOverlay.addView(tv, params);
+                        suchOverlay.addView(wowText.view, wowText.params);
+                        Log.e("ASD", "ms -> " + ((System.nanoTime() - start) / 1000000l));
+                        Log.e("ASD", "localConflictCounter -> " + localConflictCounter);
+                        Log.e("ASD", "globalConflictCounter -> " + globalConflictCounter);
                     }
                 });
             }
         };
         overlayTimer = new Timer();
         overlayTimer.schedule(handleOverlayText, 0, WOW_INTERVAL);
+    }
+
+    private boolean checkWowTextConflict(WowText needle) {
+        Rect needleRect = layoutParamsToRect(needle.params);
+        // head is the one to be removed
+        WowText head = overlays.peek();
+        for(WowText wow : overlays) {
+            if(head == wow && overlays.size() == 4) {
+                // We do not want to compare against head because
+                // it'll be removed
+                continue;
+            }
+            if(Rect.intersects(needleRect, layoutParamsToRect(wow.params))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static Rect layoutParamsToRect(RelativeLayout.LayoutParams params) {
+        return new Rect(params.leftMargin, params.topMargin,
+                params.leftMargin + params.width, params.topMargin + params.height);
     }
 
     private void setBackground(int resId) {
@@ -448,8 +520,8 @@ final public class MainActivity extends Activity implements
 
             // This only works when going from Comic Sans -> Comic Neue, not the other way around
             // Android doesn't redraw Comic Sans correctly, or something...
-            for(TextView tv : overlays) {
-                tv.setTypeface(wowComicSans);
+            for(WowText wowText : overlays) {
+                wowText.view.setTypeface(wowComicSans);
             }
         }
         else {
@@ -471,12 +543,12 @@ final public class MainActivity extends Activity implements
         suchTemp.setShadowLayer(shadowR, shadowX, shadowY, Color.BLACK);
         suchDegree.setShadowLayer(shadowR, shadowX, shadowY, Color.BLACK);
         suchLocation.setShadowLayer(shadowR, shadowX, shadowY, Color.BLACK);
-        for(TextView tv : overlays) {
+        for(WowText wowText : overlays) {
             if(shadowAdjs) {
-                tv.setShadowLayer(shadowR, shadowX, shadowY, Color.BLACK);
+                wowText.view.setShadowLayer(shadowR, shadowX, shadowY, Color.BLACK);
                 continue;
             }
-            tv.setShadowLayer(0, 0, 0, 0);
+            wowText.view.setShadowLayer(0, 0, 0, 0);
         }
     }
 
