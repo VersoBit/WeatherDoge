@@ -297,7 +297,7 @@ final public class MainActivity extends Activity implements
                             // How big is the overlay layer?
                             int[] layoutDim = { suchOverlay.getWidth(), suchOverlay.getHeight() };
 
-                            wowText.view.setText(WeatherDoge.getDogeism(r, wows, dogefixes, weatherAdjectives));
+                            wowText.view.setText(getUniqueDogeism(r));
                             wowText.view.setTextColor(colors[r.nextInt(colors.length)]);
                             wowText.view.setTextSize(TypedValue.COMPLEX_UNIT_SP, r.nextInt(15) + 25);
 
@@ -358,6 +358,24 @@ final public class MainActivity extends Activity implements
         };
         overlayTimer = new Timer();
         overlayTimer.schedule(handleOverlayText, 0, WOW_INTERVAL);
+    }
+
+    private String getUniqueDogeism(Random r) {
+        String ism = null;
+        while(ism == null) {
+            ism = WeatherDoge.getDogeism(r, wows, dogefixes, weatherAdjectives);
+            WowText head = overlays.peek();
+            for(WowText wow : overlays) {
+                if(head == wow && overlays.size() == 4) {
+                    continue; // Continues on the inner loop
+                }
+                if(ism.contentEquals(wow.view.getText())) {
+                    ism = null;
+                    break;
+                }
+            }
+        }
+        return ism;
     }
 
     private boolean checkWowTextConflict(WowText needle) {
