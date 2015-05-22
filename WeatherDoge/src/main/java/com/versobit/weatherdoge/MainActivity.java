@@ -98,7 +98,6 @@ final public class MainActivity extends Activity implements
     private boolean textOnTop = false;
     private int lastVersion = 0;
 
-    private RelativeLayout suchLayout;
     private ImageView suchBg;
     private RelativeLayout suchOverlay;
     private RelativeLayout suchTopOverlay;
@@ -110,7 +109,6 @@ final public class MainActivity extends Activity implements
     private TextView suchTemp;
     private TextView suchDegree;
     private TextView suchLocation;
-    private ImageView suchShare;
     private ImageView suchOptions;
     private GoogleApiClient wowClient;
     private Location whereIsDoge;
@@ -152,7 +150,7 @@ final public class MainActivity extends Activity implements
         wows = getResources().getStringArray(R.array.wows);
         colors = getResources().getIntArray(R.array.wow_colors);
 
-        suchLayout = (RelativeLayout)findViewById(R.id.main_suchlayout);
+        RelativeLayout suchLayout = (RelativeLayout)findViewById(R.id.main_suchlayout);
         suchBg = (ImageView)findViewById(R.id.main_suchbg);
         suchOverlay = (RelativeLayout)findViewById(R.id.main_suchoverlay);
         suchTopOverlay = (RelativeLayout)findViewById(R.id.main_suchtopoverlay);
@@ -175,7 +173,7 @@ final public class MainActivity extends Activity implements
         suchTemp = (TextView)findViewById(R.id.main_suchtemp);
         suchDegree = (TextView)findViewById(R.id.main_suchdegree);
         suchLocation = (TextView)findViewById(R.id.main_suchlocation);
-        suchShare = (ImageView)findViewById(R.id.main_suchshare);
+        ImageView suchShare = (ImageView)findViewById(R.id.main_suchshare);
         suchShare.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -247,7 +245,7 @@ final public class MainActivity extends Activity implements
         forceMetric = sp.getBoolean(OptionsActivity.PREF_FORCE_METRIC, false);
         forceLocation = sp.getString(OptionsActivity.PREF_FORCE_LOCATION, "");
         String strSource = sp.getString(OptionsActivity.PREF_WEATHER_SOURCE, "0");
-        if(strSource.equals("0")) {
+        if("0".equals(strSource)) {
             weatherSource = WeatherUtil.Source.OPEN_WEATHER_MAP;
         } else {
             weatherSource = WeatherUtil.Source.YAHOO;
