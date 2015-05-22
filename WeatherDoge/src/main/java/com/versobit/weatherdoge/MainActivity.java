@@ -109,7 +109,6 @@ final public class MainActivity extends Activity implements
     private TextView suchTemp;
     private TextView suchDegree;
     private TextView suchLocation;
-    private ImageView suchOptions;
     private GoogleApiClient wowClient;
     private Location whereIsDoge;
     private Typeface wowComicSans;
@@ -150,7 +149,6 @@ final public class MainActivity extends Activity implements
         wows = getResources().getStringArray(R.array.wows);
         colors = getResources().getIntArray(R.array.wow_colors);
 
-        RelativeLayout suchLayout = (RelativeLayout)findViewById(R.id.main_suchlayout);
         suchBg = (ImageView)findViewById(R.id.main_suchbg);
         suchOverlay = (RelativeLayout)findViewById(R.id.main_suchoverlay);
         suchTopOverlay = (RelativeLayout)findViewById(R.id.main_suchtopoverlay);
@@ -203,7 +201,7 @@ final public class MainActivity extends Activity implements
                 return true;
             }
         });
-        suchOptions = (ImageView)findViewById(R.id.main_suchoptions);
+        ImageView suchOptions = (ImageView)findViewById(R.id.main_suchoptions);
         suchOptions.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
