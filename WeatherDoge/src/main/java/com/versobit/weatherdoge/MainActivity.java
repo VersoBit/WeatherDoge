@@ -516,12 +516,8 @@ final public class MainActivity extends Activity implements
 
     private void updateFont() {
         RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams)suchTemp.getLayoutParams();
-        Typeface degTypeface;
         if(useNeue) {
             wowComicSans = Typeface.createFromAsset(getAssets(), "ComicNeue-Regular.ttf");
-
-            // Roboto Thin is used because Comic Neue's degree symbol is too thick
-            degTypeface = Typeface.createFromAsset(getAssets(), "Roboto-Thin.ttf");
 
             // Horizontal and vertical centering for proper display
             layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
@@ -534,10 +530,9 @@ final public class MainActivity extends Activity implements
         }
         else {
             wowComicSans = Typeface.createFromAsset(getAssets(), "comic.ttf");
-            degTypeface = wowComicSans;
             layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, 0); // Disable vertical center
         }
-        suchDegree.setTypeface(degTypeface);
+        suchDegree.setTypeface(wowComicSans);
         suchStatus.setTypeface(wowComicSans);
         suchLocation.setTypeface(wowComicSans);
         suchNegative.setTypeface(wowComicSans);
