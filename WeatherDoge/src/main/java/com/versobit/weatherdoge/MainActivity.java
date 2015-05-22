@@ -342,13 +342,14 @@ final public class MainActivity extends Activity implements
                             suchOverlay.removeView(v);
                             suchTopOverlay.removeView(v);
                         }
-                        overlays.add(wowText);
 
                         if(textOnTop) {
                             suchTopOverlay.addView(wowText.view, wowText.params);
-                            return;
+                        } else {
+                            suchOverlay.addView(wowText.view, wowText.params);
                         }
-                        suchOverlay.addView(wowText.view, wowText.params);
+                        overlays.add(wowText);
+
                         Log.e("ASD", "ms -> " + ((System.nanoTime() - start) / 1000000l));
                         Log.e("ASD", "localConflictCounter -> " + localConflictCounter);
                         Log.e("ASD", "globalConflictCounter -> " + globalConflictCounter);
