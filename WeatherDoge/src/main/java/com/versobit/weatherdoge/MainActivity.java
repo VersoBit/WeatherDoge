@@ -126,7 +126,7 @@ final public class MainActivity extends Activity implements
     private String[] weatherAdjectives;
     private int[] colors;
     private Timer overlayTimer;
-    private Queue<WowText> overlays = new ArrayDeque<>();
+    private Queue<WowText> overlays = new ArrayDeque<>(4);
     private int currentBackgroundId = Integer.MIN_VALUE;
     private int currentDogeId = R.drawable.doge_01d;
     private boolean currentlyAnim = false;
