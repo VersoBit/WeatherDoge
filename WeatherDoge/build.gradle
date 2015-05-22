@@ -37,15 +37,21 @@ android {
         targetSdkVersion 22
         versionCode getVersionCode()
         versionName getVersionName()
+        buildConfigField "String", "FLAVOR_PLAY", '"play"'
+        buildConfigField "String", "FLAVOR_FOSS", '"foss"'
     }
     packagingOptions {
         exclude "META-INF/LICENSE.txt"
         exclude "META-INF/NOTICE.txt"
     }
+    productFlavors {
+        play
+        foss
+    }
 }
 
 dependencies {
-    compile 'com.google.android.gms:play-services-location:7.3.0'
+    playCompile 'com.google.android.gms:play-services-location:7.3.0'
     compile 'commons-io:commons-io:2.4'
     compile 'org.apache.commons:commons-lang3:3.3.2'
 }

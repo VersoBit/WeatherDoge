@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Copyright (C) 2014 VersoBit Ltd
+    Copyright (C) 2014-2015 VersoBit Ltd
 
     This file is part of Weather Doge.
 
@@ -42,10 +42,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <meta-data
-            android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version" />
 
         <activity
             android:theme="@style/AppTheme.Options"

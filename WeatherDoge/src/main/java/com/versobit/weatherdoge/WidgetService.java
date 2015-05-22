@@ -39,20 +39,13 @@ import android.view.View;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationServices;
-
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-public final class WidgetService extends IntentService implements
-        GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener {
+public final class WidgetService extends IntentService implements LocationReceiver {
 
     private static final String TAG = WidgetService.class.getSimpleName();
     static final String ACTION_REFRESH_ALL = "refresh_all";
@@ -109,10 +102,9 @@ public final class WidgetService extends IntentService implements
         boolean backgroundFix = prefs.getBoolean(OptionsActivity.PREF_WIDGET_BACKGROUND_FIX, false);
 
         if(forceLocation == null || forceLocation.isEmpty()) {
-            int gmsCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
-            if(gmsCode != ConnectionResult.SUCCESS) {
-                GooglePlayServicesUtil.showErrorNotification(gmsCode, this);
-                showToast(R.string.widget_error_no_gms);
+            if(!LocationApi.isAvailable(this)) {
+                showToast(BuildConfig.FLAVOR.equals(BuildConfig.FLAVOR_PLAY) ?
+                        R.string.widget_error_no_gms : R.string.error_ensure_location_settings);
                 return;
             }
         }
@@ -121,12 +113,8 @@ public final class WidgetService extends IntentService implements
         WeatherUtil.WeatherData data;
         String locationName = "";
         if(forceLocation == null || forceLocation.isEmpty()) {
-            GoogleApiClient locationClient = new GoogleApiClient.Builder(this)
-                    .addApi(LocationServices.API)
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .build();
-            locationClient.connect();
+            LocationApi locationApi = new LocationApi(this, this);
+            locationApi.connect();
             try {
                 locationLatch.await(15, TimeUnit.SECONDS);
             } catch (InterruptedException ex) {
@@ -134,15 +122,16 @@ public final class WidgetService extends IntentService implements
                 showToast(R.string.widget_error_unknown);
                 return;
             }
-            if(!locationClient.isConnected()) {
+            if(!locationApi.isConnected()) {
                 showToast(R.string.widget_error_gms_connect);
                 return;
             }
-            Location location = LocationServices.FusedLocationApi.getLastLocation(locationClient);
-            locationClient.disconnect();
+            Location location = locationApi.getLocation();
+            locationApi.disconnect();
             if(location == null) {
                 Log.e(TAG, "Unable to retrieve location. (null)");
-                showToast(R.string.widget_error_location);
+                showToast(BuildConfig.FLAVOR.equals(BuildConfig.FLAVOR_PLAY) ?
+                        R.string.widget_error_location : R.string.error_ensure_location_settings);
                 return;
             }
             data = Cache.getWeatherData(this, location.getLatitude(),location.getLongitude());
@@ -301,17 +290,12 @@ public final class WidgetService extends IntentService implements
     }
 
     @Override
-    public void onConnected(Bundle bundle) {
+    public void onLocation(Location location) {
         locationLatch.countDown();
     }
 
     @Override
-    public void onConnectionSuspended(int i) {
-        //
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-        //
+    public void onConnected() {
+        locationLatch.countDown();
     }
 }

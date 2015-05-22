@@ -21,10 +21,8 @@ package com.versobit.weatherdoge;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -59,12 +57,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationListener;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
 import com.versobit.weatherdoge.dialogs.WhatsNewDialog;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -77,13 +69,8 @@ import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
-final public class MainActivity extends Activity implements
-        GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener,
-        LocationListener {
+final public class MainActivity extends Activity implements LocationReceiver {
 
-    private static final int REQUEST_PLAY_ERR_DIAG = 52000000;
-    private static final int REQUEST_PLAY_CONN_FAIL_RES = 3643;
     private static final long WOW_INTERVAL = 2300;
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -109,7 +96,7 @@ final public class MainActivity extends Activity implements
     private TextView suchTemp;
     private TextView suchDegree;
     private TextView suchLocation;
-    private GoogleApiClient wowClient;
+    private LocationApi wowApi;
     private Location whereIsDoge;
     private Typeface wowComicSans;
 
@@ -159,8 +146,8 @@ final public class MainActivity extends Activity implements
             public void onClick(View v) {
                 if(!forceLocation.isEmpty()) {
                     new GetWeather().execute();
-                } else if(wowClient != null && wowClient.isConnected()) {
-                    whereIsDoge = LocationServices.FusedLocationApi.getLastLocation(wowClient);
+                } else if(wowApi != null && wowApi.isConnected()) {
+                    whereIsDoge = wowApi.getLocation();
                     new GetWeather().execute(whereIsDoge);
                 }
             }
@@ -221,12 +208,8 @@ final public class MainActivity extends Activity implements
 
         if(!forceLocation.isEmpty()) {
             new GetWeather().execute();
-        } else if(playServicesAvailable()) {
-            wowClient = new GoogleApiClient.Builder(this)
-                    .addApi(LocationServices.API)
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .build();
+        } else if(LocationApi.isAvailable(this)) {
+            wowApi = new LocationApi(this, this);
         }
         setBackground(R.drawable.sky_01d);
 
@@ -445,7 +428,8 @@ final public class MainActivity extends Activity implements
         final Animation zoomIn = AnimationUtils.loadAnimation(this, R.anim.dogezoom_in);
         zoomOut.setAnimationListener(new Animation.AnimationListener() {
             @Override
-            public void onAnimationStart(Animation animation) {}
+            public void onAnimationStart(Animation animation) {
+            }
 
             @Override
             public void onAnimationEnd(Animation animation) {
@@ -454,7 +438,8 @@ final public class MainActivity extends Activity implements
             }
 
             @Override
-            public void onAnimationRepeat(Animation animation) {}
+            public void onAnimationRepeat(Animation animation) {
+            }
         });
         suchDoge.startAnimation(zoomOut);
     }
@@ -462,17 +447,16 @@ final public class MainActivity extends Activity implements
     @Override
     protected void onStart() {
         super.onStart();
-        if(wowClient != null) {
-            wowClient.connect();
+        if(wowApi != null) {
+            wowApi.connect();
         }
         initOverlayTimer();
     }
 
     @Override
     protected void onStop() {
-        if(wowClient != null && wowClient.isConnected()) {
-            LocationServices.FusedLocationApi.removeLocationUpdates(wowClient, this);
-            wowClient.disconnect();
+        if(wowApi != null && wowApi.isConnected()) {
+            wowApi.disconnect();
         }
         overlayTimer.cancel();
         super.onStop();
@@ -493,20 +477,15 @@ final public class MainActivity extends Activity implements
             updateShadow();
         }
         if(forceLocation.isEmpty()) {
-            if(wowClient == null) {
-                wowClient = new GoogleApiClient.Builder(this)
-                        .addApi(LocationServices.API)
-                        .addConnectionCallbacks(this)
-                        .addOnConnectionFailedListener(this)
-                        .build();
+            if(wowApi == null) {
+                wowApi = new LocationApi(this, this);
             }
-            if(!wowClient.isConnected() && !wowClient.isConnecting()) {
-                wowClient.connect();
+            if(!wowApi.isConnected() && !wowApi.isConnecting()) {
+                wowApi.connect();
             }
         } else {
-            if(wowClient != null && wowClient.isConnected()) {
-                LocationServices.FusedLocationApi.removeLocationUpdates(wowClient, this);
-                wowClient.disconnect();
+            if(wowApi != null && wowApi.isConnected()) {
+                wowApi.disconnect();
             }
             new GetWeather().execute();
         }
@@ -553,56 +532,18 @@ final public class MainActivity extends Activity implements
         }
     }
 
-    private boolean playServicesAvailable() {
-        int result = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
-        if(result == ConnectionResult.SUCCESS) {
-            return true;
-        }
-        Dialog errorDialog = GooglePlayServicesUtil.getErrorDialog(result, this, REQUEST_PLAY_ERR_DIAG);
-        if(errorDialog != null && !isFinishing()) {
-            errorDialog.show();
-        }
-        return false;
+    @Override
+    public void onConnected() {
+        onLocation(wowApi.getLocation());
     }
 
     @Override
-    public void onConnected(Bundle bundle) {
-        Log.d(TAG, "Play Services Connected");
-        LocationRequest request = LocationRequest.create();
-        request.setPriority(LocationRequest.PRIORITY_LOW_POWER);
-        request.setInterval(5000);
-        request.setFastestInterval(1000);
-        LocationServices.FusedLocationApi.requestLocationUpdates(wowClient, request, this);
-        whereIsDoge = LocationServices.FusedLocationApi.getLastLocation(wowClient);
+    public void onLocation(Location location) {
+        whereIsDoge = location;
         if(whereIsDoge == null) {
             Log.e(TAG, "dunno where this shibe is");
             return;
         }
-        new GetWeather().execute(whereIsDoge);
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-        //
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-        if(!connectionResult.hasResolution()) {
-            Toast.makeText(this, "Connection failed.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        try {
-            connectionResult.startResolutionForResult(this, REQUEST_PLAY_CONN_FAIL_RES);
-        } catch (IntentSender.SendIntentException ex) {
-            Log.wtf(TAG, ex);
-        }
-    }
-
-    @Override
-    public void onLocationChanged(Location location) {
-        Log.d(TAG, "onLocationChanged");
-        whereIsDoge = location;
         new GetWeather().execute(whereIsDoge);
     }
 
