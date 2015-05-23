@@ -19,16 +19,11 @@ wow. Weather Doge is the full [dogeweather.com](http://dogeweather.com/) experie
  * Configurable drop shadows for all text
  * [Comic Neue](http://comicneue.com/)
  * Ability to force doge adjectives to appear above weather info
+ * Google Play Services-free builds
  * Open-source!
 
-## TODO?
- * Create a Google Play Services-free build variant to eliminate dependencies on non-FOSS code.
- * Animate doge adjectives
- * Configure the temperatures at which certain doge adjectives appear
- * Widget rendering tweaks
-
 ## Building &amp; Contributing
-Import the project into Android Studio and you'll be up and running in no time. The build process relies on a shell script. Building will only work as-is for Mac and Linux systems until we create a Windows variant. Just remove the shell script from the build process and you'll be good to go on Windows.
+Import the project into Android Studio and you'll be up and running in no time.
 
 Got something to add? Best way to get your idea in to the app is forking, coding, and submitting a pull request!
 
@@ -42,7 +37,7 @@ The original dogeweather.com has a Dogecoin address too! They deserve it! `DD5z3
 Thank you!
 
 ## Contact Us
-Weather Doge is maintained by [Kevin](https://twitter.com/Kev1nMark), [Rylea](https://twitter.com/DeviledMoon), and [Leyton](https://twitter.com/LeytonReed) of [VersoBit](http://versobit.com/). Say hi [on Twitter](https://twitter.com/VersoBit) or [send us an email](mailto:hello@versobit.com). We'd love to hear from you.
+Weather Doge is maintained by [Kevin](https://twitter.com/Kev1nMark), [Rylea](https://twitter.com/DeviledMoon), and [Leyton](https://twitter.com/LeytonReed) of [VersoBit](https://versobit.com/). Say hi [on Twitter](https://twitter.com/VersoBit) or [send us an email](mailto:hello@versobit.com). We'd love to hear from you.
 
 ## Licensing
 Copyright © 2014-2015 VersoBit Ltd. Weather Doge is licensed under the GNU GPLv3 which can be found in `LICENSE.md`. The background images, doge images, and doge adjectives are from the [dogeweather](https://github.com/katiaeirin/dogeweather) project licensed under the [MIT license](http://opensource.org/licenses/MIT).
