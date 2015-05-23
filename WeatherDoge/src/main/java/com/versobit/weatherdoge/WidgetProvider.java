@@ -139,7 +139,7 @@ public final class WidgetProvider extends AppWidgetProvider {
         textPaint.setShadowLayer(0, 0, 0, Color.BLACK);
 
         textBounds = new Rect();
-        textPaint.getTextBounds(location, 0, location.length(), textBounds);
+        textPaint.getTextBounds(location + "g", 0, location.length() + 1, textBounds);
 
         b2 = new Rect();
         textPaint.getTextBounds("a", 0, 1, b2);
@@ -149,7 +149,7 @@ public final class WidgetProvider extends AppWidgetProvider {
         c.drawText(location, c.getWidth() / 2f, (c.getHeight() + b2.height()) / 2f, textPaint);
 
         textBounds = new Rect();
-        textPaint.getTextBounds(lastUpdated, 0, lastUpdated.length(), textBounds);
+        textPaint.getTextBounds(lastUpdated + "g", 0, lastUpdated.length() + 1, textBounds);
 
         bitmaps[3] = Bitmap.createBitmap(textBounds.width(), textBounds.height(), Bitmap.Config.ARGB_8888);
         c = new Canvas(bitmaps[3]);
@@ -168,7 +168,7 @@ public final class WidgetProvider extends AppWidgetProvider {
         textPaint.setTextSize(ctx.getResources().getDimension(R.dimen.widget_bottom_bar_font_size));
 
         Rect textBounds = new Rect();
-        textPaint.getTextBounds(status, 0, status.length(), textBounds);
+        textPaint.getTextBounds(status + "g", 0, status.length() + 1, textBounds);
         Rect baselineBounds = new Rect();
         textPaint.getTextBounds("a", 0, 1, baselineBounds);
 
