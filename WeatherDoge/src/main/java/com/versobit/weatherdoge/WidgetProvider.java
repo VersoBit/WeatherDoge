@@ -299,6 +299,9 @@ public final class WidgetProvider extends AppWidgetProvider {
                 (int)(widgetSize[1] - res.getDimension(R.dimen.widget_wowlayer_rect_top)),
                 (int)res.getDimension(R.dimen.widget_wowlayer_rect_right), (int)widgetSize[1]);
 
+        // Store dogeisms used to avoid duplicates
+        String[] drawnText = new String[total];
+
         // Loop over all the dogeisms we're going to create
         for(int i = 0; i < total; i++) {
             Rect textBounds = new Rect();
@@ -307,10 +310,10 @@ public final class WidgetProvider extends AppWidgetProvider {
             textPaint.setColor(colors[r.nextInt(colors.length)]);
 
             // The text to draw
-            String ism = WeatherDoge.getDogeism(r, wows, dogefixes, weatherAdjs);
+            drawnText[i] = getUniqueDogeism(drawnText, r, wows, dogefixes, weatherAdjs);
 
             // Find the bounding rectangle of the text
-            textPaint.getTextBounds(ism, 0, ism.length(), textBounds);
+            textPaint.getTextBounds(drawnText[i], 0, drawnText[i].length(), textBounds);
             // Prevent the text from going offscreen
             int xMax = (int)widgetSize[0] - textBounds.width();
             int yMax = (int)widgetSize[1] - textBounds.height();
@@ -328,13 +331,31 @@ public final class WidgetProvider extends AppWidgetProvider {
             } while(realRect.bottom < textBounds.height() || intersects(realRect, drawnRects));
 
             // realRect is valid. Draw it out.
-            canvas.drawText(ism, realRect.left, realRect.bottom, textPaint);
+            canvas.drawText(drawnText[i], realRect.left, realRect.bottom, textPaint);
 
             // Store it for intersection checks
             drawnRects[i] = realRect;
         }
 
         return bitmap;
+    }
+
+    private static String getUniqueDogeism(String[] existing, Random r, String[] wows,
+                                           String[] dogefixes, String[] weatherAdjs) {
+        String ism = null;
+        while(ism == null) {
+            ism = WeatherDoge.getDogeism(r, wows, dogefixes, weatherAdjs);
+            for(String s : existing) {
+                if(s == null) {
+                    continue;
+                }
+                if(ism.equals(s)) {
+                    ism = null;
+                    break;
+                }
+            }
+        }
+        return ism;
     }
 
     // Searches a Rect array for an intersection with a given Rect
