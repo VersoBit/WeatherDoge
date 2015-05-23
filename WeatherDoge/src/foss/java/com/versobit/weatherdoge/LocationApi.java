@@ -25,7 +25,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 
-public class LocationApi implements LocationListener {
+final class LocationApi implements LocationListener {
 
     private static final String PROVIDER = LocationManager.NETWORK_PROVIDER;
 
