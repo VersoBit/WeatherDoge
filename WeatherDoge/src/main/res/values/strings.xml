@@ -78,6 +78,8 @@
     </string-array>
     <string name="pref_widget_tap_refresh_name">Tap-to-Refresh</string>
     <string name="pref_widget_tap_refresh_desc">Refresh instead of opening the app.</string>
+    <string name="pref_widget_show_wowtext_name">Show Doge-isms</string>
+    <string name="pref_widget_show_wowtext_desc">Display the \"very weather\" random text.</string>
     <string name="pref_widget_bg_fix_name">Background Fix</string>
     <string name="pref_widget_bg_fix_desc">Enable this if the sky does not completely cover the widget even after it has finished loading.</string>
 

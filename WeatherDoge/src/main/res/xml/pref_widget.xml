@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Copyright (C) 2014 VersoBit Ltd
+    Copyright (C) 2014-2015 VersoBit Ltd
 
     This file is part of Weather Doge.
 
@@ -37,6 +37,11 @@
         android:title="@string/very_neue_name"
         android:defaultValue="false"
         android:summary="@string/very_neue_desc" />
+    <CheckBoxPreference
+        android:key="pref_widget_show_wowtext"
+        android:title="@string/pref_widget_show_wowtext_name"
+        android:defaultValue="true"
+        android:summary="@string/pref_widget_show_wowtext_desc" />
     <CheckBoxPreference
         android:key="pref_widget_background_fix"
         android:title="@string/pref_widget_bg_fix_name"

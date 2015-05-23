@@ -99,6 +99,7 @@ public final class WidgetService extends IntentService implements LocationReceiv
             weatherSource = WeatherUtil.Source.YAHOO;
         }
         boolean tapToRefresh = prefs.getBoolean(OptionsActivity.PREF_WIDGET_TAP_TO_REFRESH, false);
+        boolean showWowText = prefs.getBoolean(OptionsActivity.PREF_WIDGET_SHOW_WOWTEXT, true);
         boolean backgroundFix = prefs.getBoolean(OptionsActivity.PREF_WIDGET_BACKGROUND_FIX, false);
 
         if(forceLocation == null || forceLocation.isEmpty()) {
@@ -247,8 +248,12 @@ public final class WidgetService extends IntentService implements LocationReceiv
                         views.setInt(R.id.widget_sky, "setVisibility", View.VISIBLE);
                         views.setInt(R.id.widget_sky_compat, "setVisibility", View.GONE);
                     }
-                    wowLayer = WidgetProvider.getWowLayer(this, options, data.image, (int)data.temperature);
-                    views.setImageViewBitmap(R.id.widget_wowlayer, wowLayer);
+                    if(showWowText) {
+                        wowLayer = WidgetProvider.getWowLayer(this, options, data.image, (int)data.temperature);
+                        views.setImageViewBitmap(R.id.widget_wowlayer, wowLayer);
+                    } else {
+                        views.setImageViewBitmap(R.id.widget_wowlayer, null);
+                    }
                 } catch (Exception ex) {
                     Log.wtf(TAG, ex);
                     failed = true;
