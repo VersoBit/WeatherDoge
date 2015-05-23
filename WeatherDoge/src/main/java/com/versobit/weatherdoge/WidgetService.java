@@ -31,13 +31,11 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
-import android.widget.Toast;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -54,23 +52,18 @@ public final class WidgetService extends IntentService implements LocationReceiv
     static final String EXTRA_WIDGET_ID = "widget_id";
 
     private CountDownLatch locationLatch = new CountDownLatch(1);
-    private Handler uiHandler;
+    private AppWidgetManager widgetManager;
+    private int[] widgets;
+    private PendingIntent pIntent;
 
     public WidgetService() {
         super(TAG);
     }
 
     @Override
-    public void onCreate() {
-        super.onCreate();
-        uiHandler = new Handler();
-    }
-
-    @Override
     protected void onHandleIntent(Intent intent) {
         locationLatch = new CountDownLatch(1);
-        AppWidgetManager widgetManager = AppWidgetManager.getInstance(this);
-        int[] widgets;
+        widgetManager = AppWidgetManager.getInstance(this);
         if(ACTION_REFRESH_ALL.equals(intent.getAction())) {
             widgets = widgetManager.getAppWidgetIds(new ComponentName(this, WidgetProvider.class));
         } else if(ACTION_REFRESH_MULTIPLE.equals(intent.getAction())) {
@@ -79,17 +72,8 @@ public final class WidgetService extends IntentService implements LocationReceiv
             widgets = new int[] { intent.getIntExtra(EXTRA_WIDGET_ID, 0) };
         } else {
             Log.wtf(TAG, "Unknown action: " + intent.getAction());
-            showToast(R.string.widget_error_action);
             return;
         }
-
-        Bitmap loading = WidgetProvider.getLoadingBitmap(this);
-        for(int widget : widgets) {
-            RemoteViews views = new RemoteViews(BuildConfig.APPLICATION_ID, R.layout.widget);
-            views.setImageViewBitmap(R.id.widget_locationimg, loading);
-            widgetManager.partiallyUpdateAppWidget(widget, views);
-        }
-        loading.recycle();
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         boolean forceMetric = prefs.getBoolean(OptionsActivity.PREF_FORCE_METRIC, false);
@@ -102,10 +86,21 @@ public final class WidgetService extends IntentService implements LocationReceiv
         boolean showWowText = prefs.getBoolean(OptionsActivity.PREF_WIDGET_SHOW_WOWTEXT, true);
         boolean backgroundFix = prefs.getBoolean(OptionsActivity.PREF_WIDGET_BACKGROUND_FIX, false);
 
+        if(tapToRefresh) {
+            pIntent = PendingIntent.getService(this, 0,
+                    new Intent(this, WidgetService.class).setAction(ACTION_REFRESH_ALL),
+                    PendingIntent.FLAG_UPDATE_CURRENT);
+        } else {
+            pIntent = PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class),
+                    PendingIntent.FLAG_UPDATE_CURRENT);
+        }
+
+        setStatus(getString(R.string.loading));
+
         if(forceLocation == null || forceLocation.isEmpty()) {
             if(!LocationApi.isAvailable(this)) {
-                showToast(BuildConfig.FLAVOR.equals(BuildConfig.FLAVOR_PLAY) ?
-                        R.string.widget_error_no_gms : R.string.error_ensure_location_settings);
+                showError(BuildConfig.FLAVOR.equals(BuildConfig.FLAVOR_PLAY) ?
+                        R.string.widget_error_no_gms : R.string.widget_error_location_settings);
                 return;
             }
         }
@@ -120,19 +115,19 @@ public final class WidgetService extends IntentService implements LocationReceiv
                 locationLatch.await(15, TimeUnit.SECONDS);
             } catch (InterruptedException ex) {
                 Log.wtf(TAG, ex);
-                showToast(R.string.widget_error_unknown);
+                showError(R.string.widget_error_unknown);
                 return;
             }
             if(!locationApi.isConnected()) {
-                showToast(R.string.widget_error_gms_connect);
+                showError(R.string.widget_error_gms_connect);
                 return;
             }
             Location location = locationApi.getLocation();
             locationApi.disconnect();
             if(location == null) {
                 Log.e(TAG, "Unable to retrieve location. (null)");
-                showToast(BuildConfig.FLAVOR.equals(BuildConfig.FLAVOR_PLAY) ?
-                        R.string.widget_error_location : R.string.error_ensure_location_settings);
+                showError(BuildConfig.FLAVOR.equals(BuildConfig.FLAVOR_PLAY) ?
+                        R.string.widget_error_location : R.string.widget_error_location_settings);
                 return;
             }
             data = Cache.getWeatherData(this, location.getLatitude(),location.getLongitude());
@@ -151,7 +146,7 @@ public final class WidgetService extends IntentService implements LocationReceiv
                 }
             } catch (IOException ex) {
                 Log.wtf(TAG, ex);
-                showToast(R.string.widget_error_geocoder);
+                showError(R.string.widget_error_geocoder);
                 return;
             }
         } else {
@@ -167,7 +162,7 @@ public final class WidgetService extends IntentService implements LocationReceiv
                 Log.wtf(TAG, "data: " + (data == null ? "null" : data) + ", data.source: " +
                         ((data == null || data.source == null) ? "null" : data.source) +
                         ", weatherSource: " + weatherSource);
-                showToast(R.string.widget_error_unknown);
+                showError(R.string.widget_error_unknown);
                 return;
             }
             switch (result.error) {
@@ -177,15 +172,15 @@ public final class WidgetService extends IntentService implements LocationReceiv
                     break;
                 case WeatherUtil.WeatherResult.ERROR_API:
                     Log.e(TAG, "ERROR_API: " + (result.msg == null ? "null" : result.msg));
-                    showToast(R.string.widget_error_api);
+                    showError(R.string.widget_error_api);
                     return;
                 case WeatherUtil.WeatherResult.ERROR_THROWABLE:
                     Log.e(TAG, "ERROR_THROWABLE: " + (result.msg == null ? "null" : result.msg), result.throwable);
-                    showToast(R.string.widget_error_weather_util);
+                    showError(R.string.widget_error_weather_util);
                     return;
                 default:
                     Log.wtf(TAG, "Unhandled WeatherResult: " + result.error);
-                    showToast(R.string.widget_error_unknown);
+                    showError(R.string.widget_error_unknown);
                     return;
             }
         }
@@ -215,16 +210,6 @@ public final class WidgetService extends IntentService implements LocationReceiv
         Bitmap[] textBitmaps = WidgetProvider.getTextBitmaps(this,
                 formattedTemp, condition, locationName,
                 " " + DateFormat.getTimeFormat(this).format(data.time) + " ");
-
-        PendingIntent pIntent;
-        if(tapToRefresh) {
-            pIntent = PendingIntent.getService(this, 0,
-                    new Intent(this, WidgetService.class).setAction(ACTION_REFRESH_ALL),
-                    PendingIntent.FLAG_UPDATE_CURRENT);
-        } else {
-            pIntent = PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class),
-                    PendingIntent.FLAG_UPDATE_CURRENT);
-        }
 
         for(int widget : widgets) {
             RemoteViews views = new RemoteViews(BuildConfig.APPLICATION_ID, R.layout.widget);
@@ -284,14 +269,22 @@ public final class WidgetService extends IntentService implements LocationReceiv
 
     }
 
-    // Thanks rony, http://stackoverflow.com/a/5420929/238374
-    private void showToast(final int resId) {
-        uiHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(WidgetService.this, resId, Toast.LENGTH_SHORT).show();
-            }
-        });
+    private void showError(final int resId) {
+        String error = getString(resId);
+        Log.e(TAG, error);
+        setStatus(error);
+    }
+
+    private void setStatus(String status) {
+        Bitmap loading = WidgetProvider.getStatusBitmap(this, status);
+        for(int widget : widgets) {
+            RemoteViews views = new RemoteViews(BuildConfig.APPLICATION_ID, R.layout.widget);
+            views.setImageViewBitmap(R.id.widget_locationimg, loading);
+            views.setImageViewBitmap(R.id.widget_last_updated_img, null);
+            views.setOnClickPendingIntent(R.id.widget_root, pIntent);
+            widgetManager.partiallyUpdateAppWidget(widget, views);
+        }
+        loading.recycle();
     }
 
     @Override
