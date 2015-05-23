@@ -1,29 +1,23 @@
-def getVersionCode = { ->
+def gitRev = {
     try {
         def stdout = new ByteArrayOutputStream()
         exec {
-            commandLine './versionCode.sh'
-            standardOutput = stdout
-        }
-        return stdout.toString().trim().toInteger()
-    }
-    catch (ignored) {
-        return null;
-    }
-}
-
-def getVersionName = { ->
-    try {
-        def stdout = new ByteArrayOutputStream()
-        exec {
-            commandLine './versionName.sh'
+            commandLine 'git', 'rev-parse', '--short', 'HEAD'
             standardOutput = stdout
         }
         return stdout.toString().trim()
     }
     catch (ignored) {
-        return null;
+        return "nogit";
     }
+}
+
+Closure<String[]> getVersionDef = {
+    new File('WeatherDoge/versionDef.txt').text.trim().split('\\r?\\n')
+}
+
+Closure<String> getVersionName = { flavor ->
+    getVersionDef()[1] + flavor + '-' + gitRev()
 }
 
 apply plugin: 'com.android.application'
@@ -35,8 +29,7 @@ android {
     defaultConfig {
         minSdkVersion 15
         targetSdkVersion 22
-        versionCode getVersionCode()
-        versionName getVersionName()
+        versionCode getVersionDef()[0].toInteger()
         buildConfigField "String", "FLAVOR_PLAY", '"play"'
         buildConfigField "String", "FLAVOR_FOSS", '"foss"'
     }
@@ -45,8 +38,12 @@ android {
         exclude "META-INF/NOTICE.txt"
     }
     productFlavors {
-        play
-        foss
+        play {
+            versionName getVersionName('p')
+        }
+        foss {
+            versionName getVersionName('f')
+        }
     }
 }
 
