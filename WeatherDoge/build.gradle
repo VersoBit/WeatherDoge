@@ -8,7 +8,7 @@ def gitRev = {
         return stdout.toString().trim()
     }
     catch (ignored) {
-        return "nogit";
+        return 'nogit';
     }
 }
 
@@ -30,12 +30,12 @@ android {
         minSdkVersion 15
         targetSdkVersion 22
         versionCode getVersionDef()[0].toInteger()
-        buildConfigField "String", "FLAVOR_PLAY", '"play"'
-        buildConfigField "String", "FLAVOR_FOSS", '"foss"'
+        buildConfigField 'String', 'FLAVOR_PLAY', '"play"'
+        buildConfigField 'String', 'FLAVOR_FOSS', '"foss"'
     }
     packagingOptions {
-        exclude "META-INF/LICENSE.txt"
-        exclude "META-INF/NOTICE.txt"
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE.txt'
     }
     productFlavors {
         play {
