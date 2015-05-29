@@ -39,6 +39,7 @@ import android.widget.RemoteViews;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -209,7 +210,7 @@ public final class WidgetService extends IntentService implements LocationReceiv
         locationName = locationName.isEmpty() ? " " : locationName;
         Bitmap[] textBitmaps = WidgetProvider.getTextBitmaps(this,
                 formattedTemp, condition, locationName,
-                " " + DateFormat.getTimeFormat(this).format(data.time) + " ");
+                " " + DateFormat.getTimeFormat(this).format(new Date()) + " ");
 
         for(int widget : widgets) {
             RemoteViews views = new RemoteViews(BuildConfig.APPLICATION_ID, R.layout.widget);
