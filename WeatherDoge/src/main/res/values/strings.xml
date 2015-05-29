@@ -108,6 +108,7 @@
     <string name="dialog_contribute_bitcoin_title">Bitcoin</string>
     <string name="dialog_contribute_bitcoin_msg">No DOGE? Tap to securely donate.</string>
 
+    <string name="addr_versobit">https://versobit.com/</string>
     <string name="addr_github">https://github.com/VersoBit/WeatherDoge</string>
     <string name="addr_dogecoin">DMdXi3PJ3o5sXpcnXLvqAvHerKLbBCC9yE</string>
     <string name="addr_bitcoin">https://bitpay.com/928010/donate</string>

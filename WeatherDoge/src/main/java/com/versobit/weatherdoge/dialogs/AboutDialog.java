@@ -43,7 +43,7 @@ public final class AboutDialog extends DialogFragment {
         v.findViewById(R.id.dialog_about_vb).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://versobit.com/")));
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.addr_versobit))));
             }
         });
         ((TextView) v.findViewById(R.id.dialog_about_version)).setText(BuildConfig.VERSION_NAME);

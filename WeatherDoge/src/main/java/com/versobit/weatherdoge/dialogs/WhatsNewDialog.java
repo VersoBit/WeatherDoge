@@ -54,7 +54,7 @@ public final class WhatsNewDialog extends DialogFragment {
         v.findViewById(R.id.dialog_whats_new_versobit).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://versobit.com/")));
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.addr_versobit))));
             }
         });
         return new AlertDialog.Builder(getActivity(), getTheme())
