@@ -18,9 +18,9 @@
     along with Weather Doge.  If not, see <http://www.gnu.org/licenses/>.
 -->
 <resources>
-    <color name="primary">#ebd59d</color>
-    <color name="primary_dark">#d7a03c</color>
-    <color name="accent">#ffdc9b00</color>
+    <color name="primary">#FFEBD59D</color>
+    <color name="primary_dark">#FFD7A03C</color>
+    <color name="accent">#FFDC9B00</color>
 
     <color name="holo_light_pressed">#FFE3E3E3</color>
     <integer-array name="wow_colors">
