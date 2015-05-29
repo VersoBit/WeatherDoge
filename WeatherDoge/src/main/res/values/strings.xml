@@ -106,11 +106,11 @@
     <string name="dialog_contribute_dogecoin_title">Dogecoin</string>
     <string name="dialog_contribute_dogecoin_msg">We ♥ Dogecoin! Tap to copy our address to your clipboard.</string>
     <string name="dialog_contribute_bitcoin_title">Bitcoin</string>
-    <string name="dialog_contribute_bitcoin_msg">No DOGE? Tap to copy our address to your clipboard.</string>
+    <string name="dialog_contribute_bitcoin_msg">No DOGE? Tap to securely donate.</string>
 
     <string name="addr_github">https://github.com/VersoBit/WeatherDoge</string>
     <string name="addr_dogecoin">DMdXi3PJ3o5sXpcnXLvqAvHerKLbBCC9yE</string>
-    <string name="addr_bitcoin">1LVdvcNDJ9JtNCZ7swT8z2pfJoUNRtrwCH</string>
+    <string name="addr_bitcoin">https://bitpay.com/928010/donate</string>
     <string name="such_copied">such copied</string>
 
     <string name="geocoder_error_title">Geocoder Error</string>

@@ -30,7 +30,7 @@ Got something to add? Best way to get your idea in to the app is forking, coding
 ## Spare Change?
 We ♥ Dogecoin. If you're feeling generous, our Dogecoin address is `DMdXi3PJ3o5sXpcnXLvqAvHerKLbBCC9yE`
 
-If you're feeling generous but only use that *other* cryptocurrency `1LVdvcNDJ9JtNCZ7swT8z2pfJoUNRtrwCH` is open for BTC donations.
+If you're feeling generous but don't have Dogecoin we also accept [more conventional donations through BitPay](https://bitpay.com/928010/donate).
 
 The original dogeweather.com has a Dogecoin address too! They deserve it! `DD5z316BX6YMzj4ARp8opoMBf82hbZB7N5`
 

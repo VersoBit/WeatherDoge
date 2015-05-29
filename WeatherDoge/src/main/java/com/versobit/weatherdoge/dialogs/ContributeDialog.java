@@ -57,8 +57,7 @@ public final class ContributeDialog extends DialogFragment {
         v.findViewById(R.id.dialog_contribute_bitcoin_layout).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                copyToClipboard(getString(R.string.addr_bitcoin));
-                Toast.makeText(getActivity(), R.string.such_copied, Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.addr_bitcoin))));
             }
         });
         return new AlertDialog.Builder(getActivity(), getTheme())
