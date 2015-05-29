@@ -1,9 +1,9 @@
 # Weather Doge
 wow. Weather Doge is the full [dogeweather.com](http://dogeweather.com/) experience on Android. And now there's even more!
 
-[![Get it on Google Play!](http://developer.android.com/images/brand/en_generic_rgb_wo_60.png)](https://play.google.com/store/apps/details?id=com.versobit.weatherdoge)
+[![Get it on Google Play!](https://developer.android.com/images/brand/en_generic_rgb_wo_60.png)](https://play.google.com/store/apps/details?id=com.versobit.weatherdoge)
 
-![Screenshot](https://raw.github.com/VersoBit/WeatherDoge/master/images/BelAirNexus5_1000.png)
+![Screenshot](https://raw.github.com/VersoBit/WeatherDoge/master/images/Nexus5BelAir_1000.png)
 
 ![Widget](https://raw.github.com/VersoBit/WeatherDoge/master/images/Widget.png)
 
