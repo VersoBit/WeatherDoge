@@ -18,12 +18,12 @@
     along with Weather Doge.  If not, see <http://www.gnu.org/licenses/>.
 -->
 <resources>
-    <string name="dialog_whats_new_title">v1.3 - many bug</string>
-    <string name="dialog_whats_new_text_1">Hello there fellow shibes! Here\'s what\'s waiting for you in v1.3 of Weather Doge:</string>
-    <string name="dialog_whats_new_text_2">Fixed spontaneous app crashing</string>
-    <string name="dialog_whats_new_text_3">The app should no longer crash on launch or when reloading location information. This issue occurred when Weather Doge could not find some shibes.\n\nTo ensure Weather Doge has the ability to find you make sure you set your device\'s location settings to \"High accuracy\" or \"Battery saving.\" The app will not receive location info from your device if it is set to \"Device only\" or \"Off.\"\n\nIf turning location services on is not an option for you, Weather Doge has a constant location setting.</string>
-    <string name="dialog_whats_new_text_4">\nHorizontal widget resizing</string>
-    <string name="dialog_whats_new_text_5">The widget can now be resized horizontally for devices and launchers that support it!</string>
+    <string name="dialog_whats_new_title">v1.4 - wow worthy</string>
+    <string name="dialog_whats_new_text_1">Hello there fellow shibes! Here\'s what\'s waiting for you in v1.4 of Weather Doge:</string>
+    <string name="dialog_whats_new_text_2">Doge-isms on the widget!</string>
+    <string name="dialog_whats_new_text_3">Fun stuff! If it\'s not to your liking you can turn it off in the settings.</string>
+    <string name="dialog_whats_new_text_4">\nAnd some other stuff…</string>
+    <string name="dialog_whats_new_text_5">• Material design color scheme!\n• Doge-isms never overlap and two of the same text will never appear at the same time\n• Better font and drop-shadow rendering on the widget\n• Widget will now always display the last refresh time regardless of cache age\n• Support for Android 5.1\n• Dropped support for Gingerbread\n• Better RTL support\n• Google Play Services-free build available\n• Updated Comic Neue\n• Updated Roboto\n• Potential bug fixes\n• Updated build system</string>
     <string name="dialog_whats_new_text_6">\nIf things aren\'t going the way you\'d like please do not hesitate to send us an email via support@versobit.com.</string>
     <string name="dialog_whats_new_text_7">Made with ♥ from</string>
 
