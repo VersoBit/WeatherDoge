@@ -38,6 +38,11 @@
         android:defaultValue="false"
         android:summary="@string/very_neue_desc" />
     <CheckBoxPreference
+        android:key="pref_widget_show_date"
+        android:title="@string/pref_widget_show_date_name"
+        android:defaultValue="false"
+        android:summary="@string/pref_widget_show_date_desc" />
+    <CheckBoxPreference
         android:key="pref_widget_show_wowtext"
         android:title="@string/pref_widget_show_wowtext_name"
         android:defaultValue="true"

@@ -80,6 +80,8 @@
     <string name="pref_widget_tap_refresh_desc">Refresh instead of opening the app.</string>
     <string name="pref_widget_show_wowtext_name">Show Doge-isms</string>
     <string name="pref_widget_show_wowtext_desc">Display the \"very weather\" random text.</string>
+    <string name="pref_widget_show_date_name">Show Date</string>
+    <string name="pref_widget_show_date_desc">Display the date next to the time.</string>
     <string name="pref_widget_bg_fix_name">Background Fix</string>
     <string name="pref_widget_bg_fix_desc">Enable this if the sky does not completely cover the widget even after it has finished loading.</string>
 
@@ -122,6 +124,7 @@
 
     <string name="dialog_dropshadow_adjectives">Use shadow for doge-isms</string>
 
+    <string name="widget_at">at</string>
     <string name="widget_error_geocoder">Error: Geocoder failed.</string>
     <string name="widget_error_location">Error: Location failed.</string>
     <string name="widget_error_gms_connect">Error: GMS connection failed.</string>

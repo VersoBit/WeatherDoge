@@ -85,6 +85,7 @@ public final class WidgetService extends IntentService implements LocationReceiv
         }
         boolean tapToRefresh = prefs.getBoolean(OptionsActivity.PREF_WIDGET_TAP_TO_REFRESH, false);
         boolean showWowText = prefs.getBoolean(OptionsActivity.PREF_WIDGET_SHOW_WOWTEXT, true);
+        boolean showDate = prefs.getBoolean(OptionsActivity.PREF_WIDGET_SHOW_DATE, false);
         boolean backgroundFix = prefs.getBoolean(OptionsActivity.PREF_WIDGET_BACKGROUND_FIX, false);
 
         if(tapToRefresh) {
@@ -208,9 +209,14 @@ public final class WidgetService extends IntentService implements LocationReceiv
         formattedTemp = formattedTemp.isEmpty() ? " " : formattedTemp;
         String condition = data.condition.isEmpty() ? " " : data.condition;
         locationName = locationName.isEmpty() ? " " : locationName;
+        Date now = new Date();
+        StringBuilder time = new StringBuilder();
+        if(showDate) {
+            time.append(DateFormat.format(" MMM d ", now)).append(getString(R.string.widget_at));
+        }
+        time.append(" ").append(DateFormat.getTimeFormat(this).format(now)).append(" ");
         Bitmap[] textBitmaps = WidgetProvider.getTextBitmaps(this,
-                formattedTemp, condition, locationName,
-                " " + DateFormat.getTimeFormat(this).format(new Date()) + " ");
+                formattedTemp, condition, locationName, time.toString());
 
         for(int widget : widgets) {
             RemoteViews views = new RemoteViews(BuildConfig.APPLICATION_ID, R.layout.widget);

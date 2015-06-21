@@ -58,6 +58,7 @@ final public class OptionsActivity extends PreferenceActivity {
     static final String PREF_WIDGET_TAP_TO_REFRESH = "pref_widget_tap_refresh";
     static final String PREF_WIDGET_USE_COMIC_NEUE = "pref_widget_use_comic_neue";
     static final String PREF_WIDGET_SHOW_WOWTEXT = "pref_widget_show_wowtext";
+    static final String PREF_WIDGET_SHOW_DATE = "pref_widget_show_date";
     static final String PREF_WIDGET_BACKGROUND_FIX = "pref_widget_background_fix";
     static final String PREF_ABOUT_VERSION = "pref_about_version";
     static final String PREF_ABOUT_CONTRIBUTE = "pref_about_contribute";
@@ -79,6 +80,7 @@ final public class OptionsActivity extends PreferenceActivity {
         boolean widgetTapToRefresh = false;
         boolean widgetComicNeue = false;
         boolean widgetShowWowText = true;
+        boolean widgetShowDate = false;
         boolean widgetBackgroundFix = false;
 
         @Override
@@ -96,6 +98,7 @@ final public class OptionsActivity extends PreferenceActivity {
             widgetTapToRefresh = prefs.getBoolean(PREF_WIDGET_TAP_TO_REFRESH, widgetTapToRefresh);
             widgetComicNeue = prefs.getBoolean(PREF_WIDGET_USE_COMIC_NEUE, widgetComicNeue);
             widgetShowWowText = prefs.getBoolean(PREF_WIDGET_SHOW_WOWTEXT, widgetShowWowText);
+            widgetShowDate = prefs.getBoolean(PREF_WIDGET_SHOW_DATE, widgetShowDate);
             widgetBackgroundFix = prefs.getBoolean(PREF_WIDGET_BACKGROUND_FIX, widgetBackgroundFix);
         }
 
@@ -188,6 +191,7 @@ final public class OptionsActivity extends PreferenceActivity {
             boolean newWidgetTapToRefresh = prefs.getBoolean(PREF_WIDGET_TAP_TO_REFRESH, widgetTapToRefresh);
             boolean newWidgetComicNeue = prefs.getBoolean(PREF_WIDGET_USE_COMIC_NEUE, widgetComicNeue);
             boolean newWidgetShowWowText = prefs.getBoolean(PREF_WIDGET_SHOW_WOWTEXT, widgetShowWowText);
+            boolean newWidgetShowDate = prefs.getBoolean(PREF_WIDGET_SHOW_DATE, widgetShowDate);
             boolean newWidgetBackgroundFix = prefs.getBoolean(PREF_WIDGET_BACKGROUND_FIX, widgetBackgroundFix);
             if (newGenForceMetric != genForceMetric ||
                     !genForceLocation.equals(newGenForceLocation) ||
@@ -195,6 +199,7 @@ final public class OptionsActivity extends PreferenceActivity {
                     newWidgetTapToRefresh != widgetTapToRefresh ||
                     newWidgetComicNeue != widgetComicNeue ||
                     newWidgetShowWowText != widgetShowWowText ||
+                    newWidgetShowDate != widgetShowDate ||
                     newWidgetBackgroundFix != widgetBackgroundFix) {
                 getActivity().startService(new Intent(getActivity(), WidgetService.class)
                         .setAction(WidgetService.ACTION_REFRESH_ALL));
