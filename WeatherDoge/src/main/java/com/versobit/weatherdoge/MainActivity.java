@@ -57,8 +57,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.versobit.weatherdoge.dialogs.WhatsNewDialog;
-
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.text.DecimalFormat;
@@ -217,7 +215,6 @@ final public class MainActivity extends Activity implements LocationReceiver {
             lastVersion = BuildConfig.VERSION_CODE;
             SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
             sp.edit().putInt(OptionsActivity.PREF_INTERNAL_LAST_VERSION, lastVersion).apply();
-            new WhatsNewDialog().show(getFragmentManager(), WhatsNewDialog.FRAGMENT_TAG);
         }
     }
 
