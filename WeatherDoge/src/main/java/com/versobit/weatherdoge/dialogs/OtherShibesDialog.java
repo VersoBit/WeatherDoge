@@ -19,23 +19,29 @@
 
 package com.versobit.weatherdoge.dialogs;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 
+import com.versobit.weatherdoge.BuildConfig;
 import com.versobit.weatherdoge.R;
 
 public final class OtherShibesDialog extends DialogFragment {
 
     public static final String FRAGMENT_TAG = "fragment_dialog_othershibes";
 
+    @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         WebView wv = new WebView(getActivity());
         wv.getSettings().setDefaultTextEncodingName("utf-8");
+        wv.getSettings().setJavaScriptEnabled(true);
+        wv.addJavascriptInterface(new JsInterface(), "App");
         wv.loadUrl("file:///android_asset/othershibes.html");
         return new AlertDialog.Builder(getActivity(), getTheme())
                 .setView(wv)
@@ -46,5 +52,12 @@ public final class OtherShibesDialog extends DialogFragment {
                     }
                 })
                 .create();
+    }
+
+    private static final class JsInterface {
+        @JavascriptInterface
+        public boolean isPlay() {
+            return BuildConfig.FLAVOR.equals(BuildConfig.FLAVOR_PLAY);
+        }
     }
 }

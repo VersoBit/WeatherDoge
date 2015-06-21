@@ -41,6 +41,7 @@ import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.versobit.weatherdoge.BuildConfig;
 import com.versobit.weatherdoge.OptionsActivity;
 import com.versobit.weatherdoge.R;
 
@@ -71,7 +72,8 @@ public final class DropShadowDialog extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         final SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        boolean useNeue = sp.getBoolean(OptionsActivity.PREF_APP_USE_COMIC_NEUE, false);
+        boolean useNeue = sp.getBoolean(OptionsActivity.PREF_APP_USE_COMIC_NEUE, false)
+                || BuildConfig.FLAVOR.equals(BuildConfig.FLAVOR_FOSS);
         Context ctx = getActivity();
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             ctx = new ContextThemeWrapper(getActivity(), R.style.AppTheme_Dialog_Light);

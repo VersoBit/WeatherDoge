@@ -35,11 +35,22 @@
                 background-color: #DDD;
             }
         </style>
+        <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', function(event) {
+            if(typeof(App) == 'undefined' || App.isPlay()) {
+                // Display the Comic Sans MS text if we're inside the Google Play flavor
+                // or if we are unable to detect the flavor
+                document.getElementById('comicsans-notice').style.display = 'block';
+            }
+        });
+        </script>
     </head>
     <body>
         <h1>Other Shibes</h1>
 
-        <p><a href="comicsans.html">Additional licensing information for Comic Sans MS.</a></p>
+        <div id="comicsans-notice" style="display: none;">
+            <p><a href="comicsans.html">Additional licensing information for Comic Sans MS.</a></p>
+        </div>
 
         <p>Weather Doge for Android is licensed under the <a href="gpl.html">GNU GPLv3</a> and wouldn't be possible without other great open-source projects. These projects are listed here, in alphabetical order, along with all necessary licensing details.</p>
 

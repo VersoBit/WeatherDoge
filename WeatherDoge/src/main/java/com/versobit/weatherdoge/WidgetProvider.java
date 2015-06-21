@@ -95,7 +95,8 @@ public final class WidgetProvider extends AppWidgetProvider {
     static Bitmap[] getTextBitmaps(Context ctx, String temp, String description, String location, String lastUpdated) {
         Bitmap[] bitmaps = { null, null, null, null };
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
-        boolean useComicNeue = prefs.getBoolean(OptionsActivity.PREF_WIDGET_USE_COMIC_NEUE, false);
+        boolean useComicNeue = prefs.getBoolean(OptionsActivity.PREF_WIDGET_USE_COMIC_NEUE, false)
+                || BuildConfig.FLAVOR.equals(BuildConfig.FLAVOR_FOSS);
         Resources res = ctx.getResources();
         Typeface primaryFont = Typeface.createFromAsset(ctx.getAssets(), useComicNeue ?
                 "ComicNeue-Regular.ttf" : "comic.ttf");
@@ -246,7 +247,8 @@ public final class WidgetProvider extends AppWidgetProvider {
 
     static Bitmap getWowLayer(Context ctx, Bundle options, String image, int temp) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
-        boolean useComicNeue = prefs.getBoolean(OptionsActivity.PREF_WIDGET_USE_COMIC_NEUE, false);
+        boolean useComicNeue = prefs.getBoolean(OptionsActivity.PREF_WIDGET_USE_COMIC_NEUE, false)
+                || BuildConfig.FLAVOR.equals(BuildConfig.FLAVOR_FOSS);
 
         Resources res = ctx.getResources();
 

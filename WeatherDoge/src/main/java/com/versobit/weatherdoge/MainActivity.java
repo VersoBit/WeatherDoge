@@ -493,7 +493,7 @@ final public class MainActivity extends Activity implements LocationReceiver {
 
     private void updateFont() {
         RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams)suchTemp.getLayoutParams();
-        if(useNeue) {
+        if(useNeue || BuildConfig.FLAVOR.equals(BuildConfig.FLAVOR_FOSS)) {
             wowComicSans = Typeface.createFromAsset(getAssets(), "ComicNeue-Regular.ttf");
 
             // Horizontal and vertical centering for proper display

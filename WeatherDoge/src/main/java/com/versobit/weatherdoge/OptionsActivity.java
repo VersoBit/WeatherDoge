@@ -22,6 +22,7 @@ package com.versobit.weatherdoge;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
@@ -160,6 +161,16 @@ final public class OptionsActivity extends PreferenceActivity {
             bindPreferenceSummaryToValue(findPreference(PREF_FORCE_LOCATION));
             bindPreferenceSummaryToValue(findPreference(PREF_WEATHER_SOURCE));
             bindPreferenceSummaryToValue(findPreference(PREF_WIDGET_REFRESH));
+
+            // Disable the ability to switch fonts for FOSS flavor
+            if(BuildConfig.FLAVOR.equals(BuildConfig.FLAVOR_FOSS)) {
+                CheckBoxPreference appNeue = (CheckBoxPreference)findPreference(PREF_APP_USE_COMIC_NEUE);
+                CheckBoxPreference widgetNeue = (CheckBoxPreference)findPreference(PREF_WIDGET_USE_COMIC_NEUE);
+                appNeue.setChecked(true);
+                appNeue.setEnabled(false);
+                widgetNeue.setChecked(true);
+                widgetNeue.setEnabled(false);
+            }
         }
 
         @Override
