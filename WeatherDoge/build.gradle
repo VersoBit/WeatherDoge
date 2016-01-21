@@ -24,8 +24,8 @@ apply plugin: 'com.android.application'
 apply from: 'signing.gradle'
 
 android {
-    compileSdkVersion 22
-    buildToolsVersion '22.0.1'
+    compileSdkVersion 23
+    buildToolsVersion '23.0.2'
     defaultConfig {
         minSdkVersion 15
         targetSdkVersion 22
@@ -48,7 +48,7 @@ android {
 }
 
 dependencies {
-    playCompile 'com.google.android.gms:play-services-location:7.5.0'
+    playCompile 'com.google.android.gms:play-services-location:8.4.0'
     compile 'commons-io:commons-io:2.4'
     compile 'org.apache.commons:commons-lang3:3.3.2'
 }

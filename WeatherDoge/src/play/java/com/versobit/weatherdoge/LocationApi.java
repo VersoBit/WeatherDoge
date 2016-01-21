@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 VersoBit Ltd
+ * Copyright (C) 2014-2016 VersoBit Ltd
  *
  * This file is part of Weather Doge.
  *
@@ -25,11 +25,12 @@ import android.content.Context;
 import android.content.IntentSender;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
@@ -78,18 +79,19 @@ final class LocationApi implements GoogleApiClient.ConnectionCallbacks,
     }
 
     static boolean isAvailable(Context ctx) {
-        int result = GooglePlayServicesUtil.isGooglePlayServicesAvailable(ctx);
+        GoogleApiAvailability apiAvail = GoogleApiAvailability.getInstance();
+        int result = apiAvail.isGooglePlayServicesAvailable(ctx);
         if(result == ConnectionResult.SUCCESS) {
             return true;
         }
         if(ctx instanceof Activity) {
             Activity act = (Activity)ctx;
-            Dialog errorDialog = GooglePlayServicesUtil.getErrorDialog(result, act, REQUEST_PLAY_ERR_DIAG);
+            Dialog errorDialog = apiAvail.getErrorDialog(act, result, REQUEST_PLAY_ERR_DIAG);
             if (errorDialog != null && !act.isFinishing()) {
                 errorDialog.show();
             }
         } else {
-            GooglePlayServicesUtil.showErrorNotification(result, ctx);
+            apiAvail.showErrorNotification(ctx, result);
         }
         return false;
     }
@@ -108,7 +110,7 @@ final class LocationApi implements GoogleApiClient.ConnectionCallbacks,
     public void onConnectionSuspended(int i) { }
 
     @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         if(ctx instanceof Activity) {
             Activity act = (Activity)ctx;
             if(!connectionResult.hasResolution()) {
