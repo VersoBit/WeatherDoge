@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 VersoBit Ltd
+ * Copyright (C) 2014-2016 VersoBit Ltd
  *
  * This file is part of Weather Doge.
  *
@@ -84,7 +84,7 @@ public final class WidgetProvider extends AppWidgetProvider {
     static void resetAlarm(Context ctx) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
         long interval = Integer.parseInt(prefs.getString(OptionsActivity.PREF_WIDGET_REFRESH, "1800"))
-                * 1000l;
+                * 1000L;
         AlarmManager am = (AlarmManager)ctx.getSystemService(Context.ALARM_SERVICE);
         PendingIntent pIntent = PendingIntent.getService(ctx, 0,
                 new Intent(ctx, WidgetService.class).setAction(WidgetService.ACTION_REFRESH_ALL), 0);
