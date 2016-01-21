@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 VersoBit Ltd
+ * Copyright (C) 2014-2016 VersoBit Ltd
  *
  * This file is part of Weather Doge.
  *
@@ -19,12 +19,15 @@
 
 package com.versobit.weatherdoge;
 
+import android.Manifest;
 import android.app.IntentService;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.location.Address;
 import android.location.Geocoder;
@@ -32,6 +35,8 @@ import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.ContextCompat;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
@@ -51,6 +56,7 @@ public final class WidgetService extends IntentService implements LocationReceiv
     static final String ACTION_REFRESH_MULTIPLE = "refresh_multiple";
     static final String ACTION_REFRESH_ONE = "refresh_one";
     static final String EXTRA_WIDGET_ID = "widget_id";
+    static final int PERMISSION_NOTIFICATION_ID = 410;
 
     private CountDownLatch locationLatch = new CountDownLatch(1);
     private AppWidgetManager widgetManager;
@@ -111,6 +117,12 @@ public final class WidgetService extends IntentService implements LocationReceiv
         WeatherUtil.WeatherData data;
         String locationName = "";
         if(forceLocation == null || forceLocation.isEmpty()) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                    != PackageManager.PERMISSION_GRANTED) {
+                showError(R.string.widget_error_permission);
+                showPermissionNotification();
+                return;
+            }
             LocationApi locationApi = new LocationApi(this, this);
             locationApi.connect();
             try {
@@ -292,6 +304,21 @@ public final class WidgetService extends IntentService implements LocationReceiv
             widgetManager.partiallyUpdateAppWidget(widget, views);
         }
         loading.recycle();
+    }
+
+    private void showPermissionNotification() {
+        PendingIntent intent = PendingIntent.getActivity(this, 0,
+                new Intent(this, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
+                .setSmallIcon(R.drawable.ic_launcher) // TODO: Needs a real icon
+                .setContentTitle(getString(R.string.widget_notification_permission_title))
+                .setContentText(getString(R.string.widget_notification_permission_body))
+                .setContentIntent(intent);
+        new NotificationCompat.BigTextStyle(builder)
+            .setBigContentTitle(builder.mContentTitle)
+            .bigText(builder.mContentText);
+        ((NotificationManager)getSystemService(NOTIFICATION_SERVICE))
+                .notify(PERMISSION_NOTIFICATION_ID, builder.build());
     }
 
     @Override

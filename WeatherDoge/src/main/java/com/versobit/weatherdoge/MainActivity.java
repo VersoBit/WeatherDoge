@@ -22,6 +22,7 @@ package com.versobit.weatherdoge;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.NotificationManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -623,6 +624,11 @@ final public class MainActivity extends Activity implements LocationReceiver,
             return;
         }
         if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            // Remove the widget notification, if any
+            ((NotificationManager)getSystemService(NOTIFICATION_SERVICE))
+                    .cancel(WidgetService.PERMISSION_NOTIFICATION_ID);
+            // Refresh the widget
+            startService(new Intent(this, WidgetService.class).setAction(WidgetService.ACTION_REFRESH_ALL));
             // Good to go, execute the actual location action
             doCheckedLocationRequest();
         }

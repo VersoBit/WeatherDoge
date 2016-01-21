@@ -131,6 +131,7 @@
     <string name="widget_at">at</string>
     <string name="widget_error_geocoder">Error: Geocoder failed.</string>
     <string name="widget_error_location">Error: Location failed.</string>
+    <string name="widget_error_permission">Error: Location permission not granted.</string>
     <string name="widget_error_gms_connect">Error: GMS connection failed.</string>
     <string name="widget_error_unknown">Error: Unknown error.</string>
     <string name="widget_error_no_gms">Error: GMS unavailable.</string>
@@ -138,6 +139,8 @@
     <string name="widget_error_api">Error: API error.</string>
     <string name="widget_error_weather_util">Error: WeatherUtil error.</string>
     <string name="widget_error_location_settings">Error: Set location to &quot;Battery Saving&quot; or &quot;High Accuracy&quot;</string>
+    <string name="widget_notification_permission_title">Location requested</string>
+    <string name="widget_notification_permission_body">The Weather Doge widget needs access to your location.</string>
 
     <string-array name="wows">
         <item>wow</item>
