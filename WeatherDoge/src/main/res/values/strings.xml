@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Copyright (C) 2014-2015 VersoBit Ltd
+    Copyright (C) 2014-2016 VersoBit Ltd
 
     This file is part of Weather Doge.
 
@@ -92,7 +92,7 @@
     <string name="contribute_name">Contribute</string>
     <string name="contribute_desc">Help support Weather Doge!</string>
 
-    <string name="dialog_about_copyright">Copyright © 2015 VersoBit Ltd.</string>
+    <string name="dialog_about_copyright">Copyright © 2016 VersoBit Ltd.</string>
     <string name="dialog_about_text1">Crafted by the fine shibes over at VersoBit and our wow-worthy open-source collaborators.</string>
     <string name="dialog_about_text2">Based on <a href="http://dogeweather.com/">dogeweather.com</a>, which is probably one of the most awesome things on the planet.</string>
     <string name="dialog_about_contact">Contact us on Twitter!</string>
