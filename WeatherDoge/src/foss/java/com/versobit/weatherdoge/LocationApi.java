@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 VersoBit Ltd
+ * Copyright (C) 2015-2016 VersoBit Ltd
  *
  * This file is part of Weather Doge.
  *
@@ -24,9 +24,11 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
 
 final class LocationApi implements LocationListener {
 
+    private static final String TAG = "FossLocationApi";
     private static final String PROVIDER = LocationManager.NETWORK_PROVIDER;
 
     private final LocationReceiver receiver;
@@ -38,12 +40,21 @@ final class LocationApi implements LocationListener {
     }
 
     void connect() {
-        locationManager.requestLocationUpdates(PROVIDER, 0, 0, this);
+        try {
+            locationManager.requestLocationUpdates(PROVIDER, 0, 0, this);
+        } catch (SecurityException ex) {
+            Log.wtf(TAG, ex);
+            return;
+        }
         receiver.onConnected();
     }
 
     void disconnect() {
-        locationManager.removeUpdates(this);
+        try {
+            locationManager.removeUpdates(this);
+        } catch (SecurityException ex) {
+            Log.wtf(TAG, ex);
+        }
     }
 
     boolean isConnected() {
@@ -55,7 +66,12 @@ final class LocationApi implements LocationListener {
     }
 
     Location getLocation() {
-        return locationManager.getLastKnownLocation(PROVIDER);
+        try {
+            return locationManager.getLastKnownLocation(PROVIDER);
+        } catch (SecurityException ex) {
+            Log.wtf(TAG, ex);
+        }
+        return null;
     }
 
     static boolean isAvailable(Context ctx) {

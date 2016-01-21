@@ -37,6 +37,10 @@
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
 
+    <string name="location_rationale_text">Weather Doge needs your location to provide dynamic weather data and will request that ability in a moment. If you prefer, you may instead provide a static location in the options.</string>
+    <string name="location_rationale_negative">Options</string>
+    <string name="location_rationale_positive">Continue</string>
+
     <string name="pref_app_header">App</string>
     <string name="such_metric_name">Such Metric</string>
     <string name="such_metric_desc">Force metric units in the US, Liberia, and Burma.</string>

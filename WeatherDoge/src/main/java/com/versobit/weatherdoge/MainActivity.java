@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 VersoBit Ltd
+ * Copyright (C) 2014-2016 VersoBit Ltd
  *
  * This file is part of Weather Doge.
  *
@@ -19,11 +19,13 @@
 
 package com.versobit.weatherdoge;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -42,6 +44,9 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
@@ -67,10 +72,12 @@ import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
-final public class MainActivity extends Activity implements LocationReceiver {
+final public class MainActivity extends Activity implements LocationReceiver,
+        ActivityCompat.OnRequestPermissionsResultCallback {
 
     private static final long WOW_INTERVAL = 2300;
     private static final String TAG = MainActivity.class.getSimpleName();
+    private static final int REQUEST_LOCATION_PERMISSION = 410;
 
     private boolean forceMetric = false;
     private String forceLocation = "";
@@ -99,6 +106,7 @@ final public class MainActivity extends Activity implements LocationReceiver {
     private Typeface wowComicSans;
 
     private AlertDialog errorDialog;
+    private AlertDialog rationaleDialog;
 
     private double currentTemp;
     private boolean currentlyMetric;
@@ -145,8 +153,7 @@ final public class MainActivity extends Activity implements LocationReceiver {
                 if(!forceLocation.isEmpty()) {
                     new GetWeather().execute();
                 } else if(wowApi != null && wowApi.isConnected()) {
-                    whereIsDoge = wowApi.getLocation();
-                    new GetWeather().execute(whereIsDoge);
+                    requestLocation();
                 }
             }
         });
@@ -445,7 +452,7 @@ final public class MainActivity extends Activity implements LocationReceiver {
     protected void onStart() {
         super.onStart();
         if(wowApi != null) {
-            wowApi.connect();
+            requestLocation();
         }
         initOverlayTimer();
     }
@@ -478,7 +485,8 @@ final public class MainActivity extends Activity implements LocationReceiver {
                 wowApi = new LocationApi(this, this);
             }
             if(!wowApi.isConnected() && !wowApi.isConnecting()) {
-                wowApi.connect();
+                // FIXME: Double request after selecting cancel on the first permission dialog
+                requestLocation();
             }
         } else {
             if(wowApi != null && wowApi.isConnected()) {
@@ -531,7 +539,7 @@ final public class MainActivity extends Activity implements LocationReceiver {
 
     @Override
     public void onConnected() {
-        onLocation(wowApi.getLocation());
+        requestLocation();
     }
 
     @Override
@@ -542,6 +550,82 @@ final public class MainActivity extends Activity implements LocationReceiver {
             return;
         }
         new GetWeather().execute(whereIsDoge);
+    }
+
+    // Asynchronously request the current location
+    private void requestLocation() {
+        // Check if we need to request the permission on >= Marshmallow
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            // We need to request it
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.ACCESS_COARSE_LOCATION)) {
+                // Show the rationale dialog if we need to
+                showLocationRationaleDialog();
+            } else {
+                // Just request the permission
+                ActivityCompat.requestPermissions(this,
+                        new String[] { Manifest.permission.ACCESS_COARSE_LOCATION },
+                        REQUEST_LOCATION_PERMISSION);
+            }
+        } else {
+            // We already have it or this is < Marshmallow
+            doCheckedLocationRequest();
+        }
+    }
+
+    // Show the location rationale dialog which explains to the user why we need their location
+    private void showLocationRationaleDialog() {
+        if (rationaleDialog != null && rationaleDialog.isShowing()) {
+            return;
+        }
+        AlertDialog.Builder adb = new AlertDialog.Builder(this)
+                .setMessage(R.string.location_rationale_text)
+                .setNegativeButton(R.string.location_rationale_negative, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // Go directly to the constant location setting in the options
+                        startActivity(new Intent(MainActivity.this, OptionsActivity.class)
+                                .putExtra(OptionsActivity.EXTRA_SHORTCUT,
+                                        OptionsActivity.EXTRA_SHORTCUT_FORCE_LOCATION
+                                ));
+                    }
+                })
+                .setPositiveButton(R.string.location_rationale_positive, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // Request the permission again
+                        ActivityCompat.requestPermissions(MainActivity.this,
+                                new String[] { Manifest.permission.ACCESS_COARSE_LOCATION },
+                                REQUEST_LOCATION_PERMISSION);
+                    }
+                });
+        // Prevent crash if MainActivity is finishing while attempting to display a new dialog
+        if(!isFinishing()) {
+            rationaleDialog = adb.show();
+        }
+    }
+
+    // Called after we're certain we have the location permission
+    private void doCheckedLocationRequest() {
+        // Make sure we're going to connect
+        if(!wowApi.isConnected() && !wowApi.isConnecting()) {
+            wowApi.connect();
+        }
+        onLocation(wowApi.getLocation());
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        if (requestCode != REQUEST_LOCATION_PERMISSION) {
+            // Not a request we're interested in
+            return;
+        }
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            // Good to go, execute the actual location action
+            doCheckedLocationRequest();
+        }
     }
 
     private final class GetWeather extends AsyncTask<Location, Void, Object[]> {

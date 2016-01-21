@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Copyright (C) 2014 VersoBit Ltd
+    Copyright (C) 2014, 2016 VersoBit Ltd
 
     This file is part of Weather Doge.
 
@@ -24,7 +24,7 @@
         android:title="@string/such_metric_name"
         android:summary="@string/such_metric_desc"
         android:defaultValue="false" />
-    <EditTextPreference
+    <com.versobit.weatherdoge.ui.DogeEditTextPreference
         android:key="pref_force_location"
         android:title="@string/force_location_name"
         android:defaultValue=""

@@ -39,7 +39,7 @@ import com.google.android.gms.location.LocationServices;
 final class LocationApi implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
-    private static final String TAG = "GLocationApi";
+    private static final String TAG = "GoogleLocationApi";
     private static final int REQUEST_PLAY_ERR_DIAG = 52000000;
     private static final int REQUEST_PLAY_CONN_FAIL_RES = 3643;
 
@@ -75,7 +75,12 @@ final class LocationApi implements GoogleApiClient.ConnectionCallbacks,
     }
 
     Location getLocation() {
-        return LocationServices.FusedLocationApi.getLastLocation(client);
+        try {
+            return LocationServices.FusedLocationApi.getLastLocation(client);
+        } catch (SecurityException ex) {
+            Log.wtf(TAG, ex);
+        }
+        return null;
     }
 
     static boolean isAvailable(Context ctx) {
@@ -102,7 +107,12 @@ final class LocationApi implements GoogleApiClient.ConnectionCallbacks,
         request.setPriority(LocationRequest.PRIORITY_LOW_POWER);
         request.setInterval(5000);
         request.setFastestInterval(1000);
-        LocationServices.FusedLocationApi.requestLocationUpdates(client, request, this);
+        try {
+            LocationServices.FusedLocationApi.requestLocationUpdates(client, request, this);
+        } catch (SecurityException ex) {
+            Log.wtf(TAG, ex);
+            return;
+        }
         receiver.onConnected();
     }
 

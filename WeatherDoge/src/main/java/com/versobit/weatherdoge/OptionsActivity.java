@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 VersoBit Ltd
+ * Copyright (C) 2014-2016 VersoBit Ltd
  *
  * This file is part of Weather Doge.
  *
@@ -34,6 +34,7 @@ import com.versobit.weatherdoge.dialogs.AboutDialog;
 import com.versobit.weatherdoge.dialogs.ContributeDialog;
 import com.versobit.weatherdoge.dialogs.DropShadowDialog;
 import com.versobit.weatherdoge.dialogs.OtherShibesDialog;
+import com.versobit.weatherdoge.ui.DogeEditTextPreference;
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings. On
@@ -47,6 +48,10 @@ import com.versobit.weatherdoge.dialogs.OtherShibesDialog;
  * API Guide</a> for more information on developing a Settings UI.
  */
 final public class OptionsActivity extends PreferenceActivity {
+
+    static final String EXTRA_SHORTCUT = "shortcut";
+    static final int EXTRA_SHORTCUT_NONE = -1;
+    static final int EXTRA_SHORTCUT_FORCE_LOCATION = 0;
 
     static final String PREF_FORCE_METRIC = "pref_force_metric";
     static final String PREF_FORCE_LOCATION = "pref_force_location";
@@ -173,6 +178,18 @@ final public class OptionsActivity extends PreferenceActivity {
                 appNeue.setEnabled(false);
                 widgetNeue.setChecked(true);
                 widgetNeue.setEnabled(false);
+            }
+
+            // Apply a shortcut
+            if (getActivity() != null) {
+                Intent i = getActivity().getIntent();
+                switch (i.getIntExtra(EXTRA_SHORTCUT, EXTRA_SHORTCUT_NONE)) {
+                    case EXTRA_SHORTCUT_FORCE_LOCATION:
+                        ((DogeEditTextPreference)findPreference(PREF_FORCE_LOCATION)).showDialog();
+                    default:
+                        // Prevent it from displaying again
+                        i.removeExtra(EXTRA_SHORTCUT);
+                }
             }
         }
 
