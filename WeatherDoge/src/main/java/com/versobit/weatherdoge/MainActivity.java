@@ -45,6 +45,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -835,33 +836,25 @@ final public class MainActivity extends Activity implements LocationReceiver,
                     AnimationUtils.loadAnimation(MainActivity.this, R.anim.textfade_in),
                     AnimationUtils.loadAnimation(MainActivity.this, R.anim.textfade_in) };
 
-            final TimerTask tempGroupTimer = new TimerTask() {
+            final Handler uiHandler = new Handler(Looper.getMainLooper());
+            final Runnable tempGroupRunnable = new Runnable() {
                 @Override
                 public void run() {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            suchTempGroup.startAnimation(fadeOuts[1]);
-                        }
-                    });
+                    suchTempGroup.startAnimation(fadeOuts[1]);
                 }
             };
 
-            final TimerTask locationTimer = new TimerTask() {
+            final Runnable locationRunnable = new Runnable() {
                 @Override
                 public void run() {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            suchLocation.startAnimation(fadeOuts[2]);
-                        }
-                    });
+                    suchLocation.startAnimation(fadeOuts[2]);
                 }
             };
+
             fadeOuts[0].setAnimationListener(new Animation.AnimationListener() {
                 @Override
                 public void onAnimationStart(Animation animation) {
-                    new Timer().schedule(tempGroupTimer, animTime);
+                    uiHandler.postDelayed(tempGroupRunnable, animTime);
                 }
 
                 @Override
@@ -876,7 +869,7 @@ final public class MainActivity extends Activity implements LocationReceiver,
             fadeOuts[1].setAnimationListener(new Animation.AnimationListener() {
                 @Override
                 public void onAnimationStart(Animation animation) {
-                    new Timer().schedule(locationTimer, animTime);
+                    uiHandler.postDelayed(locationRunnable, animTime);
                 }
 
                 @Override
