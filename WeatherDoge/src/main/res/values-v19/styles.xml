@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Copyright (C) 2014-2015 VersoBit Ltd
+    Copyright (C) 2014-2016 VersoBit Ltd
 
     This file is part of Weather Doge.
 
@@ -20,9 +20,10 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="android:Theme.Holo.Light.NoActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowTranslucentStatus">true</item>
+        <item name="colorPrimary">@color/primary</item>
     </style>
 
 </resources>

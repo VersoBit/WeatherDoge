@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Copyright (C) 2014-2015 VersoBit Ltd
+    Copyright (C) 2014-2016 VersoBit Ltd
 
     This file is part of Weather Doge.
 
@@ -20,26 +20,18 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="android:Theme.Material.Light.NoActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowTranslucentStatus">true</item>
-        <item name="android:colorPrimary">@color/primary</item>
+        <item name="colorPrimary">@color/primary</item>
         <item name="android:alertDialogTheme">@style/AppTheme.Dialog</item>
     </style>
 
-    <style name="AppTheme.Options" parent="android:Theme.Material.Light">
-        <item name="android:colorPrimary">@color/primary</item>
-        <item name="android:colorPrimaryDark">@color/primary_dark</item>
-        <item name="android:colorAccent">@color/accent</item>
+    <style name="AppTheme.Options" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <item name="colorAccent">@color/accent</item>
         <item name="android:alertDialogTheme">@style/AppTheme.Dialog</item>
-    </style>
-
-    <style name="AppTheme.Dialog" parent="android:Theme.Material.Light.Dialog.Alert">
-        <item name="android:colorAccent">@color/accent</item>
-    </style>
-
-    <style name="AppTheme.Dialog.Light">
-        <item name="android:colorAccent">@color/primary</item>
     </style>
 
 </resources>
