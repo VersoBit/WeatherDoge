@@ -82,7 +82,7 @@ final class WeatherUtil {
                 }
                 yqlText = location.replaceAll("[^\\p{L}\\p{Nd} ,-]+", "");
             } else {
-                yqlText = String.valueOf(latitude) + ", " + String.valueOf(longitude);
+                yqlText = String.format("(%s, %s)", latitude, longitude);
             }
             URL url = new URL("https://query.yahooapis.com/v1/public/yql?q="
                     + URLEncoder.encode("select location.city, units, item.condition, astronomy from weather.forecast where woeid in (select woeid from geo.places(1) where text = \""
