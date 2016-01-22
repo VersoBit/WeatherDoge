@@ -46,6 +46,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.DisplayMetrics;
@@ -110,6 +111,7 @@ final public class MainActivity extends Activity implements LocationReceiver,
 
     private AlertDialog errorDialog;
     private AlertDialog rationaleDialog;
+    private Snackbar locationSnackbar;
 
     private double currentTemp;
     private boolean currentlyMetric;
@@ -542,13 +544,17 @@ final public class MainActivity extends Activity implements LocationReceiver,
         new GetWeather().execute(whereIsDoge);
     }
 
-    // Asynchronously request the current location
     private void requestLocation() {
+        requestLocation(false);
+    }
+
+    // Asynchronously request the current location
+    private void requestLocation(boolean skipRationale) {
         // Check if we need to request the permission on >= Marshmallow
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
             // We need to request it
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+            if (!skipRationale && ActivityCompat.shouldShowRequestPermissionRationale(this,
                     Manifest.permission.ACCESS_COARSE_LOCATION)) {
                 // Show the rationale dialog if we need to
                 showLocationRationaleDialog();
@@ -566,7 +572,8 @@ final public class MainActivity extends Activity implements LocationReceiver,
 
     // Show the location rationale dialog which explains to the user why we need their location
     private void showLocationRationaleDialog() {
-        if (rationaleDialog != null && rationaleDialog.isShowing()) {
+        if ((rationaleDialog != null && rationaleDialog.isShowing())
+                || (locationSnackbar != null && locationSnackbar.isShown())) {
             return;
         }
         AlertDialog.Builder adb = new AlertDialog.Builder(this)
@@ -589,11 +596,34 @@ final public class MainActivity extends Activity implements LocationReceiver,
                                 new String[] { Manifest.permission.ACCESS_COARSE_LOCATION },
                                 REQUEST_LOCATION_PERMISSION);
                     }
+                })
+                .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                    @Override
+                    public void onCancel(DialogInterface dialog) {
+                        showLocationSnackbar();
+                    }
                 });
         // Prevent crash if MainActivity is finishing while attempting to display a new dialog
         if(!isFinishing()) {
             rationaleDialog = adb.show();
         }
+    }
+
+    private void showLocationSnackbar() {
+        if(locationSnackbar != null && locationSnackbar.isShown()) {
+            return;
+        }
+
+        locationSnackbar = Snackbar.make(findViewById(R.id.main_suchlayout),
+                R.string.location_snackbar_text, Snackbar.LENGTH_INDEFINITE)
+                .setAction(R.string.location_snackbar_button, new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        requestLocation(true);
+                    }
+                })
+                .setActionTextColor(ContextCompat.getColor(this, R.color.primary_dark));
+        locationSnackbar.show();
     }
 
     // Called after we're certain we have the location permission
@@ -618,8 +648,14 @@ final public class MainActivity extends Activity implements LocationReceiver,
                     .cancel(WidgetService.PERMISSION_NOTIFICATION_ID);
             // Refresh the widget
             startService(new Intent(this, WidgetService.class).setAction(WidgetService.ACTION_REFRESH_ALL));
+            // Dismiss the snackbar, if any
+            if (locationSnackbar != null && locationSnackbar.isShown()) {
+                locationSnackbar.dismiss();
+            }
             // Good to go, execute the actual location action
             doCheckedLocationRequest();
+        } else {
+            showLocationSnackbar();
         }
     }
 
