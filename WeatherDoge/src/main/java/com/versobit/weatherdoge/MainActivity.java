@@ -56,7 +56,6 @@ import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.View;
-import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
@@ -211,7 +210,7 @@ final public class MainActivity extends Activity implements LocationReceiver,
         } else if(LocationApi.isAvailable(this)) {
             wowApi = new LocationApi(this, this);
         }
-        setBackground(R.drawable.sky_01d);
+        new SetBackgroundTask(R.drawable.sky_01d).execute();
 
         if(BuildConfig.VERSION_CODE > lastVersion) {
             lastVersion = BuildConfig.VERSION_CODE;
@@ -372,53 +371,6 @@ final public class MainActivity extends Activity implements LocationReceiver,
     private static Rect layoutParamsToRect(RelativeLayout.LayoutParams params) {
         return new Rect(params.leftMargin, params.topMargin,
                 params.leftMargin + params.width, params.topMargin + params.height);
-    }
-
-    private void setBackground(int resId) {
-        if(currentBackgroundId == resId) {
-            return;
-        }
-        currentBackgroundId = resId;
-
-        // Manually resize/crop the sky background because god forbid if Android can do this well on its own
-        // Load in the full bitmap
-        Bitmap theSky = BitmapFactory.decodeResource(getResources(), resId);
-        // Get display info
-        DisplayMetrics metrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(metrics);
-
-        // Create empty bitmap the size of the screen
-        Bitmap scaledSky = Bitmap.createBitmap(metrics.widthPixels, metrics.heightPixels, Bitmap.Config.ARGB_8888);
-
-        // Use a canvas to draw on the bitmap
-        Canvas canvas = new Canvas(scaledSky);
-        float skyHeight = (float)theSky.getScaledHeight(canvas); // Height of the sky scaled on the canvas
-        skyHeight = skyHeight == 0f ? metrics.heightPixels : skyHeight; // If not scaled, use device height
-        int compensationPixels = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT ? 4 : 0; // Weird. Compensate for translucent status bar
-        float newScale = (metrics.heightPixels + compensationPixels) / skyHeight; // The scale we need to achieve the device's height
-        // Magic number to get some important image elements onscreen
-        float moveAmount = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 180, metrics);
-
-        Matrix matrix = new Matrix();
-        matrix.setScale(newScale, newScale, moveAmount, 0);
-        canvas.setMatrix(matrix);
-        canvas.drawBitmap(theSky, 0, 0, new Paint()); // Draw the bitmap
-
-        theSky.recycle();
-
-        Drawable current = suchBg.getDrawable();
-        if(current != null) {
-            if(current instanceof TransitionDrawable) {
-                current = ((TransitionDrawable) current).getDrawable(1);
-            }
-            Drawable[] drawables = new Drawable[] { current, new BitmapDrawable(getResources(), scaledSky)};
-            TransitionDrawable transition = new TransitionDrawable(drawables);
-            transition.setCrossFadeEnabled(true);
-            suchBg.setImageDrawable(transition);
-            transition.startTransition(getResources().getInteger(R.integer.anim_refresh_time) * 2);
-        } else {
-            suchBg.setImageDrawable(new BitmapDrawable(getResources(), scaledSky));
-        }
     }
 
     private void setDoge(final int resId) {
@@ -667,6 +619,76 @@ final public class MainActivity extends Activity implements LocationReceiver,
         }
     }
 
+    private final class SetBackgroundTask extends AsyncTask<Void, Void, Bitmap> {
+
+        private final int resId;
+
+        private SetBackgroundTask(int resId) {
+            this.resId = resId;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            if(currentBackgroundId == resId) {
+                cancel(true);
+                return;
+            }
+            currentBackgroundId = resId;
+        }
+
+        @Override
+        protected Bitmap doInBackground(Void... params) {
+            if(isCancelled()) {
+                return null;
+            }
+
+            // Manually resize/crop the sky background because god forbid if Android can do this well on its own
+            // Load in the full bitmap
+            Bitmap theSky = BitmapFactory.decodeResource(getResources(), resId);
+            // Get display info
+            DisplayMetrics metrics = new DisplayMetrics();
+            getWindowManager().getDefaultDisplay().getMetrics(metrics);
+
+            // Create empty bitmap the size of the screen
+            Bitmap scaledSky = Bitmap.createBitmap(metrics.widthPixels, metrics.heightPixels, Bitmap.Config.ARGB_8888);
+
+            // Use a canvas to draw on the bitmap
+            Canvas canvas = new Canvas(scaledSky);
+            float skyHeight = (float)theSky.getScaledHeight(canvas); // Height of the sky scaled on the canvas
+            skyHeight = skyHeight == 0f ? metrics.heightPixels : skyHeight; // If not scaled, use device height
+            int compensationPixels = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT ? 4 : 0; // Weird. Compensate for translucent status bar
+            float newScale = (metrics.heightPixels + compensationPixels) / skyHeight; // The scale we need to achieve the device's height
+            // Magic number to get some important image elements onscreen
+            float moveAmount = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 180, metrics);
+
+            Matrix matrix = new Matrix();
+            matrix.setScale(newScale, newScale, moveAmount, 0);
+            canvas.setMatrix(matrix);
+            canvas.drawBitmap(theSky, 0, 0, new Paint()); // Draw the bitmap
+
+            theSky.recycle();
+
+            return scaledSky;
+        }
+
+        @Override
+        protected void onPostExecute(Bitmap scaledSky) {
+            Drawable current = suchBg.getDrawable();
+            if(current != null) {
+                if(current instanceof TransitionDrawable) {
+                    current = ((TransitionDrawable) current).getDrawable(1);
+                }
+                Drawable[] drawables = new Drawable[] { current, new BitmapDrawable(getResources(), scaledSky)};
+                TransitionDrawable transition = new TransitionDrawable(drawables);
+                transition.setCrossFadeEnabled(true);
+                suchBg.setImageDrawable(transition);
+                transition.startTransition(getResources().getInteger(R.integer.anim_refresh_time) * 2);
+            } else {
+                suchBg.setImageDrawable(new BitmapDrawable(getResources(), scaledSky));
+            }
+        }
+    }
+
     private final class GetWeather extends AsyncTask<Location, Void, Object[]> {
         @Override
         protected void onPreExecute() {
@@ -798,7 +820,7 @@ final public class MainActivity extends Activity implements LocationReceiver,
             weatherAdjectives = ArrayUtils.addAll(tempAdjs, bgAdjs);
 
             setDoge(WeatherDoge.dogeSelect(data.image));
-            setBackground(WeatherDoge.skySelect(data.image));
+            new SetBackgroundTask(WeatherDoge.skySelect(data.image)).execute();
 
             // Do we need to animate?
             if(suchStatus.getText().equals(description) && (currentTemp == data.temperature) &&
