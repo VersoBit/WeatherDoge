@@ -298,32 +298,6 @@ final public class MainActivity extends Activity implements LocationReceiver,
                 params.leftMargin + params.width, params.topMargin + params.height);
     }
 
-    private void setDoge(final int resId) {
-        if(currentDogeId == resId) {
-            return;
-        }
-        currentDogeId = resId;
-
-        final Animation zoomOut = AnimationUtils.loadAnimation(this, R.anim.dogezoom_out);
-        final Animation zoomIn = AnimationUtils.loadAnimation(this, R.anim.dogezoom_in);
-        zoomOut.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) {
-            }
-
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                suchDoge.setImageResource(resId);
-                suchDoge.startAnimation(zoomIn);
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {
-            }
-        });
-        suchDoge.startAnimation(zoomOut);
-    }
-
     @Override
     protected void onStart() {
         super.onStart();
@@ -616,6 +590,51 @@ final public class MainActivity extends Activity implements LocationReceiver,
         }
     }
 
+    private final class SetDogeTask extends AsyncTask<Void, Void, Animation> {
+
+        private final int resId;
+
+        private SetDogeTask(int resId) {
+            this.resId = resId;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            if (currentDogeId == resId) {
+                cancel(true);
+                return;
+            }
+            currentDogeId = resId;
+        }
+
+        @Override
+        protected Animation doInBackground(Void... params) {
+            Animation zoomOut = AnimationUtils.loadAnimation(MainActivity.this, R.anim.dogezoom_out);
+            final Animation zoomIn = AnimationUtils.loadAnimation(MainActivity.this, R.anim.dogezoom_in);
+            zoomOut.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    suchDoge.setImageResource(resId);
+                    suchDoge.startAnimation(zoomIn);
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) { }
+            });
+
+            return zoomOut;
+        }
+
+        @Override
+        protected void onPostExecute(Animation animation) {
+            suchDoge.startAnimation(animation);
+        }
+    }
+
     private final class SetBackgroundTask extends AsyncTask<Void, Void, Bitmap> {
 
         private final int resId;
@@ -737,6 +756,22 @@ final public class MainActivity extends Activity implements LocationReceiver,
                 addr = getAddress(data.latitude, data.longitude);
             }
 
+            // Start the first half of the animation update still in the background thread
+            if (currentlyAnim) {
+                return new Object[] { null };
+            }
+
+            currentlyAnim = true;
+            if (forceLocation.isEmpty() && addr != null) {
+                String locality = addr.getLocality();
+                currentLocation = locality == null ? data.place : locality;
+            } else {
+                currentLocation = data.place;
+            }
+            String[] tempAdjs = getResources().getStringArray(WeatherDoge.getTempAdjectives((int)data.temperature));
+            String[] bgAdjs = getResources().getStringArray(WeatherDoge.getBgAdjectives(data.image));
+            weatherAdjectives = ArrayUtils.addAll(tempAdjs, bgAdjs);
+
             return new Object[] { data, addr };
         }
 
@@ -778,12 +813,12 @@ final public class MainActivity extends Activity implements LocationReceiver,
 
         @Override
         protected void onPostExecute(Object[] result) {
-            if(result[0] instanceof Throwable) {
+            if (result[0] instanceof Throwable) {
                 Log.wtf(TAG, (Throwable) result[0]);
                 Toast.makeText(MainActivity.this, ((Throwable)result[0]).getMessage(), Toast.LENGTH_LONG).show();
                 return;
             }
-            if(result[0] instanceof WeatherUtil.WeatherResult) {
+            else if (result[0] instanceof WeatherUtil.WeatherResult) {
                 WeatherUtil.WeatherResult wResult = (WeatherUtil.WeatherResult)result[0];
                 switch (wResult.error) {
                     case WeatherUtil.WeatherResult.ERROR_API:
@@ -798,36 +833,41 @@ final public class MainActivity extends Activity implements LocationReceiver,
                 }
                 return;
             }
-
-            final WeatherUtil.WeatherData data = (WeatherUtil.WeatherData)result[0];
-            if(currentlyAnim) {
+            else if (!(result[0] instanceof WeatherUtil.WeatherData)) {
                 return;
             }
 
-            currentlyAnim = true;
-            if(forceLocation.isEmpty() && result[1] != null) {
-                String locality = ((Address)result[1]).getLocality();
-                currentLocation = locality == null ? data.place : locality;
-            } else {
-                currentLocation = data.place;
-            }
-            final String description = getString(R.string.wow) + " " + data.condition.trim().toLowerCase();
-            String[] tempAdjs = getResources().getStringArray(WeatherDoge.getTempAdjectives((int)data.temperature));
-            String[] bgAdjs = getResources().getStringArray(WeatherDoge.getBgAdjectives(data.image));
-            weatherAdjectives = ArrayUtils.addAll(tempAdjs, bgAdjs);
+            // This is a continuation of the animation work started in the background thread
+            // The stuff here must be done on the current UI thread
+            WeatherUtil.WeatherData data = (WeatherUtil.WeatherData)result[0];
 
-            setDoge(WeatherDoge.dogeSelect(data.image));
+            // Do the doge and background animations
+            new SetDogeTask(WeatherDoge.dogeSelect(data.image)).execute();
             new SetBackgroundTask(WeatherDoge.skySelect(data.image)).execute();
 
             // Do we need to animate?
-            if(suchStatus.getText().equals(description) && (currentTemp == data.temperature) &&
+            String description = getString(R.string.wow) + " " + data.condition.trim().toLowerCase();
+            if (suchStatus.getText().equals(description) && (currentTemp == data.temperature) &&
                     (currentlyMetric != (UnitLocale.getDefault() == UnitLocale.IMPERIAL && !forceMetric)) &&
                     suchLocation.getText().equals(currentLocation)) {
                 currentlyAnim = false;
                 return;
             }
 
-            final int animTime = (int)(MainActivity.this.getResources().getInteger(R.integer.anim_refresh_time) / 2.5);
+            // Do the second half of the animation work on a background thread
+            new WeatherDataTask().execute(data, description);
+        }
+    }
+
+    private final class WeatherDataTask extends AsyncTask<Object, Void, Animation> {
+        @Override
+        protected Animation doInBackground(Object... params) {
+            final WeatherUtil.WeatherData data = (WeatherUtil.WeatherData)params[0];
+            final String description = (String)params[1];
+
+            final FormattedTemp formattedTemp = new FormattedTemp(data.temperature);
+
+            final int animTime = (int)(getResources().getInteger(R.integer.anim_refresh_time) / 2.5);
 
             final Animation[] fadeOuts = { AnimationUtils.loadAnimation(MainActivity.this, R.anim.textfade_out),
                     AnimationUtils.loadAnimation(MainActivity.this, R.anim.textfade_out),
@@ -874,7 +914,11 @@ final public class MainActivity extends Activity implements LocationReceiver,
 
                 @Override
                 public void onAnimationEnd(Animation animation) {
-                    setTemp(data.temperature);
+                    currentTemp = data.temperature;
+                    currentlyMetric = UnitLocale.getDefault() != UnitLocale.IMPERIAL || forceMetric;
+                    suchTemp.setText(formattedTemp.str);
+                    suchNegative.setVisibility(formattedTemp.temp < 0d ? View.VISIBLE : View.GONE);
+                    suchDegree.setVisibility(View.VISIBLE);
                     suchTempGroup.startAnimation(fadeIns[1]);
                 }
 
@@ -907,27 +951,32 @@ final public class MainActivity extends Activity implements LocationReceiver,
                 public void onAnimationRepeat(Animation animation) {}
             });
 
-            suchStatus.startAnimation(fadeOuts[0]);
+            return fadeOuts[0];
         }
 
-        private void setTemp(double temp) {
-            currentTemp = temp;
-            boolean metric = true;
-            if(UnitLocale.getDefault() == UnitLocale.IMPERIAL && !forceMetric) {
-                temp = temp * 1.8d + 32d; // F
-                metric = false;
+        private final class FormattedTemp {
+            private final double temp;
+            private final String str;
+
+            FormattedTemp(double inTemp) {
+                if (UnitLocale.getDefault() == UnitLocale.IMPERIAL && !forceMetric) {
+                    inTemp = inTemp * 1.8d + 32d; // F
+                }
+                inTemp = Math.round(inTemp);
+                DecimalFormat df = new DecimalFormat();
+                df.setNegativePrefix("");
+                df.setNegativeSuffix("");
+                df.setMaximumFractionDigits(0);
+                df.setDecimalSeparatorAlwaysShown(false);
+                df.setGroupingUsed(false);
+                temp = inTemp;
+                str = df.format(inTemp);
             }
-            currentlyMetric = metric;
-            temp = Math.round(temp);
-            DecimalFormat df = new DecimalFormat();
-            df.setNegativePrefix("");
-            df.setNegativeSuffix("");
-            df.setMaximumFractionDigits(0);
-            df.setDecimalSeparatorAlwaysShown(false);
-            df.setGroupingUsed(false);
-            suchTemp.setText(df.format(temp));
-            suchNegative.setVisibility(temp < 0d ? View.VISIBLE : View.GONE);
-            suchDegree.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected void onPostExecute(Animation kickoff) {
+            suchStatus.startAnimation(kickoff);
         }
     }
 }
