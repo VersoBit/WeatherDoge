@@ -808,44 +808,6 @@ final public class MainActivity extends Activity implements LocationReceiver,
                 return;
             }
 
-            // Use a simpler animation for Gingerbread
-            // It hates AnimationUtils.loadAnimation for some reason
-            if(Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
-                final AlphaAnimation fadeOut = new AlphaAnimation(1.0f, 0.0f);
-                fadeOut.setDuration(MainActivity.this.getResources().getInteger(R.integer.anim_refresh_time));
-                final AlphaAnimation fadeIn = new AlphaAnimation(0.0f, 1.0f);
-                fadeIn.setDuration(MainActivity.this.getResources().getInteger(R.integer.anim_refresh_time));
-                fadeOut.setAnimationListener(new Animation.AnimationListener() {
-                    @Override
-                    public void onAnimationStart(Animation animation) {}
-
-                    @Override
-                    public void onAnimationEnd(Animation animation) {
-                        suchStatus.setText(description);
-                        setTemp(data.temperature);
-                        suchLocation.setText(currentLocation);
-                        suchInfoGroup.startAnimation(fadeIn);
-                    }
-
-                    @Override
-                    public void onAnimationRepeat(Animation animation) {}
-                });
-                fadeIn.setAnimationListener(new Animation.AnimationListener() {
-                    @Override
-                    public void onAnimationStart(Animation animation) {}
-
-                    @Override
-                    public void onAnimationEnd(Animation animation) {
-                        currentlyAnim = false;
-                    }
-
-                    @Override
-                    public void onAnimationRepeat(Animation animation) {}
-                });
-                suchInfoGroup.startAnimation(fadeOut);
-                return;
-            }
-
             final int animTime = (int)(MainActivity.this.getResources().getInteger(R.integer.anim_refresh_time) / 2.5);
 
             final Animation[] fadeOuts = { AnimationUtils.loadAnimation(MainActivity.this, R.anim.textfade_out),
