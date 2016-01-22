@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Copyright (C) 2014-2015 VersoBit Ltd
+    Copyright (C) 2014-2016 VersoBit Ltd
 
     This file is part of Weather Doge.
 
@@ -23,6 +23,12 @@
     <color name="accent">#FFDC9B00</color>
 
     <color name="holo_light_pressed">#FFE3E3E3</color>
+
+    <color name="fab">#FFEBD08D</color>
+    <color name="fab_pressed">#FFD9C082</color>
+    <color name="offwhite">#FFFAFAFA</color>
+    <color name="black_semi_transparent">#B2000000</color>
+
     <integer-array name="wow_colors">
         <item>0xFF0066FF</item>
         <item>0xFFFF3399</item>

@@ -20,8 +20,8 @@
 <resources>
 
     <string name="app_name">Weather Doge</string>
-    <string name="action_share">Such Share</string>
-    <string name="action_options">Such Options</string>
+    <string name="action_share">Share</string>
+    <string name="action_options">Options</string>
 
     <string name="share_title">%1$s in %2$s - Weather Doge</string>
     <string name="share_text">%1$s. It\'s %2$s in %3$s.\n\nWow, this shibe is using Weather Doge for Android. https://play.google.com/store/apps/details?id=com.versobit.weatherdoge</string>

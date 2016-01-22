@@ -63,6 +63,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.getbase.floatingactionbutton.FloatingActionsMenu;
+
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.text.DecimalFormat;
@@ -164,8 +166,8 @@ final public class MainActivity extends Activity implements LocationReceiver,
         suchTemp = (TextView)findViewById(R.id.main_suchtemp);
         suchDegree = (TextView)findViewById(R.id.main_suchdegree);
         suchLocation = (TextView)findViewById(R.id.main_suchlocation);
-        ImageView suchShare = (ImageView)findViewById(R.id.main_suchshare);
-        suchShare.setOnClickListener(new View.OnClickListener() {
+        final FloatingActionsMenu suchMenu = (FloatingActionsMenu)findViewById(R.id.main_fam);
+        findViewById(R.id.man_fab_share).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(Intent.ACTION_SEND);
@@ -184,28 +186,15 @@ final public class MainActivity extends Activity implements LocationReceiver,
                     i.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.share_title, temp, currentLocation));
                     i.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_text, WeatherDoge.getDogeism(wows, dogefixes, weatherAdjectives), temp, currentLocation));
                 }
+                suchMenu.collapse();
                 startActivity(Intent.createChooser(i, getString(R.string.action_share)));
             }
         });
-        suchShare.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                Toast.makeText(MainActivity.this, R.string.action_share, Toast.LENGTH_SHORT).show();
-                return true;
-            }
-        });
-        ImageView suchOptions = (ImageView)findViewById(R.id.main_suchoptions);
-        suchOptions.setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.man_fab_options).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                suchMenu.collapse();
                 startActivity(new Intent(MainActivity.this, OptionsActivity.class));
-            }
-        });
-        suchOptions.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                Toast.makeText(MainActivity.this, R.string.action_options, Toast.LENGTH_SHORT).show();
-                return true;
             }
         });
 
