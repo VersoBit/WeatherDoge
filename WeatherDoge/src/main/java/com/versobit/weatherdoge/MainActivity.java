@@ -660,6 +660,17 @@ final public class MainActivity extends Activity implements LocationReceiver,
     }
 
     private final class GetWeather extends AsyncTask<Location, Void, Object[]> {
+        @Override
+        protected void onPreExecute() {
+            // Dismiss the snackbar and dialog, if any
+            if (rationaleDialog != null && rationaleDialog.isShowing()) {
+                rationaleDialog.dismiss();
+            }
+            if (locationSnackbar != null && locationSnackbar.isShown()) {
+                locationSnackbar.dismiss();
+            }
+        }
+
         private final String TAG = GetWeather.class.getSimpleName();
         @Override
         protected Object[] doInBackground(Location... params) {
