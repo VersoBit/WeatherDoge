@@ -238,82 +238,6 @@ final public class MainActivity extends Activity implements LocationReceiver,
         lastVersion = sp.getInt(OptionsActivity.PREF_INTERNAL_LAST_VERSION, lastVersion);
     }
 
-    private void initOverlayTimer() {
-        overlayTask = new OverlayTimerTask();
-        overlayTimer.schedule(overlayTask, 0, WOW_INTERVAL);
-    }
-
-    private class OverlayTimerTask extends TimerTask {
-        @Override
-        public void run() {
-            if(weatherAdjectives == null) {
-                return;
-            }
-
-            WowText wowText;
-
-            // Set up the RNG
-            Random r = new Random();
-
-            // Continue to loop until we come out the other side with a valid wowText
-            while(true) {
-                // Create the new view
-                wowText = new WowText(null, new TextView(MainActivity.this));
-
-                // 15sp is a magic padding number I've tested with
-                int padding = (int)Math.ceil(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 15, getResources().getDisplayMetrics()));
-
-                // Set up the view with the basics
-                wowText.view.setTypeface(wowComicSans);
-                if(shadowAdjs) {
-                    wowText.view.setShadowLayer(shadowR, shadowX, shadowY, Color.BLACK);
-                }
-
-                // How big is the overlay layer?
-                int[] layoutDim = { suchOverlay.getWidth(), suchOverlay.getHeight() };
-
-                wowText.view.setText(getUniqueDogeism(r));
-                wowText.view.setTextColor(colors[r.nextInt(colors.length)]);
-                wowText.view.setTextSize(TypedValue.COMPLEX_UNIT_SP, r.nextInt(15) + 25);
-
-                // How big is this textview going to be?
-                wowText.view.measure(layoutDim[0], layoutDim[1]);
-                int[] textDim = { wowText.view.getMeasuredWidth(), wowText.view.getMeasuredHeight() };
-
-                // Set a fixed width and height
-                wowText.params = new RelativeLayout.LayoutParams(textDim[0], textDim[1]);
-
-                // Find the maximum left and top margins
-                int[] absPos = { layoutDim[0] - textDim[0], layoutDim[1] - textDim[1] };
-
-                // Can we fit this text on the screen?
-                if(absPos[0] < 0 || absPos[1] < 0) {
-                    continue; // Can't fit with that dogeism, text size, and layout dimensions
-                }
-
-                wowText.params.leftMargin = absPos[0] == 0 ? 0 : r.nextInt(absPos[0]);
-                wowText.params.topMargin = absPos[1] == 0 ? 0 : r.nextInt(absPos[1]);
-
-                wowText.params.width += padding * 2; // left + right
-                wowText.params.height += padding * 2; // top + bottom
-                // Padding is subtracted from top/left margins so the measured values are still accurate
-                // We don't care if the shadow clips on the edge of the screen
-                // abs prevents possibly dangerous negative margins
-                wowText.params.leftMargin = Math.abs(wowText.params.leftMargin - padding);
-                wowText.params.topMargin = Math.abs(wowText.params.topMargin - padding);
-                wowText.view.setGravity(Gravity.CENTER); // Text is centered within the now padded view
-
-                if(checkWowTextConflict(wowText)) {
-                    continue;
-                }
-                break;
-            }
-
-            newWowText = wowText;
-            runOnUiThread(overlayUiRunnable);
-        }
-    }
-
     private Runnable overlayUiRunnable = new Runnable() {
         @Override
         public void run() {
@@ -405,7 +329,8 @@ final public class MainActivity extends Activity implements LocationReceiver,
         if(wowApi != null) {
             requestLocation();
         }
-        initOverlayTimer();
+        overlayTask = new OverlayTimerTask();
+        overlayTimer.schedule(overlayTask, 0, WOW_INTERVAL);
     }
 
     @Override
@@ -616,6 +541,77 @@ final public class MainActivity extends Activity implements LocationReceiver,
             doCheckedLocationRequest();
         } else {
             showLocationSnackbar();
+        }
+    }
+
+    private final class OverlayTimerTask extends TimerTask {
+        @Override
+        public void run() {
+            if(weatherAdjectives == null) {
+                return;
+            }
+
+            WowText wowText;
+
+            // Set up the RNG
+            Random r = new Random();
+
+            // Continue to loop until we come out the other side with a valid wowText
+            while(true) {
+                // Create the new view
+                wowText = new WowText(null, new TextView(MainActivity.this));
+
+                // 15sp is a magic padding number I've tested with
+                int padding = (int)Math.ceil(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 15, getResources().getDisplayMetrics()));
+
+                // Set up the view with the basics
+                wowText.view.setTypeface(wowComicSans);
+                if(shadowAdjs) {
+                    wowText.view.setShadowLayer(shadowR, shadowX, shadowY, Color.BLACK);
+                }
+
+                // How big is the overlay layer?
+                int[] layoutDim = { suchOverlay.getWidth(), suchOverlay.getHeight() };
+
+                wowText.view.setText(getUniqueDogeism(r));
+                wowText.view.setTextColor(colors[r.nextInt(colors.length)]);
+                wowText.view.setTextSize(TypedValue.COMPLEX_UNIT_SP, r.nextInt(15) + 25);
+
+                // How big is this textview going to be?
+                wowText.view.measure(layoutDim[0], layoutDim[1]);
+                int[] textDim = { wowText.view.getMeasuredWidth(), wowText.view.getMeasuredHeight() };
+
+                // Set a fixed width and height
+                wowText.params = new RelativeLayout.LayoutParams(textDim[0], textDim[1]);
+
+                // Find the maximum left and top margins
+                int[] absPos = { layoutDim[0] - textDim[0], layoutDim[1] - textDim[1] };
+
+                // Can we fit this text on the screen?
+                if(absPos[0] < 0 || absPos[1] < 0) {
+                    continue; // Can't fit with that dogeism, text size, and layout dimensions
+                }
+
+                wowText.params.leftMargin = absPos[0] == 0 ? 0 : r.nextInt(absPos[0]);
+                wowText.params.topMargin = absPos[1] == 0 ? 0 : r.nextInt(absPos[1]);
+
+                wowText.params.width += padding * 2; // left + right
+                wowText.params.height += padding * 2; // top + bottom
+                // Padding is subtracted from top/left margins so the measured values are still accurate
+                // We don't care if the shadow clips on the edge of the screen
+                // abs prevents possibly dangerous negative margins
+                wowText.params.leftMargin = Math.abs(wowText.params.leftMargin - padding);
+                wowText.params.topMargin = Math.abs(wowText.params.topMargin - padding);
+                wowText.view.setGravity(Gravity.CENTER); // Text is centered within the now padded view
+
+                if(checkWowTextConflict(wowText)) {
+                    continue;
+                }
+                break;
+            }
+
+            newWowText = wowText;
+            runOnUiThread(overlayUiRunnable);
         }
     }
 
