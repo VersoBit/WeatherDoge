@@ -239,65 +239,6 @@ final public class MainActivity extends Activity implements LocationReceiver,
         lastVersion = sp.getInt(OptionsActivity.PREF_INTERNAL_LAST_VERSION, lastVersion);
     }
 
-    private Runnable overlayUiRunnable = new Runnable() {
-        @Override
-        public void run() {
-            if(overlays.size() == 4) {
-                // If the view doesn't exist in the particular overlay it will not throw an exception
-                View v = overlays.remove().view;
-                suchOverlay.removeView(v);
-                suchTopOverlay.removeView(v);
-            }
-
-            if(textOnTop) {
-                suchTopOverlay.addView(newWowText.view, newWowText.params);
-            } else {
-                suchOverlay.addView(newWowText.view, newWowText.params);
-            }
-            overlays.add(newWowText);
-        }
-    };
-
-    private String getUniqueDogeism(Random r) {
-        String ism = null;
-        while(ism == null) {
-            ism = WeatherDoge.getDogeism(r, wows, dogefixes, weatherAdjectives);
-            WowText head = overlays.peek();
-            for(WowText wow : overlays) {
-                if(head == wow && overlays.size() == 4) {
-                    continue; // Continues on the inner loop
-                }
-                if(ism.contentEquals(wow.view.getText())) {
-                    ism = null;
-                    break;
-                }
-            }
-        }
-        return ism;
-    }
-
-    private boolean checkWowTextConflict(WowText needle) {
-        Rect needleRect = layoutParamsToRect(needle.params);
-        // head is the one to be removed
-        WowText head = overlays.peek();
-        for(WowText wow : overlays) {
-            if(head == wow && overlays.size() == 4) {
-                // We do not want to compare against head because
-                // it'll be removed
-                continue;
-            }
-            if(Rect.intersects(needleRect, layoutParamsToRect(wow.params))) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static Rect layoutParamsToRect(RelativeLayout.LayoutParams params) {
-        return new Rect(params.leftMargin, params.topMargin,
-                params.leftMargin + params.width, params.topMargin + params.height);
-    }
-
     @Override
     protected void onStart() {
         super.onStart();
@@ -588,6 +529,65 @@ final public class MainActivity extends Activity implements LocationReceiver,
             newWowText = wowText;
             runOnUiThread(overlayUiRunnable);
         }
+
+        private String getUniqueDogeism(Random r) {
+            String ism = null;
+            while(ism == null) {
+                ism = WeatherDoge.getDogeism(r, wows, dogefixes, weatherAdjectives);
+                WowText head = overlays.peek();
+                for(WowText wow : overlays) {
+                    if(head == wow && overlays.size() == 4) {
+                        continue; // Continues on the inner loop
+                    }
+                    if(ism.contentEquals(wow.view.getText())) {
+                        ism = null;
+                        break;
+                    }
+                }
+            }
+            return ism;
+        }
+
+        private boolean checkWowTextConflict(WowText needle) {
+            Rect needleRect = layoutParamsToRect(needle.params);
+            // head is the one to be removed
+            WowText head = overlays.peek();
+            for(WowText wow : overlays) {
+                if(head == wow && overlays.size() == 4) {
+                    // We do not want to compare against head because
+                    // it'll be removed
+                    continue;
+                }
+                if(Rect.intersects(needleRect, layoutParamsToRect(wow.params))) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private Rect layoutParamsToRect(RelativeLayout.LayoutParams params) {
+            return new Rect(params.leftMargin, params.topMargin,
+                    params.leftMargin + params.width, params.topMargin + params.height);
+        }
+
+        private Runnable overlayUiRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if(overlays.size() == 4) {
+                    // If the view doesn't exist in the particular overlay it will not throw an exception
+                    View v = overlays.remove().view;
+                    suchOverlay.removeView(v);
+                    suchTopOverlay.removeView(v);
+                }
+
+                if(textOnTop) {
+                    suchTopOverlay.addView(newWowText.view, newWowText.params);
+                } else {
+                    suchOverlay.addView(newWowText.view, newWowText.params);
+                }
+                overlays.add(newWowText);
+            }
+        };
     }
 
     private final class SetDogeTask extends AsyncTask<Void, Void, Animation> {
