@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 VersoBit Ltd
+ * Copyright (C) 2014-2016 VersoBit Ltd
  *
  * This file is part of Weather Doge.
  *
@@ -85,8 +85,8 @@ final class WeatherUtil {
                 yqlText = String.valueOf(latitude) + ", " + String.valueOf(longitude);
             }
             URL url = new URL("https://query.yahooapis.com/v1/public/yql?q="
-                    + URLEncoder.encode("select location.city, units, item.condition, astronomy from weather.forecast where woeid in (select woeid from geo.placefinder where text = \""
-                    + yqlText + "\" and gflags = \"R\" limit 1) limit 1", "UTF-8") + "&format=json");
+                    + URLEncoder.encode("select location.city, units, item.condition, astronomy from weather.forecast where woeid in (select woeid from geo.places(1) where text = \""
+                    + yqlText + "\") limit 1", "UTF-8") + "&format=json");
             HttpsURLConnection connection = (HttpsURLConnection)url.openConnection();
             try {
                 JSONObject response = new JSONObject(IOUtils.toString(connection.getInputStream()));
