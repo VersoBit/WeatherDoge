@@ -744,7 +744,7 @@ final public class MainActivity extends Activity implements LocationReceiver,
             skyHeight = skyHeight == 0f ? metrics.heightPixels : skyHeight; // If not scaled, use device height
             int compensationPixels = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT ? 4 : 0; // Weird. Compensate for translucent status bar
             float newScale = (metrics.heightPixels + compensationPixels) / skyHeight; // The scale we need to achieve the device's height
-            // Magic number to get some important image elements onscreen
+            // Magic number to get some important image elements onscreen (205 for 01d, 250 for 01n)
             float moveAmount = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 180, metrics);
 
             Matrix matrix = new Matrix();
