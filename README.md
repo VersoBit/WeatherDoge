@@ -1,7 +1,7 @@
 # Weather Doge
-wow. Weather Doge is the full [dogeweather.com](http://dogeweather.com/) experience on Android. And now there's even more!
+wow. Weather Doge is the full [dogeweather.com](http://dogeweather.com/) experience on Android™. And now there's even more!
 
-[![Get it on Google Play!](https://developer.android.com/images/brand/en_generic_rgb_wo_60.png)](https://play.google.com/store/apps/details?id=com.versobit.weatherdoge)
+[<img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/images/apps/en-play-badge.png" width="250" height="74">](https://play.google.com/store/apps/details?id=com.versobit.weatherdoge&hl=en&utm_source=global_co&utm_medium=prtnr&utm_content=Mar2515&utm_campaign=PartBadge&pcampaignid=MKT-AC-global-none-all-co-pr-py-PartBadges-Oct1515-1)
 
 ![Screenshot](https://raw.github.com/VersoBit/WeatherDoge/master/images/Nexus5BelAir_1000.png)
 
@@ -45,3 +45,7 @@ Copyright © 2014-2016 VersoBit Ltd. Weather Doge is licensed under the GNU GPLv
 Weather Doge uses a number of open-source tools and libraries. Check the "Other Shibes" dialog from within the app or open `WeatherDoge/src/main/assets/othershibes.html` in your browser.
 
 Have fun!
+
+--
+
+Android, Google Play and the Google Play logo are trademarks of Google Inc.
