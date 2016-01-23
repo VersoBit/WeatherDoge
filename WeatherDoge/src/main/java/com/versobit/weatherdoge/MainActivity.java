@@ -343,6 +343,17 @@ final public class MainActivity extends Activity implements LocationReceiver,
         return super.dispatchTouchEvent(ev);
     }
 
+    @Override
+    public void onBackPressed() {
+        // Close the FAB with the back button if it's open
+        if(suchMenu.isExpanded()) {
+            suchMenu.collapse();
+            return;
+        }
+
+        super.onBackPressed();
+    }
+
     private void updateFont() {
         RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams)suchTemp.getLayoutParams();
         if(useNeue || BuildConfig.FLAVOR.equals(BuildConfig.FLAVOR_FOSS)) {
