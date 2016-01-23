@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 VersoBit Ltd
+ * Copyright (C) 2014-2016 VersoBit Ltd
  *
  * This file is part of Weather Doge.
  *
@@ -105,6 +105,16 @@ final public class WeatherDoge extends Application {
                 break;
         }
         return resId;
+    }
+
+    static boolean isSnowing(int resId) {
+        switch (resId) {
+            case R.drawable.sky_13d:
+            case R.drawable.sky_13n:
+            case R.drawable.doge_13:
+                return true;
+        }
+        return false;
     }
 
     // Temp must be in celsius

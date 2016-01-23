@@ -57,6 +57,7 @@ import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
@@ -66,6 +67,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
+import com.plattysoft.leonids.ParticleSystem;
 
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -113,6 +115,9 @@ final public class MainActivity extends Activity implements LocationReceiver,
     private AlertDialog errorDialog;
     private AlertDialog rationaleDialog;
     private Snackbar locationSnackbar;
+
+    private ParticleSystem particleSystem;
+    private boolean isEmitting = false;
 
     private double currentTemp;
     private boolean currentlyMetric;
@@ -247,6 +252,15 @@ final public class MainActivity extends Activity implements LocationReceiver,
         }
         overlayTask = new OverlayTimerTask();
         overlayTimer.schedule(overlayTask, 0, WOW_INTERVAL);
+        if (WeatherDoge.isSnowing(currentBackgroundId)) {
+            if (particleSystem != null) {
+                particleSystem.cancel();
+            }
+            particleSystem = newParticleSystem();
+            // Make it render as if it started 25 seconds ago
+            particleSystem.setStartTime(25000);
+            startParticleSystem();
+        }
     }
 
     @Override
@@ -256,6 +270,10 @@ final public class MainActivity extends Activity implements LocationReceiver,
         }
         overlayTask.cancel();
         overlayTask = null;
+        if (particleSystem != null && isEmitting) {
+            particleSystem.cancel();
+            isEmitting = false;
+        }
         super.onStop();
     }
 
@@ -458,6 +476,18 @@ final public class MainActivity extends Activity implements LocationReceiver,
         } else {
             showLocationSnackbar();
         }
+    }
+
+    private ParticleSystem newParticleSystem() {
+        return new ParticleSystem(this, 200, R.drawable.snowflake, 20000)
+                .setSpeedByComponentsRange(0f, 0f, 0.05f, 0.1f)
+                .setScaleRange(0.2f, 1f)
+                .setParentViewGroup((ViewGroup)findViewById(R.id.main_snowframe));
+    }
+
+    private void startParticleSystem() {
+        isEmitting = true;
+        particleSystem.emitWithGravity(findViewById(R.id.snow_emitter), Gravity.TOP, 5);
     }
 
     private final class OverlayTimerTask extends TimerTask {
@@ -859,9 +889,9 @@ final public class MainActivity extends Activity implements LocationReceiver,
         }
     }
 
-    private final class WeatherDataTask extends AsyncTask<Object, Void, Animation> {
+    private final class WeatherDataTask extends AsyncTask<Object, Void, Object[]> {
         @Override
-        protected Animation doInBackground(Object... params) {
+        protected Object[] doInBackground(Object... params) {
             final WeatherUtil.WeatherData data = (WeatherUtil.WeatherData)params[0];
             final String description = (String)params[1];
 
@@ -951,7 +981,13 @@ final public class MainActivity extends Activity implements LocationReceiver,
                 public void onAnimationRepeat(Animation animation) {}
             });
 
-            return fadeOuts[0];
+            ParticleSystem newPartSys = null;
+            if (WeatherDoge.isSnowing(currentBackgroundId)
+                    && (particleSystem == null || !isEmitting)) {
+                newPartSys = newParticleSystem();
+            }
+
+            return new Object[] { fadeOuts[0], newPartSys };
         }
 
         private final class FormattedTemp {
@@ -975,8 +1011,21 @@ final public class MainActivity extends Activity implements LocationReceiver,
         }
 
         @Override
-        protected void onPostExecute(Animation kickoff) {
-            suchStatus.startAnimation(kickoff);
+        protected void onPostExecute(Object[] objects) {
+            if (WeatherDoge.isSnowing(currentBackgroundId)) {
+                if (!isEmitting) {
+                    if (particleSystem != null) {
+                        particleSystem.cancel();
+                    }
+                    particleSystem = (ParticleSystem)objects[1];
+                    startParticleSystem();
+                }
+            } else if (particleSystem != null && isEmitting) {
+                particleSystem.stopEmitting();
+                isEmitting = false;
+            }
+
+            suchStatus.startAnimation((Animation)objects[0]);
         }
     }
 }
