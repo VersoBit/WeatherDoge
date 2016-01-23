@@ -1,17 +1,19 @@
 # Weather Doge
 wow. Weather Doge is the full [dogeweather.com](http://dogeweather.com/) experience on Android™. And now there's even more!
 
-[<img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/images/apps/en-play-badge.png" width="250" height="74">](https://play.google.com/store/apps/details?id=com.versobit.weatherdoge&hl=en&utm_source=global_co&utm_medium=prtnr&utm_content=Mar2515&utm_campaign=PartBadge&pcampaignid=MKT-AC-global-none-all-co-pr-py-PartBadges-Oct1515-1)
+[<img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/images/apps/en-play-badge.png" width="250">](https://play.google.com/store/apps/details?id=com.versobit.weatherdoge&hl=en&utm_source=global_co&utm_medium=prtnr&utm_content=Mar2515&utm_campaign=PartBadge&pcampaignid=MKT-AC-global-none-all-co-pr-py-PartBadges-Oct1515-1)
 
-![Screenshot](https://raw.github.com/VersoBit/WeatherDoge/master/images/Nexus5BelAir_1000.png)
+<img alt="Screenshot" src="https://raw.github.com/VersoBit/WeatherDoge/master/images/Nexus5BelAir_1000.png" width="500px">
 
-![Widget](https://raw.github.com/VersoBit/WeatherDoge/master/images/Widget.png)
+<img alt="Widget" src="https://raw.github.com/VersoBit/WeatherDoge/master/images/Widget.png" width="500px">
 
 ## Features
- * Utilizes [OpenWeatherMap.org](http://openweathermap.org/) or [Yahoo](https://developer.yahoo.com/weather/) for weather data
+ * Utilizes [OpenWeatherMap.org](http://openweathermap.org/) or [Yahoo!](https://developer.yahoo.com/weather/) for weather data
  * All images are included with the app. The app only uses your data to communicate with the weather and location APIs.
+ * Android 6.0 Marshmallow support
+ * Material Design
  * Polished, animated weather updates
- * A great looking companion widget!
+ * A great looking customizable companion widget!
  * Time and location-based cache. Weather Doge uses even less data and it loads super fast! By default, the cache expires in 10 minutes or when your location changes by 1.1 km or more.
  * Backgrounds are properly rendered across the majority (all?) of Android phone screen sizes and densities.
  * Ability to force metric units in locales where metric is not the default
@@ -19,7 +21,8 @@ wow. Weather Doge is the full [dogeweather.com](http://dogeweather.com/) experie
  * Configurable drop shadows for all text
  * [Comic Neue](http://comicneue.com/)
  * Ability to force doge adjectives to appear above weather info
- * Google Play Services-free builds
+ * Animated snowfall ❄️
+ * FOSS-only builds that do not rely on Google Play Services or other non-free binaries.
  * Open-source!
 
 ## Building &amp; Contributing
