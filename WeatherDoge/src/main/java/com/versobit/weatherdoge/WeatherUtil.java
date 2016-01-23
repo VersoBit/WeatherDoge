@@ -85,7 +85,7 @@ final class WeatherUtil {
                 yqlText = String.format("(%s, %s)", latitude, longitude);
             }
             URL url = new URL("https://query.yahooapis.com/v1/public/yql?q="
-                    + URLEncoder.encode("select location.city, units, item.condition, astronomy from weather.forecast where woeid in (select woeid from geo.places(1) where text = \""
+                    + URLEncoder.encode("select location.city, units, item.condition, item.link, astronomy from weather.forecast where woeid in (select woeid from geo.places(1) where text = \""
                     + yqlText + "\") limit 1", "UTF-8") + "&format=json");
             HttpsURLConnection connection = (HttpsURLConnection)url.openConnection();
             try {
@@ -101,7 +101,8 @@ final class WeatherUtil {
 
                 JSONObject channel = query.getJSONObject("results").getJSONObject("channel");
                 JSONObject units = channel.getJSONObject("units");
-                JSONObject condition = channel.getJSONObject("item").getJSONObject("condition");
+                JSONObject item = channel.getJSONObject("item");
+                JSONObject condition = item.getJSONObject("condition");
                 JSONObject astronomy = channel.getJSONObject("astronomy");
 
                 double temp = condition.getDouble("temp");
@@ -113,6 +114,7 @@ final class WeatherUtil {
                 String date = condition.getString("date");
                 String sunrise = astronomy.getString("sunrise");
                 String sunset = astronomy.getString("sunset");
+                String link = item.getString("link");
 
                 String owmCode = convertYahooCode(code, date, sunrise, sunset);
 
@@ -121,7 +123,8 @@ final class WeatherUtil {
                 }
 
                 return new WeatherResult(new WeatherData(
-                        temp, text, owmCode, latitude, longitude, location, new Date(), Source.YAHOO
+                        temp, text, owmCode, latitude, longitude, location, new Date(),
+                        Source.YAHOO, link
                 ), WeatherResult.ERROR_NONE, null, null);
             } finally {
                 connection.disconnect();
@@ -169,8 +172,11 @@ final class WeatherUtil {
                     location = response.getString("name");
                 }
 
+                String link = "https://openweathermap.org/city/" + response.getInt("id");
+
                 return new WeatherResult(new WeatherData(
-                        temp, condition, image, latitude, longitude, location, new Date(), Source.OPEN_WEATHER_MAP
+                        temp, condition, image, latitude, longitude, location, new Date(),
+                        Source.OPEN_WEATHER_MAP, link
                 ), WeatherResult.ERROR_NONE, null, null);
             } finally {
                 connection.disconnect();
@@ -288,7 +294,7 @@ final class WeatherUtil {
     }
 
     final static class WeatherData implements Serializable {
-        private static final long serialVersionUID = 7141137302093960119L;
+        private static final long serialVersionUID = 2253249035716676067L;
 
         final double temperature; // Always in Celsius
         final String condition;
@@ -298,9 +304,10 @@ final class WeatherUtil {
         final String place;
         final Date time; // The system time the data was retrieved
         final Source source;
+        final String link;
 
         WeatherData(double temperature, String condition, String image, double latitude,
-                    double longitude, String place, Date time, Source source) {
+                    double longitude, String place, Date time, Source source, String link) {
             this.temperature = temperature;
             this.condition = condition;
             this.image = image;
@@ -309,6 +316,7 @@ final class WeatherUtil {
             this.place = place;
             this.time = time;
             this.source = source;
+            this.link = link;
         }
 
         @Override
@@ -323,7 +331,8 @@ final class WeatherUtil {
             return !((this.temperature != other.temperature) || !this.condition.equals(other.condition)
                     || !this.image.equals(other.image) || (this.latitude != other.latitude)
                     || (this.longitude != other.longitude) || !this.place.equals(other.place)
-                    || !this.time.equals(other.time) || (this.source != other.source));
+                    || !this.time.equals(other.time) || (this.source != other.source)
+                    || !this.link.equals(other.link));
         }
 
         @Override
@@ -333,7 +342,8 @@ final class WeatherUtil {
             sb.append("[temperature=").append(temperature).append(", condition=").append(condition)
                     .append(", image=").append(image).append(", latitude=").append(latitude)
                     .append(", longitude=").append(longitude).append(", place=").append(place)
-                    .append(", time=").append(time).append(", source=").append(source).append("]");
+                    .append(", time=").append(time).append(", source=").append(source)
+                    .append(", link=").append(link).append("]");
             return sb.toString();
         }
     }

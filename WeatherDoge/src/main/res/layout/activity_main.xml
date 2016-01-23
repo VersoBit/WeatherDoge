@@ -88,7 +88,8 @@
                 android:orientation="vertical"
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
-                android:layout_centerHorizontal="true">
+                android:layout_centerHorizontal="true"
+                android:clickable="true">
 
                 <TextView
                     style="@style/AppTheme.TextViewDropShadow"

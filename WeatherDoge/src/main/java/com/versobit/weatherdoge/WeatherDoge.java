@@ -27,6 +27,9 @@ import java.util.Random;
 
 final public class WeatherDoge extends Application {
 
+    public static final String EXTRA_CUSTOM_TABS_SESSION = "android.support.customtabs.extra.SESSION";
+    public static final String EXTRA_CUSTOM_TABS_TOOLBAR_COLOR = "android.support.customtabs.extra.TOOLBAR_COLOR";
+
     @Override
     public void onCreate() {
         super.onCreate();

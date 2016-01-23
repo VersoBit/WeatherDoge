@@ -41,6 +41,7 @@ import android.graphics.drawable.TransitionDrawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -122,6 +123,7 @@ final public class MainActivity extends Activity implements LocationReceiver,
     private double currentTemp;
     private boolean currentlyMetric;
     private String currentLocation;
+    private Uri currentLink;
     private String[] dogefixes;
     private String[] wows;
     private String[] weatherAdjectives;
@@ -159,6 +161,24 @@ final public class MainActivity extends Activity implements LocationReceiver,
         suchOverlay = (RelativeLayout)findViewById(R.id.main_suchoverlay);
         suchTopOverlay = (RelativeLayout)findViewById(R.id.main_suchtopoverlay);
         suchInfoGroup = (LinearLayout)findViewById(R.id.main_suchinfogroup);
+        suchInfoGroup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (currentLink == null) {
+                    return;
+                }
+                Intent i = new Intent(Intent.ACTION_VIEW, currentLink);
+                // Use Chrome Custom Tabs when available
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                    Bundle extras = new Bundle();
+                    extras.putBinder(WeatherDoge.EXTRA_CUSTOM_TABS_SESSION, null);
+                    extras.putInt(WeatherDoge.EXTRA_CUSTOM_TABS_TOOLBAR_COLOR,
+                            ContextCompat.getColor(MainActivity.this, R.color.primary));
+                    i.putExtras(extras);
+                }
+                startActivity(i);
+            }
+        });
         suchDoge = (ImageView)findViewById(R.id.main_suchdoge);
         suchDoge.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -801,6 +821,13 @@ final public class MainActivity extends Activity implements LocationReceiver,
             String[] tempAdjs = getResources().getStringArray(WeatherDoge.getTempAdjectives((int)data.temperature));
             String[] bgAdjs = getResources().getStringArray(WeatherDoge.getBgAdjectives(data.image));
             weatherAdjectives = ArrayUtils.addAll(tempAdjs, bgAdjs);
+
+            if (data.link != null) {
+                Uri link = Uri.parse(data.link);
+                if ("http".equals(link.getScheme()) || "https".equals(link.getScheme())) {
+                    currentLink = link;
+                }
+            }
 
             return new Object[] { data, addr };
         }
