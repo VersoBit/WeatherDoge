@@ -29,6 +29,7 @@ android {
     defaultConfig {
         minSdkVersion 15
         targetSdkVersion 23
+        applicationId "com.versobit.weatherdoge"
         versionCode getVersionDef()[0].toInteger()
         buildConfigField 'String', 'FLAVOR_PLAY', '"play"'
         buildConfigField 'String', 'FLAVOR_FOSS', '"foss"'
@@ -42,6 +43,7 @@ android {
             versionName getVersionName('p')
         }
         foss {
+            applicationId "com.versobit.weatherdoge.foss"
             versionName getVersionName('f')
         }
     }
