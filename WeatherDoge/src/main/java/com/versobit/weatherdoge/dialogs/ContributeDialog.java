@@ -33,6 +33,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.versobit.weatherdoge.R;
+import com.versobit.weatherdoge.WeatherDoge;
 
 public final class ContributeDialog extends DialogFragment {
 
@@ -44,7 +45,9 @@ public final class ContributeDialog extends DialogFragment {
         v.findViewById(R.id.dialog_contribute_github_layout).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.addr_github))));
+                Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.addr_github)));
+                WeatherDoge.applyChromeCustomTab(getActivity(), i);
+                startActivity(i);
             }
         });
         v.findViewById(R.id.dialog_contribute_dogecoin_layout).setOnClickListener(new View.OnClickListener() {
@@ -57,7 +60,9 @@ public final class ContributeDialog extends DialogFragment {
         v.findViewById(R.id.dialog_contribute_bitcoin_layout).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.addr_bitcoin))));
+                Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.addr_bitcoin)));
+                WeatherDoge.applyChromeCustomTab(getActivity(), i);
+                startActivity(i);
             }
         });
         return new AlertDialog.Builder(getActivity(), getTheme())

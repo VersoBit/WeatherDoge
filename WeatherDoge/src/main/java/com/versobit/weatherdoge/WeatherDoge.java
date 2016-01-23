@@ -20,15 +20,20 @@
 package com.versobit.weatherdoge;
 
 import android.app.Application;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Build;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.content.ContextCompat;
 
 import java.util.Random;
 
 
 final public class WeatherDoge extends Application {
 
-    public static final String EXTRA_CUSTOM_TABS_SESSION = "android.support.customtabs.extra.SESSION";
-    public static final String EXTRA_CUSTOM_TABS_TOOLBAR_COLOR = "android.support.customtabs.extra.TOOLBAR_COLOR";
+    private static final String EXTRA_CUSTOM_TABS_SESSION = "android.support.customtabs.extra.SESSION";
+    private static final String EXTRA_CUSTOM_TABS_TOOLBAR_COLOR = "android.support.customtabs.extra.TOOLBAR_COLOR";
 
     @Override
     public void onCreate() {
@@ -194,5 +199,16 @@ final public class WeatherDoge extends Application {
         }
         // Otherwise use a random dogefix with a random weather adjective
         return String.format(dogefixes[r.nextInt(dogefixes.length)], weatherAdjectives[r.nextInt(weatherAdjectives.length)]);
+    }
+
+    public static void applyChromeCustomTab(Context ctx, Intent intent) {
+        // Use Chrome Custom Tabs when available
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            Bundle extras = new Bundle();
+            extras.putBinder(WeatherDoge.EXTRA_CUSTOM_TABS_SESSION, null);
+            extras.putInt(WeatherDoge.EXTRA_CUSTOM_TABS_TOOLBAR_COLOR,
+                    ContextCompat.getColor(ctx, R.color.primary));
+            intent.putExtras(extras);
+        }
     }
 }

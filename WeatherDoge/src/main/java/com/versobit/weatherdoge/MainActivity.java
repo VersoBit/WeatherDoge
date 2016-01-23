@@ -170,14 +170,7 @@ final public class MainActivity extends Activity implements LocationReceiver,
                     return;
                 }
                 Intent i = new Intent(Intent.ACTION_VIEW, currentLink);
-                // Use Chrome Custom Tabs when available
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                    Bundle extras = new Bundle();
-                    extras.putBinder(WeatherDoge.EXTRA_CUSTOM_TABS_SESSION, null);
-                    extras.putInt(WeatherDoge.EXTRA_CUSTOM_TABS_TOOLBAR_COLOR,
-                            ContextCompat.getColor(MainActivity.this, R.color.primary));
-                    i.putExtras(extras);
-                }
+                WeatherDoge.applyChromeCustomTab(MainActivity.this, i);
                 startActivity(i);
             }
         });
