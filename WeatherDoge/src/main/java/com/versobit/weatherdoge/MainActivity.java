@@ -57,6 +57,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -109,6 +110,7 @@ final public class MainActivity extends Activity implements LocationReceiver,
     private TextView suchTemp;
     private TextView suchDegree;
     private TextView suchLocation;
+    private FloatingActionsMenu suchMenu;
     private LocationApi wowApi;
     private Location whereIsDoge;
     private Typeface wowComicSans;
@@ -196,7 +198,7 @@ final public class MainActivity extends Activity implements LocationReceiver,
         suchTemp = (TextView)findViewById(R.id.main_suchtemp);
         suchDegree = (TextView)findViewById(R.id.main_suchdegree);
         suchLocation = (TextView)findViewById(R.id.main_suchlocation);
-        final FloatingActionsMenu suchMenu = (FloatingActionsMenu)findViewById(R.id.main_fam);
+        suchMenu = (FloatingActionsMenu)findViewById(R.id.main_fam);
         findViewById(R.id.man_fab_share).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -325,6 +327,20 @@ final public class MainActivity extends Activity implements LocationReceiver,
             }
             new GetWeather().execute();
         }
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        // Close the FAB if the user taps elsewhere
+        if (ev.getAction() == MotionEvent.ACTION_DOWN && suchMenu.isExpanded()) {
+            Rect outRect = new Rect();
+            suchMenu.getGlobalVisibleRect(outRect);
+            if (!outRect.contains((int)ev.getRawX(), (int)ev.getRawY())) {
+                suchMenu.collapse();
+            }
+        }
+
+        return super.dispatchTouchEvent(ev);
     }
 
     private void updateFont() {
