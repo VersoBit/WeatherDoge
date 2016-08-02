@@ -86,7 +86,7 @@ final class WeatherUtil {
                 }
                 yqlText = location.replaceAll("[^\\p{L}\\p{Nd} ,-]+", "");
             } else {
-                yqlText = String.format("(%s, %s)", latitude, longitude);
+                yqlText = String.format(Locale.US, "(%.6f, %.6f)", latitude, longitude);
             }
             URL url = new URL("https://query.yahooapis.com/v1/public/yql?q="
                     + URLEncoder.encode("select location.city, units, item.condition, item.link, astronomy from weather.forecast where woeid in (select woeid from geo.places(1) where text = \""
@@ -148,8 +148,8 @@ final class WeatherUtil {
                 }
                 query = "q=" + URLEncoder.encode(location, "UTF-8");
             } else {
-                query = "lat=" + URLEncoder.encode(String.valueOf(latitude), "UTF-8")
-                    + "&lon=" + URLEncoder.encode(String.valueOf(longitude), "UTF-8");
+                query = "lat=" + URLEncoder.encode(String.format(Locale.US, "%.6f", latitude), "UTF-8")
+                    + "&lon=" + URLEncoder.encode(String.format(Locale.US, "%.6f", longitude), "UTF-8");
             }
             query += "&APPID=" + URLEncoder.encode(BuildConfig.OWM_APPID, "UTF-8");
             URL url = new URL("http://api.openweathermap.org/data/2.5/weather?" + query);
