@@ -52,10 +52,12 @@
     <string-array name="pref_weather_source_options">
         <item>OpenWeatherMap</item>
         <item>Yahoo!</item>
+        <item>AccuWeather</item>
     </string-array>
     <string-array name="pref_weather_source_values">
         <item>0</item>
         <item>1</item>
+        <item>2</item>
     </string-array>
     <string name="very_neue_name">Very Neue</string>
     <string name="very_neue_desc">Use Comic Neue!</string>

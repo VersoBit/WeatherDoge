@@ -24,7 +24,9 @@ import android.util.Log;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.text.WordUtils;
+import org.json.JSONArray;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import java.io.Serializable;
 import java.net.HttpURLConnection;
@@ -35,6 +37,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -68,6 +71,8 @@ final class WeatherUtil {
                 return getWeatherFromOWM(latitude, longitude, location);
             case YAHOO:
                 return getWeatherFromYahoo(latitude, longitude, location);
+            case ACCUWEATHER:
+                return getWeatherFromAccuWeather(latitude, longitude, location);
         }
         throw new IllegalArgumentException("No supported weather source provided.");
     }
@@ -186,6 +191,80 @@ final class WeatherUtil {
         }
     }
 
+    private static WeatherResult getWeatherFromAccuWeather(double latitude, double longitude, String location) {
+        String query;
+        if (latitude == Double.MIN_VALUE && longitude == Double.MIN_VALUE) {
+            if (location == null) {
+                return new WeatherResult(null, WeatherResult.ERROR_THROWABLE,
+                        "No valid location parameters.", new IllegalArgumentException());
+            }
+            query = location;
+        } else {
+            query = String.format(Locale.US, "%.6f, %.6f", latitude, longitude);
+        }
+
+        String locationKey;
+        String place;
+        try {
+            URL url = new URL("https://dataservice.accuweather.com/locations/v1/search?apikey="
+                    + URLEncoder.encode(BuildConfig.ACCUWEATHER_KEY, "UTF-8")
+                    + "&q=" + URLEncoder.encode(query, "UTF-8"));
+            HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+            try {
+                JSONArray response = new JSONArray(IOUtils.toString(connection.getInputStream()));
+                if (response.length() == 0) {
+                    return new WeatherResult(null, WeatherResult.ERROR_API, "No results found for that location.", null);
+                }
+                // We'll just use the first location result
+                JSONObject jsonLocation = response.getJSONObject(0);
+                locationKey = jsonLocation.getString("Key");
+                place = jsonLocation.getString("LocalizedName");
+            } finally {
+                connection.disconnect();
+            }
+        } catch (Exception ex) {
+            return new WeatherResult(null, WeatherResult.ERROR_THROWABLE, ex.getMessage(), ex);
+        }
+
+        try {
+            URL url = new URL("https://dataservice.accuweather.com/currentconditions/v1/"
+                    + URLEncoder.encode(locationKey, "UTF-8")
+                    + "?apikey=" + URLEncoder.encode(BuildConfig.ACCUWEATHER_KEY, "UTF-8"));
+            HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+            try {
+                Object response = new JSONTokener(IOUtils.toString(connection.getInputStream())).nextValue();
+                if (response instanceof JSONObject) {
+                    return new WeatherResult(null, WeatherResult.ERROR_API,
+                            ((JSONObject) response).getString("Message"), null);
+                }
+                JSONObject obj = ((JSONArray) response).getJSONObject(0);
+                JSONObject jsonTemp = obj.getJSONObject("Temperature");
+                JSONObject jsonMetric = jsonTemp.getJSONObject("Metric");
+                JSONObject jsonImperial = jsonTemp.getJSONObject("Imperial");
+                double temp = 0d;
+                if (jsonMetric != null && !jsonMetric.isNull("Value")) {
+                    temp = jsonMetric.getDouble("Value");
+                } else if (jsonImperial != null && !jsonImperial.isNull("Value")) {
+                    temp = (jsonImperial.getDouble("Value") - 32d) * (5/9);
+                }
+                String condition = obj.getString("WeatherText");
+                String image = convertAccuWeatherCode(
+                        obj.isNull("WeatherIcon") ? 1 : obj.getInt("WeatherIcon"),
+                        obj.getBoolean("IsDayTime")
+                );
+                String link = obj.getString("MobileLink");
+                return new WeatherResult(new WeatherData(
+                        temp, condition, image, latitude, longitude, place, new Date(),
+                        Source.ACCUWEATHER, link
+                ), WeatherResult.ERROR_NONE, null, null);
+            } finally {
+                connection.disconnect();
+            }
+        } catch (Exception ex) {
+            return new WeatherResult(null, WeatherResult.ERROR_THROWABLE, ex.getMessage(), ex);
+        }
+    }
+
     private static String convertYahooCode(String code, String weatherTime, String sunrise, String sunset) {
         Date weatherDate = new Date();
         try {
@@ -270,9 +349,53 @@ final class WeatherUtil {
         return owmCode + (isDaytime ? "d" : "n");
     }
 
+    private static String convertAccuWeatherCode(int weatherIcon, boolean daytime) {
+        String owmCode = "01";
+        switch (weatherIcon) {
+            // Clear
+            case 1: case 2: case 5: case 30: case 33: case 34: case 37:
+                owmCode = "01";
+                break;
+            // Partly Cloudy
+            case 3: case 4: case 35: case 36:
+                owmCode = "02";
+                break;
+            // Mostly Cloudy
+            case 6:
+                owmCode = "03";
+                break;
+            // Cloudy
+            case 7: case 8:
+                owmCode = "04";
+                break;
+            // Fog
+            case 11:
+                owmCode = "50";
+                break;
+            // Light-ish Rain
+            case 12: case 13: case 14: case 39: case 40:
+                owmCode = "10";
+                break;
+            // Thunderstorms
+            case 15: case 16: case 17: case 41: case 42:
+                owmCode = "11";
+                break;
+            // Rain
+            case 18: case 26:
+                owmCode = "09";
+                break;
+            // Snow
+            case 19: case 20: case 21: case 22: case 23: case 24: case 25: case 29: case 43: case 44:
+                owmCode = "13";
+                break;
+        }
+        return owmCode + (daytime ? "d" : "n");
+    }
+
     enum Source {
         OPEN_WEATHER_MAP,
-        YAHOO
+        YAHOO,
+        ACCUWEATHER
     }
 
     final static class WeatherResult {
@@ -340,8 +463,10 @@ final class WeatherUtil {
             @SuppressWarnings("StringBufferReplaceableByString")
             StringBuilder sb = new StringBuilder(WeatherData.class.getSimpleName());
             sb.append("[temperature=").append(temperature).append(", condition=").append(condition)
-                    .append(", image=").append(image).append(", latitude=").append(latitude)
-                    .append(", longitude=").append(longitude).append(", place=").append(place)
+                    .append(", image=").append(image).append(", latitude=")
+                    .append(String.format(Locale.US, "%.6f", latitude))
+                    .append(", longitude=").append(String.format(Locale.US, "%.6f", longitude))
+                    .append(", place=").append(place)
                     .append(", time=").append(time).append(", source=").append(source)
                     .append(", link=").append(link).append("]");
             return sb.toString();

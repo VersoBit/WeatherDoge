@@ -247,8 +247,10 @@ final public class MainActivity extends Activity implements LocationReceiver,
         String strSource = sp.getString(OptionsActivity.PREF_WEATHER_SOURCE, "0");
         if("0".equals(strSource)) {
             weatherSource = WeatherUtil.Source.OPEN_WEATHER_MAP;
-        } else {
+        } else if ("1".equals(strSource)) {
             weatherSource = WeatherUtil.Source.YAHOO;
+        } else {
+            weatherSource = WeatherUtil.Source.ACCUWEATHER;
         }
         useNeue = sp.getBoolean(OptionsActivity.PREF_APP_USE_COMIC_NEUE, false);
         shadowR = sp.getFloat(OptionsActivity.PREF_APP_DROP_SHADOW + "_radius", 1f);
