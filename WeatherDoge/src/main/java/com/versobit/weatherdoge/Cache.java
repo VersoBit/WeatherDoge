@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 VersoBit Ltd
+ * Copyright (C) 2014-2016 VersoBit Ltd
  *
  * This file is part of Weather Doge.
  *
@@ -38,7 +38,7 @@ final class Cache {
     private static final String TAG = Cache.class.getSimpleName();
     private static final String WEATHER_DATA_FILE = "weather_data";
     private static final int CACHE_MAX_AGE = 10 * 60 * 1000; // 10 minutes
-    // http://gis.stackexchange.com/a/8674
+    // http://gis.stackexchange.com/a/8674/78986
     private static final int CACHE_COORD_FUZZ = 2; // 1.1km, more digits -> less fuzz
 
     // For super fast access when the app is still around
