@@ -19,7 +19,6 @@
 
 package com.versobit.weatherdoge;
 
-import android.annotation.SuppressLint;
 import android.util.Log;
 
 import org.apache.commons.io.IOUtils;
@@ -28,9 +27,12 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -40,6 +42,7 @@ import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.GZIPInputStream;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -88,12 +91,13 @@ final class WeatherUtil {
             } else {
                 yqlText = String.format(Locale.US, "(%.6f, %.6f)", latitude, longitude);
             }
-            URL url = new URL("https://query.yahooapis.com/v1/public/yql?q="
+            HttpsURLConnection connection = (HttpsURLConnection) openGzipConnection(
+                    new URL("https://query.yahooapis.com/v1/public/yql?q="
                     + URLEncoder.encode("select location.city, units, item.condition, item.link, astronomy from weather.forecast where woeid in (select woeid from geo.places(1) where text = \""
-                    + yqlText + "\") limit 1", "UTF-8") + "&format=json");
-            HttpsURLConnection connection = (HttpsURLConnection)url.openConnection();
+                    + yqlText + "\") limit 1", "UTF-8") + "&format=json")
+            );
             try {
-                JSONObject response = new JSONObject(IOUtils.toString(connection.getInputStream()));
+                JSONObject response = new JSONObject(getUncompressedResponse(connection));
                 if(connection.getResponseCode() != HttpsURLConnection.HTTP_OK) {
                     JSONObject error = response.getJSONObject("error");
                     return new WeatherResult(null, WeatherResult.ERROR_API, error.getString("description"), null);
@@ -152,10 +156,11 @@ final class WeatherUtil {
                     + "&lon=" + URLEncoder.encode(String.format(Locale.US, "%.6f", longitude), "UTF-8");
             }
             query += "&APPID=" + URLEncoder.encode(BuildConfig.OWM_APPID, "UTF-8");
-            URL url = new URL("http://api.openweathermap.org/data/2.5/weather?" + query);
-            HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+            HttpURLConnection connection = (HttpURLConnection) openGzipConnection(
+                    new URL("http://api.openweathermap.org/data/2.5/weather?" + query)
+            );
             try {
-                JSONObject response = new JSONObject(IOUtils.toString(connection.getInputStream()));
+                JSONObject response = new JSONObject(getUncompressedResponse(connection));
                 if(response.getInt("cod") != HttpURLConnection.HTTP_OK) {
                     // OWM has HTTP error codes that are passed through an API field, the actual HTTP
                     // error code is always 200...
@@ -205,12 +210,13 @@ final class WeatherUtil {
         String locationKey;
         String place;
         try {
-            URL url = new URL("https://dataservice.accuweather.com/locations/v1/search?apikey="
+            HttpsURLConnection connection = (HttpsURLConnection) openGzipConnection(
+                    new URL("https://dataservice.accuweather.com/locations/v1/search?apikey="
                     + URLEncoder.encode(BuildConfig.ACCUWEATHER_KEY, "UTF-8")
-                    + "&q=" + URLEncoder.encode(query, "UTF-8"));
-            HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+                    + "&q=" + URLEncoder.encode(query, "UTF-8"))
+            );
             try {
-                JSONArray response = new JSONArray(IOUtils.toString(connection.getInputStream()));
+                JSONArray response = new JSONArray(getUncompressedResponse(connection));
                 if (response.length() == 0) {
                     return new WeatherResult(null, WeatherResult.ERROR_API, "No results found for that location.", null);
                 }
@@ -226,12 +232,13 @@ final class WeatherUtil {
         }
 
         try {
-            URL url = new URL("https://dataservice.accuweather.com/currentconditions/v1/"
+            HttpsURLConnection connection = (HttpsURLConnection) openGzipConnection(
+                    new URL("https://dataservice.accuweather.com/currentconditions/v1/"
                     + URLEncoder.encode(locationKey, "UTF-8")
-                    + "?apikey=" + URLEncoder.encode(BuildConfig.ACCUWEATHER_KEY, "UTF-8"));
-            HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+                    + "?apikey=" + URLEncoder.encode(BuildConfig.ACCUWEATHER_KEY, "UTF-8"))
+            );
             try {
-                Object response = new JSONTokener(IOUtils.toString(connection.getInputStream())).nextValue();
+                Object response = new JSONTokener(getUncompressedResponse(connection)).nextValue();
                 if (response instanceof JSONObject) {
                     return new WeatherResult(null, WeatherResult.ERROR_API,
                             ((JSONObject) response).getString("Message"), null);
@@ -389,6 +396,22 @@ final class WeatherUtil {
                 break;
         }
         return owmCode + (daytime ? "d" : "n");
+    }
+
+    private static URLConnection openGzipConnection(URL url) throws IOException {
+        URLConnection connection = url.openConnection();
+        connection.setRequestProperty("Accept-Encoding", "gzip");
+        return connection;
+    }
+
+    private static String getUncompressedResponse(URLConnection connection) throws IOException {
+        InputStream input;
+        if ("gzip".equalsIgnoreCase(connection.getContentEncoding())) {
+            input = new GZIPInputStream(connection.getInputStream());
+        } else {
+            input = connection.getInputStream();
+        }
+        return IOUtils.toString(input);
     }
 
     enum Source {
