@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Copyright (C) 2014 VersoBit Ltd
+    Copyright (C) 2014-2016 VersoBit Ltd
 
     This file is part of Weather Doge.
 
@@ -31,5 +31,9 @@
         android:title="@string/text_on_top_name"
         android:defaultValue="false"
         android:summary="@string/text_on_top_desc" />
+    <CheckBoxPreference android:key="pref_enable_particles"
+        android:title="@string/pref_disable_particles_name"
+        android:defaultValue="true"
+        android:summary="@string/pref_disable_particles_desc" />
 
 </PreferenceScreen>

@@ -65,6 +65,8 @@
     <string name="much_shadow_desc">Customize text drop shadow</string>
     <string name="text_on_top_name">Text-on-Top</string>
     <string name="text_on_top_desc">Display doge-isms over weather info</string>
+    <string name="pref_disable_particles_name">Such Snow</string>
+    <string name="pref_disable_particles_desc">When it snows. It snows.</string>
 
     <string name="pref_widget_header">Widget</string>
     <string name="pref_widget_refresh_name">Refresh Interval</string>

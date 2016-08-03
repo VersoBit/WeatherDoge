@@ -73,6 +73,7 @@ final public class OptionsActivity extends PreferenceActivity {
     public static final String PREF_APP_USE_COMIC_NEUE = "pref_use_comic_neue";
     public static final String PREF_APP_DROP_SHADOW = "pref_drop_shadow";
     static final String PREF_APP_TEXT_ON_TOP = "pref_text_on_top";
+    static final String PREF_APP_ENABLE_PARTICLES = "pref_enable_particles";
     static final String PREF_WIDGET_REFRESH = "pref_widget_refresh";
     static final String PREF_WIDGET_TAP_TO_REFRESH = "pref_widget_tap_refresh";
     static final String PREF_WIDGET_USE_COMIC_NEUE = "pref_widget_use_comic_neue";

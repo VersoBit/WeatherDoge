@@ -97,6 +97,7 @@ final public class MainActivity extends Activity implements LocationReceiver,
     private float shadowY = 3f;
     private boolean shadowAdjs = false;
     private boolean textOnTop = false;
+    private boolean enableParticles = true;
     private int lastVersion = 0;
 
     private ImageView suchBg;
@@ -258,6 +259,7 @@ final public class MainActivity extends Activity implements LocationReceiver,
         shadowY = sp.getFloat(OptionsActivity.PREF_APP_DROP_SHADOW + "_y", 3f);
         shadowAdjs = sp.getBoolean(OptionsActivity.PREF_APP_DROP_SHADOW + "_adjs", false);
         textOnTop = sp.getBoolean(OptionsActivity.PREF_APP_TEXT_ON_TOP, false);
+        enableParticles = sp.getBoolean(OptionsActivity.PREF_APP_ENABLE_PARTICLES, true);
         lastVersion = sp.getInt(OptionsActivity.PREF_INTERNAL_LAST_VERSION, lastVersion);
     }
 
@@ -269,7 +271,7 @@ final public class MainActivity extends Activity implements LocationReceiver,
         }
         overlayTask = new OverlayTimerTask();
         overlayTimer.schedule(overlayTask, 0, WOW_INTERVAL);
-        if (WeatherDoge.isSnowing(currentBackgroundId)) {
+        if (WeatherDoge.isSnowing(currentBackgroundId) && enableParticles) {
             if (particleSystem != null) {
                 particleSystem.cancel();
             }
@@ -321,6 +323,21 @@ final public class MainActivity extends Activity implements LocationReceiver,
                 wowApi.disconnect();
             }
             new GetWeather().execute();
+        }
+        if (!enableParticles && isEmitting) {
+            if (particleSystem != null) {
+                particleSystem.cancel();
+            }
+            isEmitting = false;
+        } else if (WeatherDoge.isSnowing(currentBackgroundId) && enableParticles && !isEmitting) {
+            if (particleSystem != null) {
+                particleSystem.cancel();
+            }
+            particleSystem = newParticleSystem();
+            // Make it render as if it started 25 seconds ago
+            particleSystem.setStartTime(25000);
+            startParticleSystem();
+            isEmitting = true;
         }
     }
 
@@ -1031,7 +1048,7 @@ final public class MainActivity extends Activity implements LocationReceiver,
             });
 
             ParticleSystem newPartSys = null;
-            if (WeatherDoge.isSnowing(currentBackgroundId)
+            if (WeatherDoge.isSnowing(currentBackgroundId) && enableParticles
                     && (particleSystem == null || !isEmitting)) {
                 newPartSys = newParticleSystem();
             }
@@ -1061,7 +1078,7 @@ final public class MainActivity extends Activity implements LocationReceiver,
 
         @Override
         protected void onPostExecute(Object[] objects) {
-            if (WeatherDoge.isSnowing(currentBackgroundId)) {
+            if (WeatherDoge.isSnowing(currentBackgroundId) && enableParticles) {
                 if (!isEmitting) {
                     if (particleSystem != null) {
                         particleSystem.cancel();
