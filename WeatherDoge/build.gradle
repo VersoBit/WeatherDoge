@@ -49,7 +49,7 @@ android {
 }
 
 dependencies {
-    playCompile 'com.google.android.gms:play-services-location:9.2.1'
+    playCompile 'com.google.android.gms:play-services-location:9.4.0'
     compile 'commons-io:commons-io:2.4'
     compile 'org.apache.commons:commons-lang3:3.3.2'
     compile 'com.android.support:support-v4:24.1.1'
