@@ -54,6 +54,7 @@
         <item>Yahoo!</item>
         <item>AccuWeather</item>
     </string-array>
+    <!-- These keys must stay in sync with WeatherUtil.Source -->
     <string-array name="pref_weather_source_values">
         <item>0</item>
         <item>1</item>

@@ -39,6 +39,7 @@ import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.AppCompatRadioButton;
 import android.support.v7.widget.AppCompatSpinner;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -49,6 +50,9 @@ import com.versobit.weatherdoge.dialogs.ContributeDialog;
 import com.versobit.weatherdoge.dialogs.DropShadowDialog;
 import com.versobit.weatherdoge.dialogs.OtherShibesDialog;
 import com.versobit.weatherdoge.ui.DogeEditTextPreference;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings. On
@@ -180,6 +184,33 @@ final public class OptionsActivity extends PreferenceActivity {
                     return true;
                 }
             });
+
+            // Make certain we do not show weather sources that are not configured
+            ListPreference srcPref = (ListPreference) findPreference(PREF_WEATHER_SOURCE);
+            CharSequence[] oldSrcEntries = srcPref.getEntries();
+            CharSequence[] oldSrcValues = srcPref.getEntryValues();
+            List<CharSequence> newSrcEntries = new ArrayList<>(oldSrcEntries.length);
+            List<CharSequence> newSrcValues = new ArrayList<>(oldSrcValues.length);
+            for (int i = 0; i < oldSrcValues.length; i++) {
+                //noinspection ConstantConditions
+                if (WeatherUtil.Source.OPEN_WEATHER_MAP.getKey().equals(oldSrcValues[i]) && TextUtils.isEmpty(BuildConfig.OWM_APPID)) {
+                    continue;
+                }
+                //noinspection ConstantConditions
+                if (WeatherUtil.Source.ACCUWEATHER.getKey().equals(oldSrcValues[i]) && TextUtils.isEmpty(BuildConfig.ACCUWEATHER_KEY)) {
+                    continue;
+                }
+                newSrcEntries.add(oldSrcEntries[i]);
+                newSrcValues.add(oldSrcValues[i]);
+            }
+            if (newSrcEntries.size() != oldSrcEntries.length) {
+                // Reset
+                srcPref.setValueIndex(0);
+                srcPref.setEntries(newSrcEntries.toArray(new CharSequence[newSrcEntries.size()]));
+                srcPref.setEntryValues(newSrcValues.toArray(new CharSequence[newSrcValues.size()]));
+                // Again, just to make certain
+                srcPref.setValueIndex(0);
+            }
 
             // Add 'widget' preferences, and a corresponding header.
             fakeHeader = new PreferenceCategory(getActivity());

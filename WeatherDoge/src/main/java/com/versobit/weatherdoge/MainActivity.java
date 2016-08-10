@@ -245,14 +245,8 @@ final public class MainActivity extends Activity implements LocationReceiver,
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
         forceMetric = sp.getBoolean(OptionsActivity.PREF_FORCE_METRIC, false);
         forceLocation = sp.getString(OptionsActivity.PREF_FORCE_LOCATION, "");
-        String strSource = sp.getString(OptionsActivity.PREF_WEATHER_SOURCE, "0");
-        if("0".equals(strSource)) {
-            weatherSource = WeatherUtil.Source.OPEN_WEATHER_MAP;
-        } else if ("1".equals(strSource)) {
-            weatherSource = WeatherUtil.Source.YAHOO;
-        } else {
-            weatherSource = WeatherUtil.Source.ACCUWEATHER;
-        }
+        weatherSource = WeatherUtil.Source.fromKey(sp.getString(OptionsActivity.PREF_WEATHER_SOURCE,
+                WeatherUtil.Source.OPEN_WEATHER_MAP.getKey()));
         useNeue = sp.getBoolean(OptionsActivity.PREF_APP_USE_COMIC_NEUE, false);
         shadowR = sp.getFloat(OptionsActivity.PREF_APP_DROP_SHADOW + "_radius", 1f);
         shadowX = sp.getFloat(OptionsActivity.PREF_APP_DROP_SHADOW + "_x", 3f);

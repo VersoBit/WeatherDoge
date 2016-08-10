@@ -19,6 +19,7 @@
 
 package com.versobit.weatherdoge;
 
+import android.text.TextUtils;
 import android.util.Log;
 
 import org.apache.commons.io.IOUtils;
@@ -68,13 +69,24 @@ final class WeatherUtil {
     }
 
     private static WeatherResult getWeather(double latitude, double longitude, String location, Source source) {
-        switch (source) {
-            case OPEN_WEATHER_MAP:
-                return getWeatherFromOWM(latitude, longitude, location);
-            case YAHOO:
-                return getWeatherFromYahoo(latitude, longitude, location);
-            case ACCUWEATHER:
-                return getWeatherFromAccuWeather(latitude, longitude, location);
+        if (source == Source.OPEN_WEATHER_MAP) {
+            //noinspection ConstantConditions
+            if (TextUtils.isEmpty(BuildConfig.OWM_APPID)) {
+                return new WeatherResult(null, WeatherResult.ERROR_THROWABLE,
+                        "OpenWeatherMap App ID has not been set. Select a different weather source.", new IllegalStateException());
+            }
+            return getWeatherFromOWM(latitude, longitude, location);
+        }
+        if (source == Source.YAHOO) {
+            return getWeatherFromYahoo(latitude, longitude, location);
+        }
+        if (source == Source.ACCUWEATHER) {
+            //noinspection ConstantConditions
+            if (TextUtils.isEmpty(BuildConfig.ACCUWEATHER_KEY)) {
+                return new WeatherResult(null, WeatherResult.ERROR_THROWABLE,
+                        "AccuWeather API key has not been set. Select a different weather source.", new IllegalStateException());
+            }
+            return getWeatherFromAccuWeather(latitude, longitude, location);
         }
         throw new IllegalArgumentException("No supported weather source provided.");
     }
@@ -415,9 +427,31 @@ final class WeatherUtil {
     }
 
     enum Source {
-        OPEN_WEATHER_MAP,
-        YAHOO,
-        ACCUWEATHER
+        OPEN_WEATHER_MAP("0"),
+        YAHOO("1"),
+        ACCUWEATHER("2");
+
+        private final String key;
+
+        Source(String key) {
+            this.key = key;
+        }
+
+        static Source fromKey(String key) {
+            for (Source s : values()) {
+                if (s.key == null) {
+                    continue;
+                }
+                if (s.key.equals(key)) {
+                    return s;
+                }
+            }
+            throw new IllegalArgumentException("No constant with key " + key + " found.");
+        }
+
+        String getKey() {
+            return key;
+        }
     }
 
     final static class WeatherResult {
