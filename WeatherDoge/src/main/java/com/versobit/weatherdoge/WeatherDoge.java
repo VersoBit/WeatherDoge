@@ -19,6 +19,7 @@
 
 package com.versobit.weatherdoge;
 
+import android.Manifest;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
@@ -31,6 +32,11 @@ import java.util.Random;
 
 
 final public class WeatherDoge extends Application {
+
+    public static final String LOCATION_PERMISSION =
+            BuildConfig.FLAVOR.equals(BuildConfig.FLAVOR_PLAY) ?
+                    Manifest.permission.ACCESS_COARSE_LOCATION :
+                    Manifest.permission.ACCESS_FINE_LOCATION;
 
     private static final String EXTRA_CUSTOM_TABS_SESSION = "android.support.customtabs.extra.SESSION";
     private static final String EXTRA_CUSTOM_TABS_TOOLBAR_COLOR = "android.support.customtabs.extra.TOOLBAR_COLOR";

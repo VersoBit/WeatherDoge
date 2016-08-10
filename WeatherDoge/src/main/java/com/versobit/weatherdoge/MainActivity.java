@@ -19,7 +19,6 @@
 
 package com.versobit.weatherdoge;
 
-import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.NotificationManager;
@@ -423,17 +422,17 @@ final public class MainActivity extends Activity implements LocationReceiver,
     // Asynchronously request the current location
     private void requestLocation(boolean skipRationale) {
         // Check if we need to request the permission on >= Marshmallow
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+        if (ContextCompat.checkSelfPermission(this, WeatherDoge.LOCATION_PERMISSION)
                 != PackageManager.PERMISSION_GRANTED) {
             // We need to request it
             if (!skipRationale && ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    Manifest.permission.ACCESS_COARSE_LOCATION)) {
+                    WeatherDoge.LOCATION_PERMISSION)) {
                 // Show the rationale dialog if we need to
                 showLocationRationaleDialog();
             } else {
                 // Just request the permission
                 ActivityCompat.requestPermissions(this,
-                        new String[] { Manifest.permission.ACCESS_COARSE_LOCATION },
+                        new String[] { WeatherDoge.LOCATION_PERMISSION },
                         REQUEST_LOCATION_PERMISSION);
             }
         } else {
@@ -465,7 +464,7 @@ final public class MainActivity extends Activity implements LocationReceiver,
                     public void onClick(DialogInterface dialog, int which) {
                         // Request the permission again
                         ActivityCompat.requestPermissions(MainActivity.this,
-                                new String[] { Manifest.permission.ACCESS_COARSE_LOCATION },
+                                new String[] { WeatherDoge.LOCATION_PERMISSION },
                                 REQUEST_LOCATION_PERMISSION);
                     }
                 })

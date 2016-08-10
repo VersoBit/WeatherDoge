@@ -19,7 +19,6 @@
 
 package com.versobit.weatherdoge;
 
-import android.Manifest;
 import android.app.IntentService;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -117,7 +116,7 @@ public final class WidgetService extends IntentService implements LocationReceiv
         WeatherUtil.WeatherData data;
         String locationName = "";
         if(forceLocation == null || forceLocation.isEmpty()) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+            if (ContextCompat.checkSelfPermission(this, WeatherDoge.LOCATION_PERMISSION)
                     != PackageManager.PERMISSION_GRANTED) {
                 showError(R.string.widget_error_permission);
                 showPermissionNotification();
