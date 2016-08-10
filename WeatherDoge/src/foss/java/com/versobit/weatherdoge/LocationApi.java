@@ -32,7 +32,6 @@ import java.math.RoundingMode;
 final class LocationApi implements LocationListener {
 
     private static final String TAG = "FossLocationApi";
-    private static final String PROVIDER = LocationManager.NETWORK_PROVIDER;
     // Accurate to about 110 meters
     private static final int COORD_FUZZ = 3;
     private static final int LOC_ACCURACY = 110;
@@ -47,7 +46,7 @@ final class LocationApi implements LocationListener {
 
     void connect() {
         try {
-            locationManager.requestLocationUpdates(PROVIDER, 0, 0, this);
+            locationManager.requestLocationUpdates(getBestProvider(), 0, 0, this);
         } catch (SecurityException ex) {
             Log.wtf(TAG, ex);
             return;
@@ -73,7 +72,7 @@ final class LocationApi implements LocationListener {
 
     Location getLocation() {
         try {
-            return fuzzLocation(locationManager.getLastKnownLocation(PROVIDER));
+            return fuzzLocation(locationManager.getLastKnownLocation(getBestProvider()));
         } catch (SecurityException ex) {
             Log.wtf(TAG, ex);
         }
@@ -81,7 +80,21 @@ final class LocationApi implements LocationListener {
     }
 
     static boolean isAvailable(Context ctx) {
-        return ((LocationManager)ctx.getSystemService(Context.LOCATION_SERVICE)).isProviderEnabled(PROVIDER);
+        LocationManager lm = (LocationManager) ctx.getSystemService(Context.LOCATION_SERVICE);
+        return lm.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
+                lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+    }
+
+    private String getBestProvider() {
+        // The network provider should be fastest and has enough accuracy for weather
+        if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+            return LocationManager.NETWORK_PROVIDER;
+        }
+        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            return LocationManager.GPS_PROVIDER;
+        }
+        // Fall back to network and hope it works
+        return LocationManager.NETWORK_PROVIDER;
     }
 
     private static Location fuzzLocation(Location location) {
