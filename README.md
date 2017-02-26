@@ -40,7 +40,7 @@ The original dogeweather.com has a Dogecoin address too! They deserve it! `DD5z3
 Thank you!
 
 ## Contact Us
-Weather Doge is maintained by [Kevin](https://twitter.com/Kev1nMark), [Rylea](https://twitter.com/DeviledMoon), and [Leyton](https://twitter.com/LeytonReed) of [VersoBit](https://versobit.com/). Say hi [on Twitter](https://twitter.com/VersoBit) or [send us an email](mailto:hello@versobit.com). We'd love to hear from you.
+Weather Doge is maintained by [Kevin](https://twitter.com/Kev1nMark) and [Rylea](https://twitter.com/DeviledMoon) of [VersoBit](https://versobit.com/). Say hi [on Twitter](https://twitter.com/VersoBit) or [send us an email](mailto:hello@versobit.com). We'd love to hear from you.
 
 ## Licensing
 Copyright © 2014-2017 VersoBit. Weather Doge is licensed under the GNU GPLv3 which can be found in `LICENSE.md`.

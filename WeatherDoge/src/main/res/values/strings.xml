@@ -110,8 +110,7 @@
     <string-array name="dialog_about_twitter">
         <item>\@VersoBit</item>
         <item>\@Kev1nMark</item>
-        <item>\@DeviledMoon</item>
-        <item>\@LeytonReed</item>
+        <item>\@DeviledMoon</item>>
     </string-array>
 
     <string name="dialog_contribute_github_title">GitHub</string>
