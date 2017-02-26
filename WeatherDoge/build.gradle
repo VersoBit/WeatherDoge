@@ -27,7 +27,7 @@ android {
     buildToolsVersion '25.0.2'
     defaultConfig {
         minSdkVersion 15
-        targetSdkVersion 24
+        targetSdkVersion 25
         applicationId "com.versobit.weatherdoge"
         versionCode getVersionDef()[0].toInteger()
         buildConfigField 'String', 'FLAVOR_PLAY', '"play"'
