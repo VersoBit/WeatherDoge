@@ -41,8 +41,9 @@
             android:launchMode="singleTask" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
+                <!-- Show in the Samsung Galaxy MultiWindow launcher -->
+                <category android:name="android.intent.category.MULTIWINDOW_LAUNCHER" />
             </intent-filter>
         </activity>
 
@@ -67,6 +68,10 @@
             android:enabled="true"
             android:exported="false" >
         </service>
+
+        <!-- Samsung Galaxy MultiWindow support -->
+        <uses-library android:required="false" android:name="com.sec.android.app.multiwindow" />
+        <meta-data android:name="com.sec.android.support.multiwindow" android:value="true" />
     </application>
 
 </manifest>
