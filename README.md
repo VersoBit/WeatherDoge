@@ -1,7 +1,7 @@
 # Weather Doge
 wow. Weather Doge is the full [dogeweather.com](http://dogeweather.com/) experience on Android™. And now there's even more!
 
-[<img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/images/apps/en-play-badge.png" width="250">](https://play.google.com/store/apps/details?id=com.versobit.weatherdoge&hl=en&utm_source=global_co&utm_medium=prtnr&utm_content=Mar2515&utm_campaign=PartBadge&pcampaignid=MKT-AC-global-none-all-co-pr-py-PartBadges-Oct1515-1)
+[<img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/images/apps/en-play-badge.png" width="250">](https://versob.it/wowDoge)
 
 <img alt="Screenshot" src="https://raw.github.com/VersoBit/WeatherDoge/master/images/Nexus5XBelAir.png" width="500px">
 
