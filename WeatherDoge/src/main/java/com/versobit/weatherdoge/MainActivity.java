@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 VersoBit
+ * Copyright (C) 2014-2017 VersoBit
  *
  * This file is part of Weather Doge.
  *
@@ -26,6 +26,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -742,27 +743,54 @@ final public class MainActivity extends Activity implements LocationReceiver,
 
             // Manually resize/crop the sky background because god forbid if Android can do this well on its own
             // Load in the full bitmap
-            Bitmap theSky = BitmapFactory.decodeResource(getResources(), resId);
+            Resources resources = getResources();
+            Bitmap theSky = BitmapFactory.decodeResource(resources, resId);
             // Get display info
             DisplayMetrics metrics = new DisplayMetrics();
             getWindowManager().getDefaultDisplay().getMetrics(metrics);
 
+            // "Support" for Nougat's multi-window mode
+            int multiWindowOffsetWidth = 0;
+            int multiWindowOffsetHeight = 0;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isInMultiWindowMode()) {
+                // Compensate for the status bar's height when we are on the top side of the window.
+                // Shouldn't this be a part of the display metrics report? ¯\_(ツ)_/¯
+                try {
+                    multiWindowOffsetHeight = resources.getDimensionPixelSize(resources.getIdentifier("status_bar_height", "dimen", "android"));
+                } catch (Resources.NotFoundException ex) {
+                    // Assume a status bar size of 25dp
+                    multiWindowOffsetHeight = (int) Math.ceil(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 25, metrics));
+                }
+                // We need to do some weird compensation for multi-window mode. I honestly don't
+                // understand it and I'm sufficiently tired. Without these a few pixels on the
+                // bottom and right edges will be left unfilled.
+                multiWindowOffsetHeight += 5;
+                multiWindowOffsetWidth = 5;
+            }
+
+            // Magic number to get some important image elements onscreen (205 for 01d, 250 for 01n)
+            float magic = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 180, metrics);
+
             // Create empty bitmap the size of the screen
-            Bitmap scaledSky = Bitmap.createBitmap(metrics.widthPixels, metrics.heightPixels, Bitmap.Config.ARGB_8888);
+            // Add in the multi-window compensation if any
+            Bitmap scaledSky = Bitmap.createBitmap(metrics.widthPixels + multiWindowOffsetWidth, metrics.heightPixels + multiWindowOffsetHeight, Bitmap.Config.ARGB_8888);
 
             // Use a canvas to draw on the bitmap
             Canvas canvas = new Canvas(scaledSky);
-            float skyHeight = (float)theSky.getScaledHeight(canvas); // Height of the sky scaled on the canvas
-            skyHeight = skyHeight == 0f ? metrics.heightPixels : skyHeight; // If not scaled, use device height
-            int compensationPixels = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT ? 4 : 0; // Weird. Compensate for translucent status bar
-            float newScale = (metrics.heightPixels + compensationPixels) / skyHeight; // The scale we need to achieve the device's height
-            // Magic number to get some important image elements onscreen (205 for 01d, 250 for 01n)
-            float moveAmount = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 180, metrics);
 
+            // Find the scale necessary to stretch across the X axis
+            // Add in the magic number to compensate for the translation done in the matrix
+            float wScale = ((float) scaledSky.getWidth() + magic) / theSky.getWidth();
+            // Find the scale necessary to stretch across the Y axis
+            float hScale = (float) scaledSky.getHeight() / theSky.getHeight();
+            // Use the largest scale (smallest side) to ensure the canvas is completely filled
+            float bigScale = wScale > hScale ? wScale : hScale;
             Matrix matrix = new Matrix();
-            matrix.setScale(newScale, newScale, moveAmount, 0);
+            // Uniform scaling with the magic translation
+            matrix.setScale(bigScale, bigScale, magic, 0);
             canvas.setMatrix(matrix);
-            canvas.drawBitmap(theSky, 0, 0, new Paint()); // Draw the bitmap
+            // Draw the bitmap
+            canvas.drawBitmap(theSky, 0, 0, new Paint());
 
             theSky.recycle();
 
