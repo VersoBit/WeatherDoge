@@ -98,6 +98,9 @@ final class LocationApi implements LocationListener {
     }
 
     private static Location fuzzLocation(Location location) {
+        if (location == null) {
+            return null;
+        }
         // Because we are receiving precise locations (unlike the Google Play flavor) we need to do
         // the fuzzing on our own before sending the locations off to the APIs. Truncating the
         // coordinates to three decimals places will give similar accuracy. It's probably much
