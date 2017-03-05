@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 VersoBit
+ * Copyright (C) 2014-2017 VersoBit
  *
  * This file is part of Weather Doge.
  *
@@ -204,12 +204,17 @@ final public class OptionsActivity extends PreferenceActivity {
                 newSrcValues.add(oldSrcValues[i]);
             }
             if (newSrcEntries.size() != oldSrcEntries.length) {
-                // Reset
+                String oldValue = srcPref.getValue();
                 srcPref.setValueIndex(0);
                 srcPref.setEntries(newSrcEntries.toArray(new CharSequence[newSrcEntries.size()]));
                 srcPref.setEntryValues(newSrcValues.toArray(new CharSequence[newSrcValues.size()]));
-                // Again, just to make certain
-                srcPref.setValueIndex(0);
+                if (newSrcValues.contains(oldValue)) {
+                    // Restore the preference since it's still available
+                    srcPref.setValue(oldValue);
+                } else {
+                    // Default to the first entry whatever that may be
+                    srcPref.setValueIndex(0);
+                }
             }
 
             // Add 'widget' preferences, and a corresponding header.
