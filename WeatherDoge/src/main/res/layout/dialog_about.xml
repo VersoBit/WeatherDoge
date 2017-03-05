@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Copyright (C) 2014 VersoBit
+    Copyright (C) 2014, 2017 VersoBit
 
     This file is part of Weather Doge.
 
@@ -32,6 +32,7 @@
         android:clickable="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
         android:id="@+id/dialog_about_vb"
         android:src="@drawable/versobit" />
 
