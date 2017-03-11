@@ -30,15 +30,6 @@ Import the project into Android Studio and you'll be up and running in no time.
 
 Got something to add? Best way to get your idea in to the app is forking, coding, and submitting a pull request!
 
-## Spare Change?
-We ♥ Dogecoin. If you're feeling generous, our Dogecoin address is `DMdXi3PJ3o5sXpcnXLvqAvHerKLbBCC9yE`
-
-If you're feeling generous but don't have Dogecoin we also accept [more conventional donations through BitPay](https://bitpay.com/928010/donate).
-
-The original dogeweather.com has a Dogecoin address too! They deserve it! `DD5z316BX6YMzj4ARp8opoMBf82hbZB7N5`
-
-Thank you!
-
 ## Contact Us
 Weather Doge is maintained by [Kevin](https://twitter.com/Kev1nMark) and [Rylea](https://twitter.com/DeviledMoon) of [VersoBit](https://versobit.com/). Say hi [on Twitter](https://twitter.com/VersoBit) or [send us an email](mailto:hello@versobit.com). We'd love to hear from you.
 

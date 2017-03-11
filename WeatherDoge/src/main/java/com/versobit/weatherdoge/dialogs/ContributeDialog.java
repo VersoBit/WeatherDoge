@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 VersoBit
+ * Copyright (C) 2014-2015, 2017 VersoBit
  *
  * This file is part of Weather Doge.
  *
@@ -50,21 +50,6 @@ public final class ContributeDialog extends DialogFragment {
                 startActivity(i);
             }
         });
-        v.findViewById(R.id.dialog_contribute_dogecoin_layout).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                copyToClipboard(getString(R.string.addr_dogecoin));
-                Toast.makeText(getActivity(), R.string.such_copied, Toast.LENGTH_SHORT).show();
-            }
-        });
-        v.findViewById(R.id.dialog_contribute_bitcoin_layout).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.addr_bitcoin)));
-                WeatherDoge.applyChromeCustomTab(getActivity(), i);
-                startActivity(i);
-            }
-        });
         return new AlertDialog.Builder(getActivity(), getTheme())
                 .setView(v)
                 .setPositiveButton(R.string.wow, new DialogInterface.OnClickListener() {
@@ -74,11 +59,5 @@ public final class ContributeDialog extends DialogFragment {
                     }
                 })
                 .create();
-    }
-
-    private void copyToClipboard(String text) {
-        ClipData clip = android.content.ClipData.newPlainText(getString(R.string.app_name), text);
-        ClipboardManager cbm = (android.content.ClipboardManager)getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
-        cbm.setPrimaryClip(clip);
     }
 }
