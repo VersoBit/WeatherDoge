@@ -35,11 +35,11 @@ Got something to add? Best way to get your idea in to the app is forking, coding
 Weather Doge is maintained by [Kevin](https://twitter.com/Kev1nMark) and [Rylea](https://twitter.com/DeviledMoon) of [VersoBit](https://versobit.com/). Say hi [on Twitter](https://twitter.com/VersoBit) or send us an email (hello at versobit dot com). We'd love to hear from you.
 
 ## Licensing
-Copyright © 2014-2017 VersoBit. Weather Doge is licensed under the GNU GPLv3 which can be found in `LICENSE.md`.
+Copyright © 2014-2018 VersoBit. Weather Doge is licensed under the GNU GPLv3 which can be found in `LICENSE.md`.
 
 The background images, doge images, and doge adjectives are from the [dogeweather](https://github.com/katiaeirin/dogeweather) project licensed under the [MIT license](https://opensource.org/licenses/MIT).
 
-The VersoBit logo is Copyright © 2014 VersoBit. All Rights Reserved.
+The VersoBit logo is Copyright © 2018 [VersoBit](https://versobit.com). All Rights Reserved.
 
 Weather Doge uses a number of open-source tools and libraries. Check the "Other Shibes" dialog from within the app or open `WeatherDoge/src/main/assets/othershibes.html` in your browser.
 
