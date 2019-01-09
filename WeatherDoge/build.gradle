@@ -16,8 +16,8 @@ Closure<String[]> getVersionDef = {
     new File('WeatherDoge/versionDef.txt').text.trim().split('\\r?\\n')
 }
 
-Closure<String> getVersionName = { flavor ->
-    getVersionDef()[1] + flavor + '-' + gitRev()
+Closure<String> getVersionNameSuffix = { flavor ->
+    flavor + '-' + gitRev()
 }
 
 apply plugin: 'com.android.application'
@@ -30,6 +30,7 @@ android {
         targetSdkVersion 25
         applicationId "com.versobit.weatherdoge"
         versionCode getVersionDef()[0].toInteger()
+        versionName getVersionDef()[1]
         buildConfigField 'String', 'FLAVOR_PLAY', '"play"'
         buildConfigField 'String', 'FLAVOR_FOSS', '"foss"'
     }
@@ -37,25 +38,27 @@ android {
         exclude 'META-INF/LICENSE.txt'
         exclude 'META-INF/NOTICE.txt'
     }
+    flavorDimensions 'version'
     productFlavors {
         play {
-            versionName getVersionName('p')
+            versionNameSuffix getVersionNameSuffix('p')
         }
         foss {
-            applicationId "com.versobit.weatherdoge.foss"
-            versionName getVersionName('f')
+            dimension 'version'
+            applicationIdSuffix '.foss'
+            versionNameSuffix getVersionNameSuffix('f')
         }
     }
 }
 
 dependencies {
-    playCompile 'com.google.android.gms:play-services-location:10.2.0'
-    compile 'commons-io:commons-io:2.5'
-    compile 'org.apache.commons:commons-lang3:3.5'
-    compile 'com.android.support:support-v4:25.2.0'
-    compile 'com.android.support:design:25.2.0'
-    compile 'com.getbase:floatingactionbutton:1.10.1'
-    compile 'com.plattysoft.leonids:LeonidsLib:1.3.2'
+    playImplementation 'com.google.android.gms:play-services-location:10.2.0'
+    implementation 'commons-io:commons-io:2.5'
+    implementation 'org.apache.commons:commons-lang3:3.5'
+    implementation 'com.android.support:support-v4:25.4.0'
+    implementation 'com.android.support:design:25.4.0'
+    implementation 'com.getbase:floatingactionbutton:1.10.1'
+    implementation 'com.plattysoft.leonids:LeonidsLib:1.3.2'
 }
 
 // Find and apply the signing file
