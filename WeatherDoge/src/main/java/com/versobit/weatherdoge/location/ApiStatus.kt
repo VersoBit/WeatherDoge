@@ -17,9 +17,9 @@
  * along with Weather Doge.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.versobit.weatherdoge.location;
+package com.versobit.weatherdoge.location
 
-public enum ApiStatus {
+enum class ApiStatus {
 
     CONNECTED,
     CONNECTING,
