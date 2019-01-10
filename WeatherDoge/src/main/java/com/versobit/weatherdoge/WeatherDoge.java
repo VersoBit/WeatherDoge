@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 VersoBit
+ * Copyright (C) 2014-2016, 2019 VersoBit
  *
  * This file is part of Weather Doge.
  *
