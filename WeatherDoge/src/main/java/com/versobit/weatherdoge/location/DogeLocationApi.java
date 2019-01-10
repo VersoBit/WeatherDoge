@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 VersoBit
+ * Copyright (C) 2019 VersoBit
  *
  * This file is part of Weather Doge.
  *
@@ -17,14 +17,20 @@
  * along with Weather Doge.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.versobit.weatherdoge;
+package com.versobit.weatherdoge.location;
 
-import android.location.Location;
+import android.content.Context;
 
-interface LocationReceiver {
+public interface DogeLocationApi {
 
-    void onConnected();
+    DogeLocationApi configure(Context ctx, LocationReceiver receiver);
 
-    void onLocation(Location location);
+    void connect();
+
+    void disconnect();
+
+    ApiStatus getStatus();
+
+    boolean isAvailable();
 
 }

@@ -41,6 +41,11 @@ import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
 
+import com.versobit.weatherdoge.location.ApiStatus;
+import com.versobit.weatherdoge.location.DogeLocationApi;
+import com.versobit.weatherdoge.location.FlavoredApiSelector;
+import com.versobit.weatherdoge.location.LocationReceiver;
+
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.Date;
@@ -107,8 +112,10 @@ public final class WidgetService extends IntentService implements LocationReceiv
 
         setStatus(getString(R.string.loading));
 
+        DogeLocationApi locationApi = FlavoredApiSelector.get();
+        locationApi.configure(this, this);
         if(forceLocation == null || forceLocation.isEmpty()) {
-            if(!LocationApi.isAvailable(this)) {
+            if(!locationApi.isAvailable()) {
                 showError(BuildConfig.FLAVOR.equals(BuildConfig.FLAVOR_PLAY) ?
                         R.string.widget_error_no_gms : R.string.widget_error_location_settings);
                 return;
@@ -125,17 +132,18 @@ public final class WidgetService extends IntentService implements LocationReceiv
                 showPermissionNotification();
                 return;
             }
-            LocationApi locationApi = new LocationApi(this, this);
             locationApi.connect();
             try {
                 locationLatch.await(15, TimeUnit.SECONDS);
             } catch (InterruptedException ex) {
                 Log.wtf(TAG, ex);
                 showError(R.string.widget_error_unknown);
+                locationApi.disconnect();
                 return;
             }
-            if(!locationApi.isConnected()) {
+            if (locationApi.getStatus() != ApiStatus.CONNECTED) {
                 showError(R.string.widget_error_gms_connect);
+                locationApi.disconnect();
                 return;
             }
             Location location = locationRef.get();

@@ -17,7 +17,7 @@
  * along with Weather Doge.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.versobit.weatherdoge;
+package com.versobit.weatherdoge.location;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -44,31 +44,31 @@ import com.google.android.gms.tasks.Task;
 
 import androidx.annotation.NonNull;
 
-final class LocationApi {
+public final class GoogleLocationApi implements DogeLocationApi {
 
-    private static final String TAG = "GoogleLocationApi";
+    private static final String TAG = GoogleLocationApi.class.getSimpleName();
     private static final int REQUEST_PLAY_ERR_DIAG = 52000000;
     private static final int REQUEST_PLAY_CONN_FAIL_RES = 3643;
     private static final long UPDATE_INTERVAL = 5000;
     private static final long FASTEST_UPDATE_INTERVAL = 1000;
     private static final long DELAY_BETWEEN_FAIL_DIAG = 5000;
 
-    private final Context ctx;
-    private final LocationReceiver receiver;
-    private final FusedLocationProviderClient client;
-    private final SettingsClient settingsClient;
-    private final LocationRequest locationRequest;
-    private final LocationSettingsRequest locationSettingsRequest;
+    private Context ctx;
+    private LocationReceiver receiver;
+    private FusedLocationProviderClient client;
+    private SettingsClient settingsClient;
+    private LocationRequest locationRequest;
+    private LocationSettingsRequest locationSettingsRequest;
 
     private final OnSuccessListener<LocationSettingsResponse> locationSettingsSuccessCallback = new OnSuccessListener<LocationSettingsResponse>() {
         @Override
         public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
             try {
                 client.requestLocationUpdates(locationRequest, locationCallback, null);
-                status = Status.CONNECTED;
+                status = ApiStatus.CONNECTED;
                 receiver.onConnected();
             } catch (SecurityException ex) {
-                status = Status.DISCONNECTED;
+                status = ApiStatus.DISCONNECTED;
                 Log.wtf(TAG, ex);
             }
         }
@@ -77,7 +77,7 @@ final class LocationApi {
     private final OnFailureListener locationSettingsFailureCallback = new OnFailureListener() {
         @Override
         public void onFailure(@NonNull Exception ex) {
-            status = Status.DISCONNECTED;
+            status = ApiStatus.DISCONNECTED;
             if (ctx instanceof Activity && ex instanceof ResolvableApiException) {
                 if (SystemClock.elapsedRealtime() < lastFailDiag + DELAY_BETWEEN_FAIL_DIAG) {
                     return;
@@ -104,10 +104,13 @@ final class LocationApi {
         }
     };
 
-    private Status status = Status.DISCONNECTED;
+    private ApiStatus status = ApiStatus.DISCONNECTED;
     private long lastFailDiag = -DELAY_BETWEEN_FAIL_DIAG - 1;
 
-    LocationApi(Context ctx, LocationReceiver receiver) {
+    GoogleLocationApi() {}
+
+    @Override
+    public DogeLocationApi configure(Context ctx, LocationReceiver receiver) {
         this.ctx = ctx;
         this.receiver = receiver;
         client = LocationServices.getFusedLocationProviderClient(ctx);
@@ -119,32 +122,33 @@ final class LocationApi {
         locationSettingsRequest = new LocationSettingsRequest.Builder()
                 .addLocationRequest(locationRequest)
                 .build();
+        return this;
     }
 
-    void connect() {
-        if (status != Status.DISCONNECTED) {
+    @Override
+    public void connect() {
+        if (status != ApiStatus.DISCONNECTED) {
             return;
         }
-        status = Status.CONNECTING;
+        status = ApiStatus.CONNECTING;
         Task<LocationSettingsResponse> task = settingsClient.checkLocationSettings(locationSettingsRequest);
         task.addOnSuccessListener(locationSettingsSuccessCallback);
         task.addOnFailureListener(locationSettingsFailureCallback);
     }
 
-    void disconnect() {
+    @Override
+    public void disconnect() {
         client.removeLocationUpdates(locationCallback);
-        status = Status.DISCONNECTED;
+        status = ApiStatus.DISCONNECTED;
     }
 
-    boolean isConnected() {
-        return status == Status.CONNECTED;
+    @Override
+    public ApiStatus getStatus() {
+        return status;
     }
 
-    boolean isConnecting() {
-        return status == Status.CONNECTING;
-    }
-
-    static boolean isAvailable(Context ctx) {
+    @Override
+    public boolean isAvailable() {
         GoogleApiAvailability apiAvail = GoogleApiAvailability.getInstance();
         int result = apiAvail.isGooglePlayServicesAvailable(ctx);
         if(result == ConnectionResult.SUCCESS) {
@@ -160,12 +164,6 @@ final class LocationApi {
             apiAvail.showErrorNotification(ctx, result);
         }
         return false;
-    }
-
-    enum Status {
-        CONNECTED,
-        CONNECTING,
-        DISCONNECTED
     }
 
 }

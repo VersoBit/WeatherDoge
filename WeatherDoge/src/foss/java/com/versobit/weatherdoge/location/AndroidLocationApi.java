@@ -17,7 +17,7 @@
  * along with Weather Doge.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.versobit.weatherdoge;
+package com.versobit.weatherdoge.location;
 
 import android.content.Context;
 import android.location.Location;
@@ -29,32 +29,39 @@ import android.util.Log;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-final class LocationApi implements LocationListener {
+public final class AndroidLocationApi implements DogeLocationApi, LocationListener {
 
-    private static final String TAG = "FossLocationApi";
+    private static final String TAG = AndroidLocationApi.class.getSimpleName();
     // Accurate to about 110 meters
     private static final int COORD_FUZZ = 3;
     private static final int LOC_ACCURACY = 110;
 
-    private final LocationReceiver receiver;
-    private final LocationManager locationManager;
+    private Context ctx;
+    private LocationReceiver receiver;
+    private LocationManager locationManager;
+    private ApiStatus status = ApiStatus.DISCONNECTED;
 
-    private boolean connected = false;
+    AndroidLocationApi() {}
 
-    LocationApi(Context ctx, LocationReceiver receiver) {
+    @Override
+    public DogeLocationApi configure(Context ctx, LocationReceiver receiver) {
+        this.ctx = ctx;
         this.receiver = receiver;
-        locationManager = (LocationManager)ctx.getSystemService(Context.LOCATION_SERVICE);
+        locationManager = (LocationManager) ctx.getSystemService(Context.LOCATION_SERVICE);
+        return this;
     }
 
-    void connect() {
-        connected = true;
+    @Override
+    public void connect() {
+        status = ApiStatus.CONNECTING;
         try {
             locationManager.requestLocationUpdates(getBestProvider(), 0, 0, this);
         } catch (SecurityException ex) {
-            connected = false;
+            status = ApiStatus.DISCONNECTED;
             Log.wtf(TAG, ex);
             return;
         }
+        status = ApiStatus.CONNECTED;
         receiver.onConnected();
         // Might be awhile until we get our first real location update, so request the
         // last known location immediately
@@ -65,8 +72,9 @@ final class LocationApi implements LocationListener {
         }
     }
 
-    void disconnect() {
-        connected = false;
+    @Override
+    public void disconnect() {
+        status = ApiStatus.DISCONNECTED;
         try {
             locationManager.removeUpdates(this);
         } catch (SecurityException ex) {
@@ -74,15 +82,13 @@ final class LocationApi implements LocationListener {
         }
     }
 
-    boolean isConnected() {
-        return connected;
+    @Override
+    public ApiStatus getStatus() {
+        return status;
     }
 
-    boolean isConnecting() {
-        return false;
-    }
-
-    static boolean isAvailable(Context ctx) {
+    @Override
+    public boolean isAvailable() {
         LocationManager lm = (LocationManager) ctx.getSystemService(Context.LOCATION_SERVICE);
         return lm.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
                 lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);

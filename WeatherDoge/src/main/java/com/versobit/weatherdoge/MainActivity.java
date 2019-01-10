@@ -70,6 +70,10 @@ import android.widget.Toast;
 
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.plattysoft.leonids.ParticleSystem;
+import com.versobit.weatherdoge.location.ApiStatus;
+import com.versobit.weatherdoge.location.DogeLocationApi;
+import com.versobit.weatherdoge.location.FlavoredApiSelector;
+import com.versobit.weatherdoge.location.LocationReceiver;
 
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -112,7 +116,7 @@ final public class MainActivity extends Activity implements LocationReceiver,
     private TextView suchDegree;
     private TextView suchLocation;
     private FloatingActionsMenu suchMenu;
-    private LocationApi wowApi;
+    private DogeLocationApi wowApi = FlavoredApiSelector.get();
     private Location whereIsDoge;
     private Typeface wowComicSans;
 
@@ -154,6 +158,8 @@ final public class MainActivity extends Activity implements LocationReceiver,
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        wowApi.configure(this, this);
+
         loadOptions();
 
         dogefixes = getResources().getStringArray(R.array.dogefix);
@@ -181,7 +187,7 @@ final public class MainActivity extends Activity implements LocationReceiver,
             public void onClick(View v) {
                 if(!forceLocation.isEmpty()) {
                     new GetWeather().execute();
-                } else if(wowApi != null && wowApi.isConnected()) {
+                } else if(wowApi.getStatus() == ApiStatus.CONNECTED) {
                     requestLocation();
                 }
             }
@@ -229,8 +235,8 @@ final public class MainActivity extends Activity implements LocationReceiver,
 
         if(!forceLocation.isEmpty()) {
             new GetWeather().execute();
-        } else if(LocationApi.isAvailable(this)) {
-            wowApi = new LocationApi(this, this);
+        } else {
+            wowApi.isAvailable();
         }
         new SetBackgroundTask(R.drawable.sky_01d).execute();
 
@@ -260,7 +266,7 @@ final public class MainActivity extends Activity implements LocationReceiver,
     @Override
     protected void onStart() {
         super.onStart();
-        if(wowApi != null) {
+        if(forceLocation.isEmpty()) {
             requestLocation();
         }
         overlayTask = new OverlayTimerTask();
@@ -278,7 +284,7 @@ final public class MainActivity extends Activity implements LocationReceiver,
 
     @Override
     protected void onStop() {
-        if(wowApi != null && wowApi.isConnected()) {
+        if(wowApi.getStatus() != ApiStatus.DISCONNECTED) {
             wowApi.disconnect();
         }
         overlayTask.cancel();
@@ -305,15 +311,12 @@ final public class MainActivity extends Activity implements LocationReceiver,
             updateShadow();
         }
         if(forceLocation.isEmpty()) {
-            if(wowApi == null) {
-                wowApi = new LocationApi(this, this);
-            }
-            if(!wowApi.isConnected() && !wowApi.isConnecting()) {
+            if(wowApi.getStatus() == ApiStatus.DISCONNECTED) {
                 // FIXME: Double request after selecting cancel on the first permission dialog
                 requestLocation();
             }
         } else {
-            if(wowApi != null && wowApi.isConnected()) {
+            if(wowApi.getStatus() != ApiStatus.DISCONNECTED) {
                 wowApi.disconnect();
             }
             new GetWeather().execute();
@@ -501,7 +504,7 @@ final public class MainActivity extends Activity implements LocationReceiver,
     // Called after we're certain we have the location permission
     private void doCheckedLocationRequest() {
         // Make sure we're going to connect
-        if(!wowApi.isConnected() && !wowApi.isConnecting()) {
+        if (wowApi.getStatus() == ApiStatus.DISCONNECTED) {
             wowApi.connect();
         }
     }
