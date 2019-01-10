@@ -37,7 +37,6 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
-import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -56,7 +55,6 @@ public final class GoogleLocationApi implements DogeLocationApi {
     private Context ctx;
     private LocationReceiver receiver;
     private FusedLocationProviderClient client;
-    private SettingsClient settingsClient;
     private LocationRequest locationRequest;
     private LocationSettingsRequest locationSettingsRequest;
 
@@ -113,8 +111,6 @@ public final class GoogleLocationApi implements DogeLocationApi {
     public DogeLocationApi configure(Context ctx, LocationReceiver receiver) {
         this.ctx = ctx;
         this.receiver = receiver;
-        client = LocationServices.getFusedLocationProviderClient(ctx);
-        settingsClient = LocationServices.getSettingsClient(ctx);
         locationRequest = new LocationRequest()
                 .setInterval(UPDATE_INTERVAL)
                 .setFastestInterval(FASTEST_UPDATE_INTERVAL)
@@ -131,14 +127,19 @@ public final class GoogleLocationApi implements DogeLocationApi {
             return;
         }
         status = ApiStatus.CONNECTING;
-        Task<LocationSettingsResponse> task = settingsClient.checkLocationSettings(locationSettingsRequest);
+        client = LocationServices.getFusedLocationProviderClient(ctx);
+        Task<LocationSettingsResponse> task = LocationServices.getSettingsClient(ctx)
+                .checkLocationSettings(locationSettingsRequest);
         task.addOnSuccessListener(locationSettingsSuccessCallback);
         task.addOnFailureListener(locationSettingsFailureCallback);
     }
 
     @Override
     public void disconnect() {
-        client.removeLocationUpdates(locationCallback);
+        if (client != null) {
+            client.removeLocationUpdates(locationCallback);
+            client = null;
+        }
         status = ApiStatus.DISCONNECTED;
     }
 
