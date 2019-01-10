@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 VersoBit
+ * Copyright (C) 2014-2016, 2019 VersoBit
  *
  * This file is part of Weather Doge.
  *
@@ -23,64 +23,125 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.IntentSender;
-import android.location.Location;
-import android.os.Bundle;
-import androidx.annotation.NonNull;
+import android.os.SystemClock;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.location.SettingsClient;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 
-final class LocationApi implements GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener, LocationListener {
+import androidx.annotation.NonNull;
+
+final class LocationApi {
 
     private static final String TAG = "GoogleLocationApi";
     private static final int REQUEST_PLAY_ERR_DIAG = 52000000;
     private static final int REQUEST_PLAY_CONN_FAIL_RES = 3643;
+    private static final long UPDATE_INTERVAL = 5000;
+    private static final long FASTEST_UPDATE_INTERVAL = 1000;
+    private static final long DELAY_BETWEEN_FAIL_DIAG = 5000;
 
     private final Context ctx;
     private final LocationReceiver receiver;
-    private final GoogleApiClient client;
+    private final FusedLocationProviderClient client;
+    private final SettingsClient settingsClient;
+    private final LocationRequest locationRequest;
+    private final LocationSettingsRequest locationSettingsRequest;
+
+    private final OnSuccessListener<LocationSettingsResponse> locationSettingsSuccessCallback = new OnSuccessListener<LocationSettingsResponse>() {
+        @Override
+        public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
+            try {
+                client.requestLocationUpdates(locationRequest, locationCallback, null);
+                status = Status.CONNECTED;
+                receiver.onConnected();
+            } catch (SecurityException ex) {
+                status = Status.DISCONNECTED;
+                Log.wtf(TAG, ex);
+            }
+        }
+    };
+
+    private final OnFailureListener locationSettingsFailureCallback = new OnFailureListener() {
+        @Override
+        public void onFailure(@NonNull Exception ex) {
+            status = Status.DISCONNECTED;
+            if (ctx instanceof Activity && ex instanceof ResolvableApiException) {
+                if (SystemClock.elapsedRealtime() < lastFailDiag + DELAY_BETWEEN_FAIL_DIAG) {
+                    return;
+                }
+                try {
+                    ((ResolvableApiException) ex).startResolutionForResult((Activity) ctx, REQUEST_PLAY_CONN_FAIL_RES);
+                    lastFailDiag = SystemClock.elapsedRealtime();
+                } catch (IntentSender.SendIntentException sendEx) {
+                    Log.e(TAG, sendEx.getMessage(), sendEx);
+                }
+            } else {
+                Toast.makeText(ctx, "Connection to location API failed.", Toast.LENGTH_SHORT).show();
+            }
+        }
+    };
+
+    private final LocationCallback locationCallback = new LocationCallback() {
+        @Override
+        public void onLocationResult(LocationResult locationResult) {
+            if (locationResult == null) {
+                return;
+            }
+            receiver.onLocation(locationResult.getLastLocation());
+        }
+    };
+
+    private Status status = Status.DISCONNECTED;
+    private long lastFailDiag = -DELAY_BETWEEN_FAIL_DIAG - 1;
 
     LocationApi(Context ctx, LocationReceiver receiver) {
         this.ctx = ctx;
         this.receiver = receiver;
-        client = new GoogleApiClient.Builder(ctx)
-                .addApi(LocationServices.API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
+        client = LocationServices.getFusedLocationProviderClient(ctx);
+        settingsClient = LocationServices.getSettingsClient(ctx);
+        locationRequest = new LocationRequest()
+                .setInterval(UPDATE_INTERVAL)
+                .setFastestInterval(FASTEST_UPDATE_INTERVAL)
+                .setPriority(LocationRequest.PRIORITY_LOW_POWER);
+        locationSettingsRequest = new LocationSettingsRequest.Builder()
+                .addLocationRequest(locationRequest)
                 .build();
     }
 
     void connect() {
-        client.connect();
+        if (status != Status.DISCONNECTED) {
+            return;
+        }
+        status = Status.CONNECTING;
+        Task<LocationSettingsResponse> task = settingsClient.checkLocationSettings(locationSettingsRequest);
+        task.addOnSuccessListener(locationSettingsSuccessCallback);
+        task.addOnFailureListener(locationSettingsFailureCallback);
     }
 
     void disconnect() {
-        LocationServices.FusedLocationApi.removeLocationUpdates(client, this);
-        client.disconnect();
+        client.removeLocationUpdates(locationCallback);
+        status = Status.DISCONNECTED;
     }
 
     boolean isConnected() {
-        return client.isConnected();
+        return status == Status.CONNECTED;
     }
 
     boolean isConnecting() {
-        return client.isConnected();
-    }
-
-    Location getLocation() {
-        try {
-            return LocationServices.FusedLocationApi.getLastLocation(client);
-        } catch (SecurityException ex) {
-            Log.wtf(TAG, ex);
-        }
-        return null;
+        return status == Status.CONNECTING;
     }
 
     static boolean isAvailable(Context ctx) {
@@ -101,43 +162,10 @@ final class LocationApi implements GoogleApiClient.ConnectionCallbacks,
         return false;
     }
 
-    @Override
-    public void onConnected(Bundle bundle) {
-        LocationRequest request = LocationRequest.create();
-        request.setPriority(LocationRequest.PRIORITY_LOW_POWER);
-        request.setInterval(5000);
-        request.setFastestInterval(1000);
-        try {
-            LocationServices.FusedLocationApi.requestLocationUpdates(client, request, this);
-        } catch (SecurityException ex) {
-            Log.wtf(TAG, ex);
-            return;
-        }
-        receiver.onConnected();
+    enum Status {
+        CONNECTED,
+        CONNECTING,
+        DISCONNECTED
     }
 
-    @Override
-    public void onConnectionSuspended(int i) { }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        if(ctx instanceof Activity) {
-            Activity act = (Activity)ctx;
-            if(!connectionResult.hasResolution()) {
-                Toast.makeText(act, "Connection failed.", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            try {
-                connectionResult.startResolutionForResult(act, REQUEST_PLAY_CONN_FAIL_RES);
-            } catch (IntentSender.SendIntentException ex) {
-                Log.wtf(TAG, ex);
-            }
-        }
-        Log.e(TAG, "Connection failed... " + connectionResult.toString());
-    }
-
-    @Override
-    public void onLocationChanged(Location location) {
-        receiver.onLocation(location);
-    }
 }

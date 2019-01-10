@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 VersoBit
+ * Copyright (C) 2014-2016, 2019 VersoBit
  *
  * This file is part of Weather Doge.
  *
@@ -47,6 +47,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 public final class WidgetService extends IntentService implements LocationReceiver {
 
@@ -56,6 +57,8 @@ public final class WidgetService extends IntentService implements LocationReceiv
     static final String ACTION_REFRESH_ONE = "refresh_one";
     static final String EXTRA_WIDGET_ID = "widget_id";
     static final int PERMISSION_NOTIFICATION_ID = 410;
+
+    private final AtomicReference<Location> locationRef = new AtomicReference<>();
 
     private CountDownLatch locationLatch = new CountDownLatch(1);
     private AppWidgetManager widgetManager;
@@ -135,7 +138,7 @@ public final class WidgetService extends IntentService implements LocationReceiv
                 showError(R.string.widget_error_gms_connect);
                 return;
             }
-            Location location = locationApi.getLocation();
+            Location location = locationRef.get();
             locationApi.disconnect();
             if(location == null) {
                 Log.e(TAG, "Unable to retrieve location. (null)");
@@ -322,11 +325,10 @@ public final class WidgetService extends IntentService implements LocationReceiv
 
     @Override
     public void onLocation(Location location) {
+        locationRef.set(location);
         locationLatch.countDown();
     }
 
     @Override
-    public void onConnected() {
-        locationLatch.countDown();
-    }
+    public void onConnected() {}
 }

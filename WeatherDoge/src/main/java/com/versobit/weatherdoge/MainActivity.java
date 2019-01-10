@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 VersoBit
+ * Copyright (C) 2014-2017, 2019 VersoBit
  *
  * This file is part of Weather Doge.
  *
@@ -504,7 +504,6 @@ final public class MainActivity extends Activity implements LocationReceiver,
         if(!wowApi.isConnected() && !wowApi.isConnecting()) {
             wowApi.connect();
         }
-        onLocation(wowApi.getLocation());
     }
 
     @Override

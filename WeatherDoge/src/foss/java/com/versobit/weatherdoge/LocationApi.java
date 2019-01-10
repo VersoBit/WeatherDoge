@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015-2016 VersoBit
+ * Copyright (C) 2015-2016, 2019 VersoBit
  *
  * This file is part of Weather Doge.
  *
@@ -39,22 +39,34 @@ final class LocationApi implements LocationListener {
     private final LocationReceiver receiver;
     private final LocationManager locationManager;
 
+    private boolean connected = false;
+
     LocationApi(Context ctx, LocationReceiver receiver) {
         this.receiver = receiver;
         locationManager = (LocationManager)ctx.getSystemService(Context.LOCATION_SERVICE);
     }
 
     void connect() {
+        connected = true;
         try {
             locationManager.requestLocationUpdates(getBestProvider(), 0, 0, this);
         } catch (SecurityException ex) {
+            connected = false;
             Log.wtf(TAG, ex);
             return;
         }
         receiver.onConnected();
+        // Might be awhile until we get our first real location update, so request the
+        // last known location immediately
+        try {
+            onLocationChanged(locationManager.getLastKnownLocation(getBestProvider()));
+        } catch (SecurityException ex) {
+            Log.wtf(TAG, ex);
+        }
     }
 
     void disconnect() {
+        connected = false;
         try {
             locationManager.removeUpdates(this);
         } catch (SecurityException ex) {
@@ -63,20 +75,11 @@ final class LocationApi implements LocationListener {
     }
 
     boolean isConnected() {
-        return true;
+        return connected;
     }
 
     boolean isConnecting() {
         return false;
-    }
-
-    Location getLocation() {
-        try {
-            return fuzzLocation(locationManager.getLastKnownLocation(getBestProvider()));
-        } catch (SecurityException ex) {
-            Log.wtf(TAG, ex);
-        }
-        return null;
     }
 
     static boolean isAvailable(Context ctx) {
