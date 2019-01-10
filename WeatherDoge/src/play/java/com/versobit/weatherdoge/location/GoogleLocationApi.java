@@ -41,6 +41,8 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
+import org.jetbrains.annotations.NotNull;
+
 import androidx.annotation.NonNull;
 
 public final class GoogleLocationApi implements DogeLocationApi {
@@ -107,8 +109,9 @@ public final class GoogleLocationApi implements DogeLocationApi {
 
     GoogleLocationApi() {}
 
+    @NotNull
     @Override
-    public DogeLocationApi configure(Context ctx, LocationReceiver receiver) {
+    public DogeLocationApi configure(@NotNull Context ctx, @NotNull LocationReceiver receiver) {
         this.ctx = ctx;
         this.receiver = receiver;
         locationRequest = new LocationRequest()
@@ -143,6 +146,7 @@ public final class GoogleLocationApi implements DogeLocationApi {
         status = ApiStatus.DISCONNECTED;
     }
 
+    @NotNull
     @Override
     public ApiStatus getStatus() {
         return status;

@@ -76,6 +76,7 @@ import com.versobit.weatherdoge.location.FlavoredApiSelector;
 import com.versobit.weatherdoge.location.LocationReceiver;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.text.DecimalFormat;
 import java.util.ArrayDeque;
@@ -410,12 +411,8 @@ final public class MainActivity extends Activity implements LocationReceiver,
     }
 
     @Override
-    public void onLocation(Location location) {
+    public void onLocation(@NotNull Location location) {
         whereIsDoge = location;
-        if(whereIsDoge == null) {
-            Log.e(TAG, "dunno where this shibe is");
-            return;
-        }
         new GetWeather().execute(whereIsDoge);
     }
 

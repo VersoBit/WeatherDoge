@@ -26,6 +26,8 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
@@ -43,8 +45,9 @@ public final class AndroidLocationApi implements DogeLocationApi, LocationListen
 
     AndroidLocationApi() {}
 
+    @NotNull
     @Override
-    public DogeLocationApi configure(Context ctx, LocationReceiver receiver) {
+    public DogeLocationApi configure(@NotNull Context ctx, @NotNull LocationReceiver receiver) {
         this.ctx = ctx;
         this.receiver = receiver;
         locationManager = (LocationManager) ctx.getSystemService(Context.LOCATION_SERVICE);
@@ -82,6 +85,7 @@ public final class AndroidLocationApi implements DogeLocationApi, LocationListen
         }
     }
 
+    @NotNull
     @Override
     public ApiStatus getStatus() {
         return status;
@@ -131,6 +135,9 @@ public final class AndroidLocationApi implements DogeLocationApi, LocationListen
 
     @Override
     public void onLocationChanged(Location location) {
+        if (location == null) {
+            return;
+        }
         receiver.onLocation(fuzzLocation(location));
     }
 }
