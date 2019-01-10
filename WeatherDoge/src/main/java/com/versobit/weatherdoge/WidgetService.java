@@ -34,8 +34,6 @@ import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import androidx.core.app.NotificationCompat;
-import androidx.core.content.ContextCompat;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
@@ -50,9 +48,14 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
+
+import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
 
 public final class WidgetService extends IntentService implements LocationReceiver {
 
@@ -64,8 +67,8 @@ public final class WidgetService extends IntentService implements LocationReceiv
     static final int PERMISSION_NOTIFICATION_ID = 410;
 
     private final AtomicReference<Location> locationRef = new AtomicReference<>();
-
-    private CountDownLatch locationLatch = new CountDownLatch(1);
+    private final CyclicBarrier locationBarrier = new CyclicBarrier(2);
+    
     private AppWidgetManager widgetManager;
     private int[] widgets;
     private PendingIntent pIntent;
@@ -76,7 +79,7 @@ public final class WidgetService extends IntentService implements LocationReceiv
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        locationLatch = new CountDownLatch(1);
+        locationBarrier.reset();
         widgetManager = AppWidgetManager.getInstance(this);
         if(ACTION_REFRESH_ALL.equals(intent.getAction())) {
             widgets = widgetManager.getAppWidgetIds(new ComponentName(this, WidgetProvider.class));
@@ -134,8 +137,8 @@ public final class WidgetService extends IntentService implements LocationReceiv
             }
             locationApi.connect();
             try {
-                locationLatch.await(15, TimeUnit.SECONDS);
-            } catch (InterruptedException ex) {
+                locationBarrier.await(15, TimeUnit.SECONDS);
+            } catch (BrokenBarrierException | TimeoutException | InterruptedException ex) {
                 Log.wtf(TAG, ex);
                 showError(R.string.widget_error_unknown);
                 locationApi.disconnect();
@@ -334,7 +337,11 @@ public final class WidgetService extends IntentService implements LocationReceiv
     @Override
     public void onLocation(Location location) {
         locationRef.set(location);
-        locationLatch.countDown();
+        try {
+            locationBarrier.await();
+        } catch (BrokenBarrierException | InterruptedException ex) {
+            //
+        }
     }
 
     @Override
