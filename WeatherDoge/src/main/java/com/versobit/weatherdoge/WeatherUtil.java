@@ -168,8 +168,8 @@ final class WeatherUtil {
                     + "&lon=" + URLEncoder.encode(String.format(Locale.US, "%.6f", longitude), "UTF-8");
             }
             query += "&APPID=" + URLEncoder.encode(BuildConfig.OWM_APPID, "UTF-8");
-            HttpURLConnection connection = (HttpURLConnection) openGzipConnection(
-                    new URL("http://api.openweathermap.org/data/2.5/weather?" + query)
+            HttpsURLConnection connection = (HttpsURLConnection) openGzipConnection(
+                    new URL("https://api.openweathermap.org/data/2.5/weather?" + query)
             );
             try {
                 JSONObject response = new JSONObject(getUncompressedResponse(connection));
