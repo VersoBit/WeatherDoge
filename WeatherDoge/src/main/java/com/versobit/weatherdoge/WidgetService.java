@@ -34,8 +34,8 @@ import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.ContextCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
@@ -312,10 +312,10 @@ public final class WidgetService extends IntentService implements LocationReceiv
                 .setSmallIcon(R.drawable.ic_launcher) // TODO: Needs a real icon
                 .setContentTitle(getString(R.string.widget_notification_permission_title))
                 .setContentText(getString(R.string.widget_notification_permission_body))
-                .setContentIntent(intent);
-        new NotificationCompat.BigTextStyle(builder)
-            .setBigContentTitle(builder.mContentTitle)
-            .bigText(builder.mContentText);
+                .setContentIntent(intent)
+                .setStyle(new NotificationCompat.BigTextStyle()
+                        .setBigContentTitle(getString(R.string.widget_notification_permission_title))
+                        .bigText(getString(R.string.widget_notification_permission_body)));
         ((NotificationManager)getSystemService(NOTIFICATION_SERVICE))
                 .notify(PERMISSION_NOTIFICATION_ID, builder.build());
     }
