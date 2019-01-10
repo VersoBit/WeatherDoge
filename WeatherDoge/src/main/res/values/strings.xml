@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Copyright (C) 2014-2017 VersoBit
+    Copyright (C) 2014-2017, 2019 VersoBit
 
     This file is part of Weather Doge.
 
@@ -135,9 +135,9 @@
     <string name="widget_error_geocoder">Error: Geocoder failed.</string>
     <string name="widget_error_location">Error: Location failed.</string>
     <string name="widget_error_permission">Error: Location permission not granted.</string>
-    <string name="widget_error_gms_connect">Error: GMS connection failed.</string>
+    <string name="widget_error_gms_connect">Error: Google Play Services connection failed.</string>
     <string name="widget_error_unknown">Error: Unknown error.</string>
-    <string name="widget_error_no_gms">Error: GMS unavailable.</string>
+    <string name="widget_error_no_gms">Error: Google Play Services unavailable.</string>
     <string name="widget_error_action">Error: Unknown action.</string>
     <string name="widget_error_api">Error: API error.</string>
     <string name="widget_error_weather_util">Error: WeatherUtil error.</string>
