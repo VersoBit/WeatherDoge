@@ -323,7 +323,7 @@ public final class WidgetService extends IntentService implements LocationReceiv
         PendingIntent intent = PendingIntent.getActivity(this, 0,
                 new Intent(this, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
-                .setSmallIcon(R.mipmap.ic_launcher) // TODO: Needs a real icon
+                .setSmallIcon(R.drawable.ic_doge_circle_notif) // TODO: Needs a real icon
                 .setContentTitle(getString(R.string.widget_notification_permission_title))
                 .setContentText(getString(R.string.widget_notification_permission_body))
                 .setContentIntent(intent)
