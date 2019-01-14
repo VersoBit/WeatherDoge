@@ -126,7 +126,7 @@ public final class WidgetWorker extends Worker implements LocationReceiver {
                     PendingIntent.FLAG_UPDATE_CURRENT);
         }
 
-        setStatus(getApplicationContext().getString(R.string.loading));
+        setStatus(getApplicationContext().getString(R.string.loading), true);
 
         DogeLocationApi locationApi = FlavoredApiSelector.get();
         locationApi.configure(getApplicationContext(), this);
@@ -262,6 +262,7 @@ public final class WidgetWorker extends Worker implements LocationReceiver {
             Bitmap wowLayer = null;
             boolean failed = false;
 
+            views.setViewVisibility(R.id.widget_loading, View.GONE);
             views.setOnClickPendingIntent(R.id.widget_root, pIntent);
             views.setImageViewResource(R.id.widget_dogeimg, dogeImg);
             views.setImageViewBitmap(R.id.widget_tempimg, textBitmaps[0]);
@@ -322,12 +323,17 @@ public final class WidgetWorker extends Worker implements LocationReceiver {
     }
 
     private void setStatus(String status) {
+        setStatus(status, false);
+    }
+
+    private void setStatus(String status, boolean isLoading) {
         Bitmap loading = WidgetProvider.getStatusBitmap(getApplicationContext(), status);
         for(int widget : widgets) {
             RemoteViews views = new RemoteViews(BuildConfig.APPLICATION_ID, R.layout.widget);
             views.setImageViewBitmap(R.id.widget_locationimg, loading);
             views.setImageViewBitmap(R.id.widget_last_updated_img, null);
             views.setOnClickPendingIntent(R.id.widget_root, pIntent);
+            views.setViewVisibility(R.id.widget_loading, isLoading ? View.VISIBLE : View.GONE);
             widgetManager.partiallyUpdateAppWidget(widget, views);
         }
         loading.recycle();

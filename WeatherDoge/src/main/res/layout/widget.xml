@@ -18,6 +18,7 @@
     along with Weather Doge.  If not, see <http://www.gnu.org/licenses/>.
 -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent" android:layout_height="match_parent"
     android:padding="@dimen/widget_margin" android:id="@+id/widget_root">
 
@@ -93,6 +94,17 @@
             android:layout_height="fill_parent"
             android:scaleType="centerInside"
             android:id="@+id/widget_locationimg" />
+
+        <ProgressBar
+            android:layout_toRightOf="@id/widget_locationimg"
+            android:layout_toEndOf="@id/widget_locationimg"
+            android:layout_width="18dp"
+            android:layout_height="15dp"
+            android:layout_centerVertical="true"
+            android:indeterminateOnly="true"
+            android:indeterminateTint="@color/primary"
+            android:id="@+id/widget_loading"
+            tools:ignore="UnusedAttribute" />
 
         <ImageView
             android:layout_alignParentEnd="false"
