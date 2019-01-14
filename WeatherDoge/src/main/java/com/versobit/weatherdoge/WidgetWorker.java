@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016, 2019 VersoBit
+ * Copyright (C) 2019 VersoBit
  *
  * This file is part of Weather Doge.
  *
@@ -19,11 +19,11 @@
 
 package com.versobit.weatherdoge;
 
-import android.app.IntentService;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -54,45 +54,58 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
+import androidx.work.Worker;
+import androidx.work.WorkerParameters;
 
-public final class WidgetService extends IntentService implements LocationReceiver {
+import static android.content.Context.NOTIFICATION_SERVICE;
 
-    private static final String TAG = WidgetService.class.getSimpleName();
+public final class WidgetWorker extends Worker implements LocationReceiver {
+
+    private static final String TAG = WidgetWorker.class.getSimpleName();
+
+    static final String TASK_ALL_TAG = TAG + "_All";
+    static final String TASK_MULTIPLE_TAG = TAG + "_Multiple";
+    static final String TASK_ONE_TAG = TAG + "_One";
+
+    static final String ACTION = "action";
     static final String ACTION_REFRESH_ALL = "refresh_all";
     static final String ACTION_REFRESH_MULTIPLE = "refresh_multiple";
     static final String ACTION_REFRESH_ONE = "refresh_one";
     static final String EXTRA_WIDGET_ID = "widget_id";
+
     static final int PERMISSION_NOTIFICATION_ID = 410;
 
     private final AtomicReference<Location> locationRef = new AtomicReference<>();
     private final CyclicBarrier locationBarrier = new CyclicBarrier(2);
-    
+
     private AppWidgetManager widgetManager;
     private int[] widgets;
     private PendingIntent pIntent;
 
-    public WidgetService() {
-        super(TAG);
+    public WidgetWorker(@NonNull Context ctx, @NonNull WorkerParameters params) {
+        super(ctx, params);
     }
 
+    @NonNull
     @Override
-    protected void onHandleIntent(Intent intent) {
+    public Result doWork() {
         locationBarrier.reset();
-        widgetManager = AppWidgetManager.getInstance(this);
-        if(ACTION_REFRESH_ALL.equals(intent.getAction())) {
-            widgets = widgetManager.getAppWidgetIds(new ComponentName(this, WidgetProvider.class));
-        } else if(ACTION_REFRESH_MULTIPLE.equals(intent.getAction())) {
-            widgets = intent.getIntArrayExtra(EXTRA_WIDGET_ID);
-        } else if(ACTION_REFRESH_ONE.equals(intent.getAction())) {
-            widgets = new int[] { intent.getIntExtra(EXTRA_WIDGET_ID, 0) };
+        widgetManager = AppWidgetManager.getInstance(getApplicationContext());
+        if(ACTION_REFRESH_ALL.equals(getInputData().getString(ACTION))) {
+            widgets = widgetManager.getAppWidgetIds(new ComponentName(getApplicationContext(), WidgetProvider.class));
+        } else if(ACTION_REFRESH_MULTIPLE.equals(getInputData().getString(ACTION))) {
+            widgets = getInputData().getIntArray(EXTRA_WIDGET_ID);
+        } else if(ACTION_REFRESH_ONE.equals(getInputData().getString(ACTION))) {
+            widgets = new int[] { getInputData().getInt(EXTRA_WIDGET_ID, 0) };
         } else {
-            Log.wtf(TAG, "Unknown action: " + intent.getAction());
-            return;
+            Log.wtf(TAG, "Unknown action: " + getInputData().getString(ACTION));
+            return Result.failure();
         }
 
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         boolean forceMetric = prefs.getBoolean(OptionsActivity.PREF_FORCE_METRIC, false);
         String forceLocation = prefs.getString(OptionsActivity.PREF_FORCE_LOCATION, "");
         WeatherUtil.Source weatherSource = WeatherUtil.Source.OPEN_WEATHER_MAP;
@@ -105,23 +118,23 @@ public final class WidgetService extends IntentService implements LocationReceiv
         boolean backgroundFix = prefs.getBoolean(OptionsActivity.PREF_WIDGET_BACKGROUND_FIX, false);
 
         if(tapToRefresh) {
-            pIntent = PendingIntent.getService(this, 0,
-                    new Intent(this, WidgetService.class).setAction(ACTION_REFRESH_ALL),
+            pIntent = PendingIntent.getBroadcast(getApplicationContext(), 0,
+                    new Intent(getApplicationContext(), WidgetRefreshReceiver.class).setAction(ACTION_REFRESH_ALL),
                     PendingIntent.FLAG_UPDATE_CURRENT);
         } else {
-            pIntent = PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class),
+            pIntent = PendingIntent.getActivity(getApplicationContext(), 0, new Intent(getApplicationContext(), MainActivity.class),
                     PendingIntent.FLAG_UPDATE_CURRENT);
         }
 
-        setStatus(getString(R.string.loading));
+        setStatus(getApplicationContext().getString(R.string.loading));
 
         DogeLocationApi locationApi = FlavoredApiSelector.get();
-        locationApi.configure(this, this);
+        locationApi.configure(getApplicationContext(), this);
         if(forceLocation == null || forceLocation.isEmpty()) {
             if(!locationApi.isAvailable()) {
                 showError(BuildConfig.FLAVOR.equals(BuildConfig.FLAVOR_PLAY) ?
                         R.string.widget_error_no_gms : R.string.widget_error_location_settings);
-                return;
+                return Result.failure();
             }
         }
 
@@ -129,11 +142,11 @@ public final class WidgetService extends IntentService implements LocationReceiv
         WeatherUtil.WeatherData data;
         String locationName = "";
         if(forceLocation == null || forceLocation.isEmpty()) {
-            if (ContextCompat.checkSelfPermission(this, WeatherDoge.LOCATION_PERMISSION)
+            if (ContextCompat.checkSelfPermission(getApplicationContext(), WeatherDoge.LOCATION_PERMISSION)
                     != PackageManager.PERMISSION_GRANTED) {
                 showError(R.string.widget_error_permission);
                 showPermissionNotification();
-                return;
+                return Result.failure();
             }
             locationApi.connect();
             try {
@@ -142,12 +155,12 @@ public final class WidgetService extends IntentService implements LocationReceiv
                 Log.wtf(TAG, ex);
                 showError(R.string.widget_error_unknown);
                 locationApi.disconnect();
-                return;
+                return Result.retry();
             }
             if (locationApi.getStatus() != ApiStatus.CONNECTED) {
                 showError(R.string.widget_error_gms_connect);
                 locationApi.disconnect();
-                return;
+                return Result.retry();
             }
             Location location = locationRef.get();
             locationApi.disconnect();
@@ -155,16 +168,16 @@ public final class WidgetService extends IntentService implements LocationReceiv
                 Log.e(TAG, "Unable to retrieve location. (null)");
                 showError(BuildConfig.FLAVOR.equals(BuildConfig.FLAVOR_PLAY) ?
                         R.string.widget_error_location : R.string.widget_error_location_settings);
-                return;
+                return Result.retry();
             }
-            data = Cache.getWeatherData(this, location.getLatitude(),location.getLongitude());
+            data = Cache.getWeatherData(getApplicationContext(), location.getLatitude(),location.getLongitude());
 
             if(data == null || data.source != weatherSource) {
                 result = WeatherUtil.getWeather(location.getLatitude(), location.getLongitude(),
                         weatherSource);
             }
 
-            Geocoder geocoder = new Geocoder(this);
+            Geocoder geocoder = new Geocoder(getApplicationContext());
             try {
                 List<Address> addresses = geocoder.getFromLocation(location.getLatitude(),
                         location.getLongitude(), 1);
@@ -174,11 +187,11 @@ public final class WidgetService extends IntentService implements LocationReceiv
             } catch (IOException ex) {
                 Log.wtf(TAG, ex);
                 showError(R.string.widget_error_geocoder);
-                return;
+                return Result.retry();
             }
         } else {
             locationName = forceLocation;
-            data = Cache.getWeatherData(this, forceLocation);
+            data = Cache.getWeatherData(getApplicationContext(), forceLocation);
             if(data == null || data.source != weatherSource) {
                 result = WeatherUtil.getWeather(forceLocation, weatherSource);
             }
@@ -190,25 +203,25 @@ public final class WidgetService extends IntentService implements LocationReceiv
                         ((data == null || data.source == null) ? "null" : data.source) +
                         ", weatherSource: " + weatherSource);
                 showError(R.string.widget_error_unknown);
-                return;
+                return Result.retry();
             }
             switch (result.error) {
                 case WeatherUtil.WeatherResult.ERROR_NONE:
                     data = result.data;
-                    Cache.putWeatherData(this, data);
+                    Cache.putWeatherData(getApplicationContext(), data);
                     break;
                 case WeatherUtil.WeatherResult.ERROR_API:
                     Log.e(TAG, "ERROR_API: " + (result.msg == null ? "null" : result.msg));
                     showError(R.string.widget_error_api);
-                    return;
+                    return Result.retry();
                 case WeatherUtil.WeatherResult.ERROR_THROWABLE:
                     Log.e(TAG, "ERROR_THROWABLE: " + (result.msg == null ? "null" : result.msg), result.throwable);
                     showError(R.string.widget_error_weather_util);
-                    return;
+                    return Result.retry();
                 default:
                     Log.wtf(TAG, "Unhandled WeatherResult: " + result.error);
                     showError(R.string.widget_error_unknown);
-                    return;
+                    return Result.retry();
             }
         }
 
@@ -237,10 +250,10 @@ public final class WidgetService extends IntentService implements LocationReceiv
         Date now = new Date();
         StringBuilder time = new StringBuilder();
         if(showDate) {
-            time.append(DateFormat.format(" MMM d ", now)).append(getString(R.string.widget_at));
+            time.append(DateFormat.format(" MMM d ", now)).append(getApplicationContext().getString(R.string.widget_at));
         }
-        time.append(" ").append(DateFormat.getTimeFormat(this).format(now)).append(" ");
-        Bitmap[] textBitmaps = WidgetProvider.getTextBitmaps(this,
+        time.append(" ").append(DateFormat.getTimeFormat(getApplicationContext()).format(now)).append(" ");
+        Bitmap[] textBitmaps = WidgetProvider.getTextBitmaps(getApplicationContext(),
                 formattedTemp, condition, locationName, time.toString());
 
         for(int widget : widgets) {
@@ -260,13 +273,13 @@ public final class WidgetService extends IntentService implements LocationReceiv
                 try {
                     Bundle options = widgetManager.getAppWidgetOptions(widget);
                     if(!backgroundFix) {
-                        sky = WidgetProvider.getSkyBitmap(this, options, skyImg);
+                        sky = WidgetProvider.getSkyBitmap(getApplicationContext(), options, skyImg);
                         views.setImageViewBitmap(R.id.widget_sky, sky);
                         views.setInt(R.id.widget_sky, "setVisibility", View.VISIBLE);
                         views.setInt(R.id.widget_sky_compat, "setVisibility", View.GONE);
                     }
                     if(showWowText) {
-                        wowLayer = WidgetProvider.getWowLayer(this, options, data.image, (int)data.temperature);
+                        wowLayer = WidgetProvider.getWowLayer(getApplicationContext(), options, data.image, (int)data.temperature);
                         views.setImageViewBitmap(R.id.widget_wowlayer, wowLayer);
                     } else {
                         views.setImageViewBitmap(R.id.widget_wowlayer, null);
@@ -299,16 +312,17 @@ public final class WidgetService extends IntentService implements LocationReceiv
             }
         }
 
+        return Result.success();
     }
 
     private void showError(final int resId) {
-        String error = getString(resId);
+        String error = getApplicationContext().getString(resId);
         Log.e(TAG, error);
         setStatus(error);
     }
 
     private void setStatus(String status) {
-        Bitmap loading = WidgetProvider.getStatusBitmap(this, status);
+        Bitmap loading = WidgetProvider.getStatusBitmap(getApplicationContext(), status);
         for(int widget : widgets) {
             RemoteViews views = new RemoteViews(BuildConfig.APPLICATION_ID, R.layout.widget);
             views.setImageViewBitmap(R.id.widget_locationimg, loading);
@@ -320,17 +334,17 @@ public final class WidgetService extends IntentService implements LocationReceiv
     }
 
     private void showPermissionNotification() {
-        PendingIntent intent = PendingIntent.getActivity(this, 0,
-                new Intent(this, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
+        PendingIntent intent = PendingIntent.getActivity(getApplicationContext(), 0,
+                new Intent(getApplicationContext(), MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext())
                 .setSmallIcon(R.drawable.ic_doge_circle_notif) // TODO: Needs a real icon
-                .setContentTitle(getString(R.string.widget_notification_permission_title))
-                .setContentText(getString(R.string.widget_notification_permission_body))
+                .setContentTitle(getApplicationContext().getString(R.string.widget_notification_permission_title))
+                .setContentText(getApplicationContext().getString(R.string.widget_notification_permission_body))
                 .setContentIntent(intent)
                 .setStyle(new NotificationCompat.BigTextStyle()
-                        .setBigContentTitle(getString(R.string.widget_notification_permission_title))
-                        .bigText(getString(R.string.widget_notification_permission_body)));
-        ((NotificationManager)getSystemService(NOTIFICATION_SERVICE))
+                        .setBigContentTitle(getApplicationContext().getString(R.string.widget_notification_permission_title))
+                        .bigText(getApplicationContext().getString(R.string.widget_notification_permission_body)));
+        ((NotificationManager)getApplicationContext().getSystemService(NOTIFICATION_SERVICE))
                 .notify(PERMISSION_NOTIFICATION_ID, builder.build());
     }
 

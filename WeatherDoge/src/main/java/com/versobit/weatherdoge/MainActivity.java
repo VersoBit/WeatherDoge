@@ -516,9 +516,9 @@ final public class MainActivity extends Activity implements LocationReceiver,
         if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             // Remove the widget notification, if any
             ((NotificationManager)getSystemService(NOTIFICATION_SERVICE))
-                    .cancel(WidgetService.PERMISSION_NOTIFICATION_ID);
+                    .cancel(WidgetWorker.PERMISSION_NOTIFICATION_ID);
             // Refresh the widget
-            startService(new Intent(this, WidgetService.class).setAction(WidgetService.ACTION_REFRESH_ALL));
+            sendBroadcast(new Intent(this, WidgetRefreshReceiver.class).setAction(WidgetWorker.ACTION_REFRESH_ALL));
             // Dismiss the snackbar, if any
             if (locationSnackbar != null && locationSnackbar.isShown()) {
                 locationSnackbar.dismiss();

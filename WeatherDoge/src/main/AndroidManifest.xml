@@ -63,11 +63,10 @@
                 android:resource="@xml/widget_info" />
         </receiver>
 
-        <service
-            android:name=".WidgetService"
+        <receiver
+            android:name=".WidgetRefreshReceiver"
             android:enabled="true"
-            android:exported="false" >
-        </service>
+            android:exported="true" />
 
         <!-- Samsung Galaxy MultiWindow support -->
         <uses-library android:required="false" android:name="com.sec.android.app.multiwindow" />

@@ -309,11 +309,11 @@ final public class OptionsActivity extends PreferenceActivity {
                     newWidgetShowWowText != widgetShowWowText ||
                     newWidgetShowDate != widgetShowDate ||
                     newWidgetBackgroundFix != widgetBackgroundFix) {
-                getActivity().startService(new Intent(getActivity(), WidgetService.class)
-                        .setAction(WidgetService.ACTION_REFRESH_ALL));
+                getActivity().sendBroadcast(new Intent(getActivity(), WidgetRefreshReceiver.class)
+                        .setAction(WidgetWorker.ACTION_REFRESH_ALL));
             }
             if (!widgetRefreshInterval.equals(newWidgetRefreshInterval)) {
-                WidgetProvider.resetAlarm(getActivity());
+                WidgetProvider.requeueWorkSchedule(getActivity());
             }
             super.onStop();
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 VersoBit
+ * Copyright (C) 2014-2016, 2019 VersoBit
  *
  * This file is part of Weather Doge.
  *
@@ -20,8 +20,6 @@
 package com.versobit.weatherdoge;
 
 import android.annotation.TargetApi;
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
@@ -48,48 +46,68 @@ import android.util.TypedValue;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
+
+import androidx.work.Constraints;
+import androidx.work.Data;
+import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.NetworkType;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
 
 public final class WidgetProvider extends AppWidgetProvider {
+
+    private final static String WORKER_ALL_TAG = "WidgetWorker_All";
+    private final static String UPDATE_ALL_WIDGETS_SEQUENCE = "update_widgets_recurring";
 
     // Will only be called once (on widget startup)
     @Override
     public void onUpdate(Context ctx, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-        resetAlarm(ctx);
-        ctx.startService(new Intent(ctx, WidgetService.class)
-                .setAction(WidgetService.ACTION_REFRESH_MULTIPLE)
-                .putExtra(WidgetService.EXTRA_WIDGET_ID, appWidgetIds));
+        requeueWorkSchedule(ctx);
+        ctx.sendBroadcast(new Intent(ctx, WidgetRefreshReceiver.class)
+                .setAction(WidgetWorker.ACTION_REFRESH_MULTIPLE)
+                .putExtra(WidgetWorker.EXTRA_WIDGET_ID, appWidgetIds));
     }
 
     @Override
     public void onEnabled(Context ctx) {
-        resetAlarm(ctx);
+        requeueWorkSchedule(ctx);
     }
 
     @Override
     public void onDisabled(Context ctx) {
-        AlarmManager am = (AlarmManager)ctx.getSystemService(Context.ALARM_SERVICE);
-        am.cancel(PendingIntent.getService(ctx, 0, new Intent(ctx, WidgetService.class)
-                .setAction(WidgetService.ACTION_REFRESH_ALL), 0));
+        WorkManager.getInstance().cancelAllWorkByTag(WORKER_ALL_TAG);
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     @Override
     public void onAppWidgetOptionsChanged(Context ctx, AppWidgetManager appWidgetManager, int appWidgetId, Bundle newOptions) {
         super.onAppWidgetOptionsChanged(ctx, appWidgetManager, appWidgetId, newOptions);
-        ctx.startService(new Intent(ctx, WidgetService.class)
-                .setAction(WidgetService.ACTION_REFRESH_ONE)
-                .putExtra(WidgetService.EXTRA_WIDGET_ID, appWidgetId));
+        ctx.sendBroadcast(new Intent(ctx, WidgetRefreshReceiver.class)
+                .setAction(WidgetWorker.ACTION_REFRESH_ONE)
+                .putExtra(WidgetWorker.EXTRA_WIDGET_ID, appWidgetId));
     }
 
-    static void resetAlarm(Context ctx) {
+    static void requeueWorkSchedule(Context ctx) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
-        long interval = Integer.parseInt(prefs.getString(OptionsActivity.PREF_WIDGET_REFRESH, "1800"))
-                * 1000L;
-        AlarmManager am = (AlarmManager)ctx.getSystemService(Context.ALARM_SERVICE);
-        PendingIntent pIntent = PendingIntent.getService(ctx, 0,
-                new Intent(ctx, WidgetService.class).setAction(WidgetService.ACTION_REFRESH_ALL), 0);
-        am.cancel(pIntent);
-        am.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, interval, interval, pIntent);
+        //noinspection ConstantConditions
+        long interval = Long.parseLong(
+                prefs.getString(OptionsActivity.PREF_WIDGET_REFRESH,"1800")
+        );
+        Constraints workerConstraints = new Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .build();
+        Data workerData = new Data.Builder()
+                .putString(WidgetWorker.ACTION, WidgetWorker.ACTION_REFRESH_ALL)
+                .build();
+        PeriodicWorkRequest widgetWorkerRequest =
+                new PeriodicWorkRequest.Builder(WidgetWorker.class, interval, TimeUnit.SECONDS)
+                        .addTag(WORKER_ALL_TAG)
+                        .setConstraints(workerConstraints)
+                        .setInputData(workerData)
+                        .build();
+        WorkManager.getInstance().enqueueUniquePeriodicWork(UPDATE_ALL_WIDGETS_SEQUENCE,
+                ExistingPeriodicWorkPolicy.REPLACE, widgetWorkerRequest);
     }
 
     static Bitmap[] getTextBitmaps(Context ctx, String temp, String description, String location, String lastUpdated) {
