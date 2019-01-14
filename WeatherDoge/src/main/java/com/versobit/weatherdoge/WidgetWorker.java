@@ -19,6 +19,8 @@
 
 package com.versobit.weatherdoge;
 
+import android.app.NotificationChannel;
+import android.app.NotificationChannelGroup;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
@@ -76,6 +78,8 @@ public final class WidgetWorker extends Worker implements LocationReceiver {
     static final String ACTION_REFRESH_ONE = "refresh_one";
     static final String EXTRA_WIDGET_ID = "widget_id";
 
+    private static final String WIDGETS_NOTIFICATION_GROUP_ID = "Widgets";
+    private static final String WIDGET_PERMISSION_REQ_NOTIFICATION_CHANNEL_ID = "WidgetLocationPermissionRequired";
     static final int PERMISSION_NOTIFICATION_ID = 410;
 
     private final AtomicReference<Location> locationRef = new AtomicReference<>();
@@ -339,10 +343,29 @@ public final class WidgetWorker extends Worker implements LocationReceiver {
         loading.recycle();
     }
 
+    private void createNotificationGroupAndChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence groupName = getApplicationContext().getString(R.string.notification_group_widgets_name);
+            NotificationChannelGroup group = new NotificationChannelGroup(WIDGETS_NOTIFICATION_GROUP_ID, groupName);
+
+            CharSequence channelName = getApplicationContext().getString(R.string.notification_channel_widgets_location_name);
+            String channelDesc = getApplicationContext().getString(R.string.notification_channel_widgets_location_desc);
+            NotificationChannel channel = new NotificationChannel(WIDGET_PERMISSION_REQ_NOTIFICATION_CHANNEL_ID,
+                    channelName, NotificationManager.IMPORTANCE_LOW);
+            channel.setDescription(channelDesc);
+            channel.setGroup(WIDGETS_NOTIFICATION_GROUP_ID);
+
+            NotificationManager notificationManager = getApplicationContext().getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannelGroup(group);
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
+
     private void showPermissionNotification() {
+        createNotificationGroupAndChannel();
         PendingIntent intent = PendingIntent.getActivity(getApplicationContext(), 0,
                 new Intent(getApplicationContext(), MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext())
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), WIDGET_PERMISSION_REQ_NOTIFICATION_CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_doge_circle_notif) // TODO: Needs a real icon
                 .setContentTitle(getApplicationContext().getString(R.string.widget_notification_permission_title))
                 .setContentText(getApplicationContext().getString(R.string.widget_notification_permission_body))

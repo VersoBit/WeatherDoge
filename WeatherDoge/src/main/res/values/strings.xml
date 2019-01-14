@@ -145,6 +145,10 @@
     <string name="widget_notification_permission_title">Location requested</string>
     <string name="widget_notification_permission_body">The Weather Doge widget needs access to your location.</string>
 
+    <string name="notification_group_widgets_name">Widgets</string>
+    <string name="notification_channel_widgets_location_name">Location Permission</string>
+    <string name="notification_channel_widgets_location_desc">Alerts you if the widget needs access to your location.</string>
+
     <string-array name="wows">
         <item>wow</item>
         <item>so wow</item>
