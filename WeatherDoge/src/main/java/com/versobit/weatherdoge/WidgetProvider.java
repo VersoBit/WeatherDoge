@@ -73,7 +73,11 @@ public final class WidgetProvider extends AppWidgetProvider {
 
     @Override
     public void onDisabled(Context ctx) {
-        WorkManager.getInstance().cancelAllWorkByTag(WORKER_ALL_TAG);
+        WorkManager workManager = WorkManager.getInstance();
+        workManager.cancelAllWorkByTag(WidgetWorker.TASK_ALL_TAG);
+        workManager.cancelAllWorkByTag(WidgetWorker.TASK_MULTIPLE_TAG);
+        workManager.cancelAllWorkByTag(WidgetWorker.TASK_ONE_TAG);
+        workManager.cancelAllWorkByTag(WORKER_ALL_TAG);
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
