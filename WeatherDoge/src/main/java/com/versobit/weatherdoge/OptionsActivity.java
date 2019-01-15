@@ -31,20 +31,13 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
-import androidx.annotation.Nullable;
-import com.google.android.material.appbar.AppBarLayout;
-import androidx.appcompat.widget.AppCompatCheckBox;
-import androidx.appcompat.widget.AppCompatCheckedTextView;
-import androidx.appcompat.widget.AppCompatEditText;
-import androidx.appcompat.widget.AppCompatRadioButton;
-import androidx.appcompat.widget.AppCompatSpinner;
-import androidx.appcompat.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
 
+import com.google.android.material.appbar.AppBarLayout;
 import com.versobit.weatherdoge.dialogs.AboutDialog;
 import com.versobit.weatherdoge.dialogs.ContributeDialog;
 import com.versobit.weatherdoge.dialogs.DropShadowDialog;
@@ -53,6 +46,14 @@ import com.versobit.weatherdoge.ui.DogeEditTextPreference;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatCheckBox;
+import androidx.appcompat.widget.AppCompatCheckedTextView;
+import androidx.appcompat.widget.AppCompatEditText;
+import androidx.appcompat.widget.AppCompatRadioButton;
+import androidx.appcompat.widget.AppCompatSpinner;
+import androidx.appcompat.widget.Toolbar;
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings. On
@@ -309,8 +310,7 @@ final public class OptionsActivity extends PreferenceActivity {
                     newWidgetShowWowText != widgetShowWowText ||
                     newWidgetShowDate != widgetShowDate ||
                     newWidgetBackgroundFix != widgetBackgroundFix) {
-                getActivity().sendBroadcast(new Intent(getActivity(), WidgetRefreshReceiver.class)
-                        .setAction(WidgetWorker.ACTION_REFRESH_ALL));
+                WidgetWorker.enqueueOnceAll();
             }
             if (!widgetRefreshInterval.equals(newWidgetRefreshInterval)) {
                 WidgetProvider.requeueWorkSchedule(getActivity());

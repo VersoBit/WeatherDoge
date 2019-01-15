@@ -59,6 +59,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
+import androidx.work.Data;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
@@ -318,6 +321,38 @@ public final class WidgetWorker extends Worker implements LocationReceiver {
         }
 
         return Result.success();
+    }
+
+    public static void enqueueOnceAll() {
+        enqueueOnceNow(ACTION_REFRESH_ALL, null);
+    }
+
+    public static void enqueueOnceMultiple(int[] appWidgetIds) {
+        enqueueOnceNow(ACTION_REFRESH_MULTIPLE, appWidgetIds);
+    }
+
+    public static void enqueueOnceSingle(int appWidgetId) {
+        enqueueOnceNow(ACTION_REFRESH_ONE, new int[] { appWidgetId });
+    }
+
+    private static void enqueueOnceNow(String action, int[] appWidgetIds) {
+        Data.Builder dataBuilder = new Data.Builder()
+                .putString(ACTION, action);
+        OneTimeWorkRequest.Builder workRequestBuilder =
+                new OneTimeWorkRequest.Builder(WidgetWorker.class);
+        switch (action) {
+            case ACTION_REFRESH_ALL:
+                workRequestBuilder.addTag(TASK_ALL_TAG);
+            case ACTION_REFRESH_MULTIPLE:
+                dataBuilder.putIntArray(EXTRA_WIDGET_ID, appWidgetIds);
+                workRequestBuilder.addTag(TASK_MULTIPLE_TAG);
+                break;
+            case ACTION_REFRESH_ONE:
+                dataBuilder.putInt(EXTRA_WIDGET_ID, appWidgetIds[0]);
+                workRequestBuilder.addTag(TASK_ONE_TAG);
+        }
+        workRequestBuilder.setInputData(dataBuilder.build());
+        WorkManager.getInstance().enqueue(workRequestBuilder.build());
     }
 
     private void showError(final int resId) {

@@ -48,10 +48,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
-import androidx.annotation.NonNull;
-import com.google.android.material.snackbar.Snackbar;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
@@ -69,6 +65,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
+import com.google.android.material.snackbar.Snackbar;
 import com.plattysoft.leonids.ParticleSystem;
 import com.versobit.weatherdoge.location.ApiStatus;
 import com.versobit.weatherdoge.location.DogeLocationApi;
@@ -85,6 +82,10 @@ import java.util.Queue;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 final public class MainActivity extends Activity implements LocationReceiver,
         ActivityCompat.OnRequestPermissionsResultCallback {
@@ -518,7 +519,7 @@ final public class MainActivity extends Activity implements LocationReceiver,
             ((NotificationManager)getSystemService(NOTIFICATION_SERVICE))
                     .cancel(WidgetWorker.PERMISSION_NOTIFICATION_ID);
             // Refresh the widget
-            sendBroadcast(new Intent(this, WidgetRefreshReceiver.class).setAction(WidgetWorker.ACTION_REFRESH_ALL));
+            WidgetWorker.enqueueOnceAll();
             // Dismiss the snackbar, if any
             if (locationSnackbar != null && locationSnackbar.isShown()) {
                 locationSnackbar.dismiss();

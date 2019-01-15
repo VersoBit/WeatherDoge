@@ -22,31 +22,15 @@ package com.versobit.weatherdoge
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import androidx.work.Data
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
 
 class WidgetRefreshReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
-        val workerDataBuilder = Data.Builder()
-                .putString(WidgetWorker.ACTION, intent.action)
         when (intent.action) {
-            WidgetWorker.ACTION_REFRESH_MULTIPLE -> workerDataBuilder.putIntArray(
-                    WidgetWorker.EXTRA_WIDGET_ID,
-                    intent.getIntArrayExtra(WidgetWorker.EXTRA_WIDGET_ID))
-            WidgetWorker.ACTION_REFRESH_ONE -> workerDataBuilder.putInt(
-                    WidgetWorker.EXTRA_WIDGET_ID,
-                    intent.getIntExtra(WidgetWorker.EXTRA_WIDGET_ID, 0))
+            WidgetWorker.ACTION_REFRESH_MULTIPLE ->
+                WidgetWorker.enqueueOnceMultiple(intent.getIntArrayExtra(WidgetWorker.EXTRA_WIDGET_ID))
+            WidgetWorker.ACTION_REFRESH_ONE ->
+                WidgetWorker.enqueueOnceSingle(intent.getIntExtra(WidgetWorker.EXTRA_WIDGET_ID, 0))
         }
-        val widgetWorkerRequest = OneTimeWorkRequestBuilder<WidgetWorker>()
-                .addTag(when (intent.action) {
-                    WidgetWorker.ACTION_REFRESH_MULTIPLE -> WidgetWorker.TASK_MULTIPLE_TAG
-                    WidgetWorker.ACTION_REFRESH_ONE -> WidgetWorker.TASK_ONE_TAG
-                    else -> WidgetWorker.TASK_ALL_TAG
-                })
-                .setInputData(workerDataBuilder.build())
-                .build()
-        WorkManager.getInstance().enqueue(widgetWorkerRequest)
     }
 }

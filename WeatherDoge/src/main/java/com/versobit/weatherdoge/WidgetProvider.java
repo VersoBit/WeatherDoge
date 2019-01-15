@@ -23,7 +23,6 @@ import android.annotation.TargetApi;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -64,9 +63,7 @@ public final class WidgetProvider extends AppWidgetProvider {
     @Override
     public void onUpdate(Context ctx, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         requeueWorkSchedule(ctx);
-        ctx.sendBroadcast(new Intent(ctx, WidgetRefreshReceiver.class)
-                .setAction(WidgetWorker.ACTION_REFRESH_MULTIPLE)
-                .putExtra(WidgetWorker.EXTRA_WIDGET_ID, appWidgetIds));
+        WidgetWorker.enqueueOnceMultiple(appWidgetIds);
     }
 
     @Override
@@ -83,9 +80,7 @@ public final class WidgetProvider extends AppWidgetProvider {
     @Override
     public void onAppWidgetOptionsChanged(Context ctx, AppWidgetManager appWidgetManager, int appWidgetId, Bundle newOptions) {
         super.onAppWidgetOptionsChanged(ctx, appWidgetManager, appWidgetId, newOptions);
-        ctx.sendBroadcast(new Intent(ctx, WidgetRefreshReceiver.class)
-                .setAction(WidgetWorker.ACTION_REFRESH_ONE)
-                .putExtra(WidgetWorker.EXTRA_WIDGET_ID, appWidgetId));
+        WidgetWorker.enqueueOnceSingle(appWidgetId);
     }
 
     static void requeueWorkSchedule(Context ctx) {
