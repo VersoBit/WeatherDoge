@@ -343,6 +343,7 @@ public final class WidgetWorker extends Worker implements LocationReceiver {
         switch (action) {
             case ACTION_REFRESH_ALL:
                 workRequestBuilder.addTag(TASK_ALL_TAG);
+                break;
             case ACTION_REFRESH_MULTIPLE:
                 dataBuilder.putIntArray(EXTRA_WIDGET_ID, appWidgetIds);
                 workRequestBuilder.addTag(TASK_MULTIPLE_TAG);
