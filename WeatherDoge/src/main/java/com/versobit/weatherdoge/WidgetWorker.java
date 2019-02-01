@@ -112,6 +112,11 @@ public final class WidgetWorker extends Worker implements LocationReceiver {
             return Result.failure();
         }
 
+        if (widgets == null || widgets.length == 0) {
+            Log.w(TAG, "WidgetWorker tasked with 0 widgets");
+            return Result.failure();
+        }
+
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         boolean forceMetric = prefs.getBoolean(OptionsActivity.PREF_FORCE_METRIC, false);
         String forceLocation = prefs.getString(OptionsActivity.PREF_FORCE_LOCATION, "");

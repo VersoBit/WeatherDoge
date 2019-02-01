@@ -310,7 +310,9 @@ final public class OptionsActivity extends PreferenceActivity {
                     newWidgetShowWowText != widgetShowWowText ||
                     newWidgetShowDate != widgetShowDate ||
                     newWidgetBackgroundFix != widgetBackgroundFix) {
-                WidgetWorker.enqueueOnceAll();
+                if (WidgetProvider.areWidgetsActive(getActivity())) {
+                    WidgetWorker.enqueueOnceAll();
+                }
             }
             if (!widgetRefreshInterval.equals(newWidgetRefreshInterval)) {
                 WidgetProvider.requeueWorkSchedule(getActivity());

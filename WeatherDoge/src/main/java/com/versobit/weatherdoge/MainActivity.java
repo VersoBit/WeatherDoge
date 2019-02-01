@@ -519,7 +519,9 @@ final public class MainActivity extends Activity implements LocationReceiver,
             ((NotificationManager)getSystemService(NOTIFICATION_SERVICE))
                     .cancel(WidgetWorker.PERMISSION_NOTIFICATION_ID);
             // Refresh the widget
-            WidgetWorker.enqueueOnceAll();
+            if (WidgetProvider.areWidgetsActive(this)) {
+                WidgetWorker.enqueueOnceAll();
+            }
             // Dismiss the snackbar, if any
             if (locationSnackbar != null && locationSnackbar.isShown()) {
                 locationSnackbar.dismiss();

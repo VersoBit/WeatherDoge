@@ -22,6 +22,7 @@ package com.versobit.weatherdoge;
 import android.annotation.TargetApi;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -88,6 +89,9 @@ public final class WidgetProvider extends AppWidgetProvider {
     }
 
     static void requeueWorkSchedule(Context ctx) {
+        if (!areWidgetsActive(ctx)) {
+            return;
+        }
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
         //noinspection ConstantConditions
         long interval = Long.parseLong(
@@ -107,6 +111,11 @@ public final class WidgetProvider extends AppWidgetProvider {
                         .build();
         WorkManager.getInstance().enqueueUniquePeriodicWork(UPDATE_ALL_WIDGETS_SEQUENCE,
                 ExistingPeriodicWorkPolicy.REPLACE, widgetWorkerRequest);
+    }
+
+    static boolean areWidgetsActive(Context ctx) {
+        return AppWidgetManager.getInstance(ctx)
+                .getAppWidgetIds(new ComponentName(ctx, WidgetProvider.class)).length != 0;
     }
 
     static Bitmap[] getTextBitmaps(Context ctx, String temp, String description, String location, String lastUpdated) {
