@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 VersoBit
+ * Copyright (C) 2014-2016, 2019 VersoBit
  *
  * This file is part of Weather Doge.
  *
@@ -69,6 +69,11 @@ final class WeatherUtil {
     }
 
     private static WeatherResult getWeather(double latitude, double longitude, String location, Source source) {
+        if (source == Source.YAHOO) {
+            // Yahoo's Weather API is no longer publicly accessible. Force switch all Yahoo users
+            // to OWM for now.
+            source = Source.OPEN_WEATHER_MAP;
+        }
         if (source == Source.OPEN_WEATHER_MAP) {
             //noinspection ConstantConditions
             if (TextUtils.isEmpty(BuildConfig.OWM_APPID)) {

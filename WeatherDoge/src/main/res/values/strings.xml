@@ -51,7 +51,7 @@
     <string name="pref_weather_source_name">Weather Source</string>
     <string-array name="pref_weather_source_options">
         <item>OpenWeatherMap</item>
-        <item>Yahoo!</item>
+        <item>Yahoo! (disabled)</item>
         <item>AccuWeather</item>
     </string-array>
     <!-- These keys must stay in sync with WeatherUtil.Source -->
