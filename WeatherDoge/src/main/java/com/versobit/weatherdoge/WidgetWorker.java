@@ -33,6 +33,7 @@ import android.graphics.Bitmap;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -50,6 +51,7 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.TimeUnit;
@@ -129,11 +131,7 @@ public final class WidgetWorker extends Worker implements LocationReceiver {
         boolean showDate = prefs.getBoolean(OptionsActivity.PREF_WIDGET_SHOW_DATE, false);
         boolean backgroundFix = prefs.getBoolean(OptionsActivity.PREF_WIDGET_BACKGROUND_FIX, false);
 
-        if(tapToRefresh) {
-            pIntent = PendingIntent.getBroadcast(getApplicationContext(), 0,
-                    new Intent(getApplicationContext(), WidgetRefreshReceiver.class).setAction(ACTION_REFRESH_ALL),
-                    PendingIntent.FLAG_UPDATE_CURRENT);
-        } else {
+        if (!tapToRefresh) {
             pIntent = PendingIntent.getActivity(getApplicationContext(), 0, new Intent(getApplicationContext(), MainActivity.class),
                     PendingIntent.FLAG_UPDATE_CURRENT);
         }
@@ -273,6 +271,23 @@ public final class WidgetWorker extends Worker implements LocationReceiver {
             Bitmap sky = null;
             Bitmap wowLayer = null;
             boolean failed = false;
+
+            if (tapToRefresh) {
+                // Worth noting that the data URI in this pending intent is used only
+                // to distinguish it from other widget intents. The extra data is what's
+                // processed by the WidgetRefreshReceiver
+                Uri dataUri = Uri.parse(String.format(Locale.US, "widget://%s/%d",
+                        BuildConfig.APPLICATION_ID, widget));
+                pIntent = PendingIntent.getBroadcast(
+                        getApplicationContext(),
+                        0,
+                        new Intent(getApplicationContext(), WidgetRefreshReceiver.class)
+                                .setAction(ACTION_REFRESH_ONE)
+                                .setData(dataUri)
+                                .putExtra(EXTRA_WIDGET_ID, widget),
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
+            }
 
             views.setViewVisibility(R.id.widget_loading, View.GONE);
             views.setOnClickPendingIntent(R.id.widget_root, pIntent);
