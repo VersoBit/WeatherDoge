@@ -92,7 +92,7 @@ public final class WidgetWorker extends Worker implements LocationReceiver {
 
     private AppWidgetManager widgetManager;
     private int[] widgets;
-    private PendingIntent pIntent;
+    private PendingIntent[] pIntents;
 
     public WidgetWorker(@NonNull Context ctx, @NonNull WorkerParameters params) {
         super(ctx, params);
@@ -131,9 +131,28 @@ public final class WidgetWorker extends Worker implements LocationReceiver {
         boolean showDate = prefs.getBoolean(OptionsActivity.PREF_WIDGET_SHOW_DATE, false);
         boolean backgroundFix = prefs.getBoolean(OptionsActivity.PREF_WIDGET_BACKGROUND_FIX, false);
 
-        if (!tapToRefresh) {
-            pIntent = PendingIntent.getActivity(getApplicationContext(), 0, new Intent(getApplicationContext(), MainActivity.class),
-                    PendingIntent.FLAG_UPDATE_CURRENT);
+        pIntents = new PendingIntent[widgets.length];
+        for (int i = 0; i < widgets.length; i++) {
+            if (tapToRefresh) {
+                // Worth noting that the data URI in this pending intent is used only
+                // to distinguish it from other widget intents. The extra data is what's
+                // processed by the WidgetRefreshReceiver
+                Uri dataUri = Uri.parse(String.format(Locale.US, "widget://%s/%d",
+                        BuildConfig.APPLICATION_ID, widgets[i]));
+                pIntents[i] = PendingIntent.getBroadcast(
+                        getApplicationContext(),
+                        0,
+                        new Intent(getApplicationContext(), WidgetRefreshReceiver.class)
+                                .setAction(ACTION_REFRESH_ONE)
+                                .setData(dataUri)
+                                .putExtra(EXTRA_WIDGET_ID, widgets[i]),
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
+            } else {
+                pIntents[i] = PendingIntent.getActivity(getApplicationContext(), 0,
+                        new Intent(getApplicationContext(), MainActivity.class),
+                        PendingIntent.FLAG_UPDATE_CURRENT);
+            }
         }
 
         setStatus(getApplicationContext().getString(R.string.loading), true);
@@ -266,31 +285,14 @@ public final class WidgetWorker extends Worker implements LocationReceiver {
         Bitmap[] textBitmaps = WidgetProvider.getTextBitmaps(getApplicationContext(),
                 formattedTemp, condition, locationName, time.toString());
 
-        for(int widget : widgets) {
+        for (int i = 0; i < widgets.length; i++) {
             RemoteViews views = new RemoteViews(BuildConfig.APPLICATION_ID, R.layout.widget);
             Bitmap sky = null;
             Bitmap wowLayer = null;
             boolean failed = false;
 
-            if (tapToRefresh) {
-                // Worth noting that the data URI in this pending intent is used only
-                // to distinguish it from other widget intents. The extra data is what's
-                // processed by the WidgetRefreshReceiver
-                Uri dataUri = Uri.parse(String.format(Locale.US, "widget://%s/%d",
-                        BuildConfig.APPLICATION_ID, widget));
-                pIntent = PendingIntent.getBroadcast(
-                        getApplicationContext(),
-                        0,
-                        new Intent(getApplicationContext(), WidgetRefreshReceiver.class)
-                                .setAction(ACTION_REFRESH_ONE)
-                                .setData(dataUri)
-                                .putExtra(EXTRA_WIDGET_ID, widget),
-                        PendingIntent.FLAG_UPDATE_CURRENT
-                );
-            }
-
             views.setViewVisibility(R.id.widget_loading, View.GONE);
-            views.setOnClickPendingIntent(R.id.widget_root, pIntent);
+            views.setOnClickPendingIntent(R.id.widget_root, pIntents[i]);
             views.setImageViewResource(R.id.widget_dogeimg, dogeImg);
             views.setImageViewBitmap(R.id.widget_tempimg, textBitmaps[0]);
             views.setImageViewBitmap(R.id.widget_descimg, textBitmaps[1]);
@@ -299,7 +301,7 @@ public final class WidgetWorker extends Worker implements LocationReceiver {
 
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                 try {
-                    Bundle options = widgetManager.getAppWidgetOptions(widget);
+                    Bundle options = widgetManager.getAppWidgetOptions(widgets[i]);
                     if(!backgroundFix) {
                         sky = WidgetProvider.getSkyBitmap(getApplicationContext(), options, skyImg);
                         views.setImageViewBitmap(R.id.widget_sky, sky);
@@ -323,7 +325,7 @@ public final class WidgetWorker extends Worker implements LocationReceiver {
                 views.setImageViewResource(R.id.widget_sky_compat, skyImg);
             }
 
-            widgetManager.updateAppWidget(widget, views);
+            widgetManager.updateAppWidget(widgets[i], views);
 
             if(sky != null && !sky.isRecycled()) {
                 sky.recycle();
@@ -388,13 +390,13 @@ public final class WidgetWorker extends Worker implements LocationReceiver {
 
     private void setStatus(String status, boolean isLoading) {
         Bitmap loading = WidgetProvider.getStatusBitmap(getApplicationContext(), status);
-        for(int widget : widgets) {
+        for (int i = 0; i < widgets.length; i++) {
             RemoteViews views = new RemoteViews(BuildConfig.APPLICATION_ID, R.layout.widget);
             views.setImageViewBitmap(R.id.widget_locationimg, loading);
             views.setImageViewBitmap(R.id.widget_last_updated_img, null);
-            views.setOnClickPendingIntent(R.id.widget_root, pIntent);
+            views.setOnClickPendingIntent(R.id.widget_root, pIntents[i]);
             views.setViewVisibility(R.id.widget_loading, isLoading ? View.VISIBLE : View.GONE);
-            widgetManager.partiallyUpdateAppWidget(widget, views);
+            widgetManager.partiallyUpdateAppWidget(widgets[i], views);
         }
         loading.recycle();
     }
