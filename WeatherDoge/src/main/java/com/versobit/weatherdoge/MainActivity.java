@@ -22,7 +22,6 @@ package com.versobit.weatherdoge;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.NotificationManager;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -172,26 +171,20 @@ final public class MainActivity extends Activity implements LocationReceiver,
         suchOverlay = (RelativeLayout)findViewById(R.id.main_suchoverlay);
         suchTopOverlay = (RelativeLayout)findViewById(R.id.main_suchtopoverlay);
         suchInfoGroup = (LinearLayout)findViewById(R.id.main_suchinfogroup);
-        suchInfoGroup.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (currentLink == null) {
-                    return;
-                }
-                Intent i = new Intent(Intent.ACTION_VIEW, currentLink);
-                WeatherDoge.applyChromeCustomTab(MainActivity.this, i);
-                startActivity(i);
+        suchInfoGroup.setOnClickListener(v -> {
+            if (currentLink == null) {
+                return;
             }
+            Intent i = new Intent(Intent.ACTION_VIEW, currentLink);
+            WeatherDoge.applyChromeCustomTab(MainActivity.this, i);
+            startActivity(i);
         });
         suchDoge = (ImageView)findViewById(R.id.main_suchdoge);
-        suchDoge.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(!forceLocation.isEmpty()) {
-                    new GetWeather().execute();
-                } else if(wowApi.getStatus() == ApiStatus.CONNECTED) {
-                    requestLocation();
-                }
+        suchDoge.setOnClickListener(v -> {
+            if(!forceLocation.isEmpty()) {
+                new GetWeather().execute();
+            } else if(wowApi.getStatus() == ApiStatus.CONNECTED) {
+                requestLocation();
             }
         });
         suchStatus = (TextView)findViewById(R.id.main_suchstatus);
@@ -201,35 +194,29 @@ final public class MainActivity extends Activity implements LocationReceiver,
         suchDegree = (TextView)findViewById(R.id.main_suchdegree);
         suchLocation = (TextView)findViewById(R.id.main_suchlocation);
         suchMenu = (FloatingActionsMenu)findViewById(R.id.main_fam);
-        findViewById(R.id.man_fab_share).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(Intent.ACTION_SEND);
-                i.setType("text/plain");
-                if(weatherAdjectives == null) {
-                    i.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.app_name));
-                    i.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_text).split("\n\n")[1]);
-                } else {
-                    String unit = (char)0x00b0 + "C";
-                    double tempTemp = currentTemp; // temporary temperature...
-                    if(UnitLocale.getDefault() == UnitLocale.IMPERIAL && !forceMetric) {
-                        tempTemp = tempTemp * 1.8d + 32d; // F
-                        unit = (char)0x00b0 + "F";
-                    }
-                    String temp = String.valueOf(Math.round(tempTemp)) + ' ' + unit;
-                    i.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.share_title, temp, currentLocation));
-                    i.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_text, WeatherDoge.getDogeism(wows, dogefixes, weatherAdjectives), temp, currentLocation));
+        findViewById(R.id.man_fab_share).setOnClickListener(v -> {
+            Intent i = new Intent(Intent.ACTION_SEND);
+            i.setType("text/plain");
+            if(weatherAdjectives == null) {
+                i.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.app_name));
+                i.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_text).split("\n\n")[1]);
+            } else {
+                String unit = (char)0x00b0 + "C";
+                double tempTemp = currentTemp; // temporary temperature...
+                if(UnitLocale.getDefault() == UnitLocale.IMPERIAL && !forceMetric) {
+                    tempTemp = tempTemp * 1.8d + 32d; // F
+                    unit = (char)0x00b0 + "F";
                 }
-                suchMenu.collapse();
-                startActivity(Intent.createChooser(i, getString(R.string.action_share)));
+                String temp = String.valueOf(Math.round(tempTemp)) + ' ' + unit;
+                i.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.share_title, temp, currentLocation));
+                i.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_text, WeatherDoge.getDogeism(wows, dogefixes, weatherAdjectives), temp, currentLocation));
             }
+            suchMenu.collapse();
+            startActivity(Intent.createChooser(i, getString(R.string.action_share)));
         });
-        findViewById(R.id.man_fab_options).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                suchMenu.collapse();
-                startActivity(new Intent(MainActivity.this, OptionsActivity.class));
-            }
+        findViewById(R.id.man_fab_options).setOnClickListener(v -> {
+            suchMenu.collapse();
+            startActivity(new Intent(MainActivity.this, OptionsActivity.class));
         });
 
         updateFont();
@@ -451,31 +438,20 @@ final public class MainActivity extends Activity implements LocationReceiver,
         }
         AlertDialog.Builder adb = new AlertDialog.Builder(this)
                 .setMessage(R.string.location_rationale_text)
-                .setNegativeButton(R.string.location_rationale_negative, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        // Go directly to the constant location setting in the options
-                        startActivity(new Intent(MainActivity.this, OptionsActivity.class)
-                                .putExtra(OptionsActivity.EXTRA_SHORTCUT,
-                                        OptionsActivity.EXTRA_SHORTCUT_FORCE_LOCATION
-                                ));
-                    }
+                .setNegativeButton(R.string.location_rationale_negative, (dialog, which) -> {
+                    // Go directly to the constant location setting in the options
+                    startActivity(new Intent(MainActivity.this, OptionsActivity.class)
+                            .putExtra(OptionsActivity.EXTRA_SHORTCUT,
+                                    OptionsActivity.EXTRA_SHORTCUT_FORCE_LOCATION
+                            ));
                 })
-                .setPositiveButton(R.string.location_rationale_positive, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        // Request the permission again
-                        ActivityCompat.requestPermissions(MainActivity.this,
-                                new String[] { WeatherDoge.LOCATION_PERMISSION },
-                                REQUEST_LOCATION_PERMISSION);
-                    }
+                .setPositiveButton(R.string.location_rationale_positive, (dialog, which) -> {
+                    // Request the permission again
+                    ActivityCompat.requestPermissions(MainActivity.this,
+                            new String[] { WeatherDoge.LOCATION_PERMISSION },
+                            REQUEST_LOCATION_PERMISSION);
                 })
-                .setOnCancelListener(new DialogInterface.OnCancelListener() {
-                    @Override
-                    public void onCancel(DialogInterface dialog) {
-                        showLocationSnackbar();
-                    }
-                });
+                .setOnCancelListener(dialog -> showLocationSnackbar());
         // Prevent crash if MainActivity is finishing while attempting to display a new dialog
         if(!isFinishing()) {
             rationaleDialog = adb.show();
@@ -489,12 +465,7 @@ final public class MainActivity extends Activity implements LocationReceiver,
 
         locationSnackbar = Snackbar.make(findViewById(R.id.main_suchlayout),
                 R.string.location_snackbar_text, Snackbar.LENGTH_INDEFINITE)
-                .setAction(R.string.location_snackbar_button, new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        requestLocation(true);
-                    }
-                })
+                .setAction(R.string.location_snackbar_button, v -> requestLocation(true))
                 .setActionTextColor(ContextCompat.getColor(this, R.color.primary_dark));
         locationSnackbar.show();
     }
@@ -904,24 +875,16 @@ final public class MainActivity extends Activity implements LocationReceiver,
                 return addresses.get(0);
             } catch (Exception ex) {
                 if(ex.getMessage() != null && ex.getMessage().equalsIgnoreCase("Service not Available")) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if(errorDialog != null && errorDialog.isShowing()) {
-                                return;
-                            }
-                            AlertDialog.Builder adb = new AlertDialog.Builder(new ContextThemeWrapper(MainActivity.this, R.style.AppTheme_Options));
-                            adb.setTitle(R.string.geocoder_error_title).setMessage(R.string.geocoder_error_msg);
-                            adb.setNeutralButton(R.string.wow, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.dismiss();
-                                }
-                            });
-                            // Prevent crash if MainActivity is finishing while attempting to display a new dialog
-                            if(!isFinishing()) {
-                                errorDialog = adb.show();
-                            }
+                    runOnUiThread(() -> {
+                        if(errorDialog != null && errorDialog.isShowing()) {
+                            return;
+                        }
+                        AlertDialog.Builder adb = new AlertDialog.Builder(new ContextThemeWrapper(MainActivity.this, R.style.AppTheme_Options));
+                        adb.setTitle(R.string.geocoder_error_title).setMessage(R.string.geocoder_error_msg);
+                        adb.setNeutralButton(R.string.wow, (dialog, which) -> dialog.dismiss());
+                        // Prevent crash if MainActivity is finishing while attempting to display a new dialog
+                        if(!isFinishing()) {
+                            errorDialog = adb.show();
                         }
                     });
                 }
@@ -996,19 +959,9 @@ final public class MainActivity extends Activity implements LocationReceiver,
                     AnimationUtils.loadAnimation(MainActivity.this, R.anim.textfade_in) };
 
             final Handler uiHandler = new Handler(Looper.getMainLooper());
-            final Runnable tempGroupRunnable = new Runnable() {
-                @Override
-                public void run() {
-                    suchTempGroup.startAnimation(fadeOuts[1]);
-                }
-            };
+            final Runnable tempGroupRunnable = () -> suchTempGroup.startAnimation(fadeOuts[1]);
 
-            final Runnable locationRunnable = new Runnable() {
-                @Override
-                public void run() {
-                    suchLocation.startAnimation(fadeOuts[2]);
-                }
-            };
+            final Runnable locationRunnable = () -> suchLocation.startAnimation(fadeOuts[2]);
 
             fadeOuts[0].setAnimationListener(new Animation.AnimationListener() {
                 @Override

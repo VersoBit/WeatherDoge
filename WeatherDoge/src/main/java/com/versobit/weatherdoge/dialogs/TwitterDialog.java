@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 VersoBit
+ * Copyright (C) 2014-2015, 2019 VersoBit
  *
  * This file is part of Weather Doge.
  *
@@ -22,7 +22,6 @@ package com.versobit.weatherdoge.dialogs;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -37,13 +36,10 @@ public final class TwitterDialog extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         final String[] accts = getActivity().getResources().getStringArray(R.array.dialog_about_twitter);
         return new AlertDialog.Builder(getActivity(), getTheme())
-                .setItems(accts, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        String s = accts[which].substring(1);
-                        getActivity().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://twitter.com/" + s)));
-                        dismiss();
-                    }
+                .setItems(accts, (dialog, which) -> {
+                    String s = accts[which].substring(1);
+                    getActivity().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://twitter.com/" + s)));
+                    dismiss();
                 })
                 .create();
     }

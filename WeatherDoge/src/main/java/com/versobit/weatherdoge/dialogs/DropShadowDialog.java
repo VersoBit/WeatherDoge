@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 VersoBit
+ * Copyright (C) 2014-2015, 2019 VersoBit
  *
  * This file is part of Weather Doge.
  *
@@ -23,7 +23,6 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -137,23 +136,13 @@ public final class DropShadowDialog extends DialogFragment {
 
         return new AlertDialog.Builder(getActivity(), getTheme())
                 .setView(v)
-                .setNeutralButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                })
-                .setPositiveButton(R.string.save, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        sp.edit()
-                                .putFloat(OptionsActivity.PREF_APP_DROP_SHADOW + "_radius", radius)
-                                .putFloat(OptionsActivity.PREF_APP_DROP_SHADOW + "_x", x)
-                                .putFloat(OptionsActivity.PREF_APP_DROP_SHADOW + "_y", y)
-                                .putBoolean(OptionsActivity.PREF_APP_DROP_SHADOW + "_adjs", adjs)
-                                .apply();
-                    }
-                })
+                .setNeutralButton(R.string.cancel, (dialog, which) -> dialog.dismiss())
+                .setPositiveButton(R.string.save, (dialog, which) -> sp.edit()
+                        .putFloat(OptionsActivity.PREF_APP_DROP_SHADOW + "_radius", radius)
+                        .putFloat(OptionsActivity.PREF_APP_DROP_SHADOW + "_x", x)
+                        .putFloat(OptionsActivity.PREF_APP_DROP_SHADOW + "_y", y)
+                        .putBoolean(OptionsActivity.PREF_APP_DROP_SHADOW + "_adjs", adjs)
+                        .apply())
                 .create();
     }
 

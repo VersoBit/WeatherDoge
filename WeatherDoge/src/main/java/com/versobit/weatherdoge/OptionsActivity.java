@@ -99,12 +99,7 @@ final public class OptionsActivity extends PreferenceActivity {
         AppBarLayout bar = (AppBarLayout) LayoutInflater.from(this).inflate(R.layout.toolbar_options, root, false);
         root.addView(bar, 0);
         Toolbar toolbar = (Toolbar)bar.getChildAt(0);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
+        toolbar.setNavigationOnClickListener(v -> finish());
 
         getFragmentManager().beginTransaction().replace(android.R.id.content, new OptionsFragment()).commit();
     }
@@ -178,12 +173,9 @@ final public class OptionsActivity extends PreferenceActivity {
             fakeHeader.setTitle(R.string.pref_app_header);
             getPreferenceScreen().addPreference(fakeHeader);
             addPreferencesFromResource(R.xml.pref_app);
-            findPreference(PREF_APP_DROP_SHADOW).setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                @Override
-                public boolean onPreferenceClick(Preference preference) {
-                    new DropShadowDialog().show(getFragmentManager(), DropShadowDialog.FRAGMENT_TAG);
-                    return true;
-                }
+            findPreference(PREF_APP_DROP_SHADOW).setOnPreferenceClickListener(preference -> {
+                new DropShadowDialog().show(getFragmentManager(), DropShadowDialog.FRAGMENT_TAG);
+                return true;
             });
 
             // Make certain we do not show weather sources that are not configured
@@ -232,27 +224,18 @@ final public class OptionsActivity extends PreferenceActivity {
 
             Preference aboutVersion = findPreference(PREF_ABOUT_VERSION);
             aboutVersion.setTitle(getString(R.string.app_name) + " v" + BuildConfig.VERSION_NAME.split("-")[0]);
-            aboutVersion.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                @Override
-                public boolean onPreferenceClick(Preference preference) {
-                    new AboutDialog().show(getFragmentManager(), AboutDialog.FRAGMENT_TAG);
-                    return true;
-                }
+            aboutVersion.setOnPreferenceClickListener(preference -> {
+                new AboutDialog().show(getFragmentManager(), AboutDialog.FRAGMENT_TAG);
+                return true;
             });
-            findPreference(PREF_ABOUT_CONTRIBUTE).setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                @Override
-                public boolean onPreferenceClick(Preference preference) {
-                    new ContributeDialog().show(getFragmentManager(), ContributeDialog.FRAGMENT_TAG);
-                    return true;
-                }
+            findPreference(PREF_ABOUT_CONTRIBUTE).setOnPreferenceClickListener(preference -> {
+                new ContributeDialog().show(getFragmentManager(), ContributeDialog.FRAGMENT_TAG);
+                return true;
             });
 
-            findPreference(PREF_ABOUT_ADD_CREDITS).setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                @Override
-                public boolean onPreferenceClick(Preference preference) {
-                    new OtherShibesDialog().show(getFragmentManager(), OtherShibesDialog.FRAGMENT_TAG);
-                    return true;
-                }
+            findPreference(PREF_ABOUT_ADD_CREDITS).setOnPreferenceClickListener(preference -> {
+                new OtherShibesDialog().show(getFragmentManager(), OtherShibesDialog.FRAGMENT_TAG);
+                return true;
             });
 
             // Bind the summaries of EditText/List/Dialog/Ringtone preferences to
@@ -324,30 +307,27 @@ final public class OptionsActivity extends PreferenceActivity {
          * A preference value change listener that updates the preference's summary
          * to reflect its new value.
          */
-        private static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener = new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object value) {
-                String stringValue = value.toString();
+        private static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener = (preference, value) -> {
+            String stringValue = value.toString();
 
-                if (preference instanceof ListPreference) {
-                    // For list preferences, look up the correct display value in
-                    // the preference's 'entries' list.
-                    ListPreference listPreference = (ListPreference) preference;
-                    int index = listPreference.findIndexOfValue(stringValue);
+            if (preference instanceof ListPreference) {
+                // For list preferences, look up the correct display value in
+                // the preference's 'entries' list.
+                ListPreference listPreference = (ListPreference) preference;
+                int index = listPreference.findIndexOfValue(stringValue);
 
-                    // Set the summary to reflect the new value.
-                    preference.setSummary(
-                            index >= 0
-                                    ? listPreference.getEntries()[index]
-                                    : null);
+                // Set the summary to reflect the new value.
+                preference.setSummary(
+                        index >= 0
+                                ? listPreference.getEntries()[index]
+                                : null);
 
-                } else {
-                    // For all other preferences, set the summary to the value's
-                    // simple string representation.
-                    preference.setSummary(stringValue.isEmpty() ? preference.getContext().getString(R.string.unset) : stringValue);
-                }
-                return true;
+            } else {
+                // For all other preferences, set the summary to the value's
+                // simple string representation.
+                preference.setSummary(stringValue.isEmpty() ? preference.getContext().getString(R.string.unset) : stringValue);
             }
+            return true;
         };
 
         /**

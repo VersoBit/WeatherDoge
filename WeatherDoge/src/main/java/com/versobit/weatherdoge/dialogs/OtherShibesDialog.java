@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 VersoBit
+ * Copyright (C) 2014-2015, 2019 VersoBit
  *
  * This file is part of Weather Doge.
  *
@@ -23,7 +23,6 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
@@ -45,12 +44,7 @@ public final class OtherShibesDialog extends DialogFragment {
         wv.loadUrl("file:///android_asset/othershibes.html");
         return new AlertDialog.Builder(getActivity(), getTheme())
                 .setView(wv)
-                .setPositiveButton(R.string.wow, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                })
+                .setPositiveButton(R.string.wow, (dialog, which) -> dialog.dismiss())
                 .create();
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 VersoBit
+ * Copyright (C) 2014-2015, 2019 VersoBit
  *
  * This file is part of Weather Doge.
  *
@@ -22,7 +22,6 @@ package com.versobit.weatherdoge.dialogs;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -40,28 +39,18 @@ public final class AboutDialog extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         View v = getActivity().getLayoutInflater().inflate(R.layout.dialog_about, null);
-        v.findViewById(R.id.dialog_about_vb).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.addr_versobit))));
-            }
-        });
+        v.findViewById(R.id.dialog_about_vb).setOnClickListener(v1 ->
+                startActivity(
+                        new Intent(Intent.ACTION_VIEW,
+                                Uri.parse(getString(R.string.addr_versobit)))
+                ));
         ((TextView) v.findViewById(R.id.dialog_about_version)).setText(BuildConfig.VERSION_NAME);
         ((TextView)v.findViewById(R.id.dialog_about_text2)).setMovementMethod(LinkMovementMethod.getInstance());
-        v.findViewById(R.id.dialog_about_contact).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                new TwitterDialog().show(getFragmentManager(), TwitterDialog.FRAGMENT_TAG);
-            }
-        });
+        v.findViewById(R.id.dialog_about_contact).setOnClickListener(v12 ->
+                new TwitterDialog().show(getFragmentManager(), TwitterDialog.FRAGMENT_TAG));
         return new AlertDialog.Builder(getActivity(), getTheme())
                 .setView(v)
-                .setPositiveButton(R.string.wow, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                })
+                .setPositiveButton(R.string.wow, (dialog, which) -> dialog.dismiss())
                 .create();
     }
 }
