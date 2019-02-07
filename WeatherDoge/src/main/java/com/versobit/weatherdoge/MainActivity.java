@@ -636,6 +636,9 @@ final public class MainActivity extends Activity implements LocationReceiver,
                     suchTopOverlay.removeView(v);
                 }
 
+                if (newWowText.view.getParent() != null) {
+                    ((ViewGroup) newWowText.view.getParent()).removeView(newWowText.view);
+                }
                 if(textOnTop) {
                     suchTopOverlay.addView(newWowText.view, newWowText.params);
                 } else {
