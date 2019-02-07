@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015, 2017 VersoBit
+ * Copyright (C) 2014-2015, 2017, 2019 VersoBit
  *
  * This file is part of Weather Doge.
  *
@@ -22,15 +22,11 @@ package com.versobit.weatherdoge.dialogs;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Toast;
 
 import com.versobit.weatherdoge.R;
 import com.versobit.weatherdoge.WeatherDoge;

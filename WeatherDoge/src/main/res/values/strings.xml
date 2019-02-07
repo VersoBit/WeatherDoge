@@ -149,6 +149,8 @@
     <string name="notification_channel_widgets_location_name">Location Permission</string>
     <string name="notification_channel_widgets_location_desc">Alerts you if the widget needs access to your location.</string>
 
+    <string name="empty" />
+
     <string-array name="wows">
         <item>wow</item>
         <item>so wow</item>

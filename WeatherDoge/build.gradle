@@ -8,7 +8,7 @@ def gitRev = {
         return stdout.toString().trim()
     }
     catch (ignored) {
-        return 'nogit';
+        return 'nogit'
     }
 }
 

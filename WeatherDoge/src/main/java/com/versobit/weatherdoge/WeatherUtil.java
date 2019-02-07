@@ -35,6 +35,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -428,7 +429,7 @@ final class WeatherUtil {
         } else {
             input = connection.getInputStream();
         }
-        return IOUtils.toString(input);
+        return IOUtils.toString(input, Charset.defaultCharset());
     }
 
     enum Source {
