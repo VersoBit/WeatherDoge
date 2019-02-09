@@ -51,13 +51,16 @@ public final class AndroidLocationApi implements DogeLocationApi, LocationListen
         this.ctx = ctx;
         this.receiver = receiver;
         locationManager = (LocationManager) ctx.getSystemService(Context.LOCATION_SERVICE);
+        Log.d(TAG, "Configured");
         return this;
     }
 
     @Override
     public void connect() {
+        Log.d(TAG, "Connecting...");
         status = ApiStatus.CONNECTING;
         try {
+            Log.d(TAG, "Requesting location updates...");
             locationManager.requestLocationUpdates(getBestProvider(), 0, 0, this);
         } catch (SecurityException ex) {
             status = ApiStatus.DISCONNECTED;
@@ -65,6 +68,7 @@ public final class AndroidLocationApi implements DogeLocationApi, LocationListen
             return;
         }
         status = ApiStatus.CONNECTED;
+        Log.d(TAG, "Connected");
         receiver.onConnected();
         // Might be awhile until we get our first real location update, so request the
         // last known location immediately
@@ -79,10 +83,12 @@ public final class AndroidLocationApi implements DogeLocationApi, LocationListen
     public void disconnect() {
         status = ApiStatus.DISCONNECTED;
         try {
+            Log.d(TAG, "Removing location updates");
             locationManager.removeUpdates(this);
         } catch (SecurityException ex) {
             Log.wtf(TAG, ex);
         }
+        Log.d(TAG, "Disconnected");
     }
 
     @NotNull
@@ -135,7 +141,9 @@ public final class AndroidLocationApi implements DogeLocationApi, LocationListen
 
     @Override
     public void onLocationChanged(Location location) {
+        Log.d(TAG, "Location changed");
         if (location == null) {
+            Log.i(TAG, "Location provided in callback was null");
             return;
         }
         receiver.onLocation(fuzzLocation(location));

@@ -65,11 +65,17 @@ public final class GoogleLocationApi implements DogeLocationApi {
         public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
             try {
                 if (receiver != null) {
-                    client.requestLocationUpdates(locationRequest, locationCallback, null);
-                    status = ApiStatus.CONNECTED;
-                    receiver.onConnected();
+                    if (client != null) {
+                        client.requestLocationUpdates(locationRequest, locationCallback, null);
+                        status = ApiStatus.CONNECTED;
+                        Log.d(TAG, "Connected");
+                        receiver.onConnected();
+                    } else {
+                        Log.e(TAG, "Location services connected but client is unavailable");
+                        disconnect();
+                    }
                 } else {
-                    Log.e(TAG, "Connected to location services but receiver is unavailable");
+                    Log.e(TAG, "Location services connected but receiver is unavailable");
                     disconnect();
                 }
             } catch (SecurityException ex) {
@@ -82,6 +88,7 @@ public final class GoogleLocationApi implements DogeLocationApi {
     private final OnFailureListener locationSettingsFailureCallback = new OnFailureListener() {
         @Override
         public void onFailure(@NonNull Exception ex) {
+            Log.w(TAG, "Connection to location API failed");
             status = ApiStatus.DISCONNECTED;
             if (ctx instanceof Activity && ex instanceof ResolvableApiException) {
                 if (SystemClock.elapsedRealtime() < lastFailDiag + DELAY_BETWEEN_FAIL_DIAG) {
@@ -102,6 +109,7 @@ public final class GoogleLocationApi implements DogeLocationApi {
     private final LocationCallback locationCallback = new LocationCallback() {
         @Override
         public void onLocationResult(LocationResult locationResult) {
+            Log.d(TAG, "LocationCallback received");
             if (locationResult == null) {
                 Log.e(TAG, "LocationCallback was provided a null LocationResult");
                 return;
@@ -132,12 +140,15 @@ public final class GoogleLocationApi implements DogeLocationApi {
         locationSettingsRequest = new LocationSettingsRequest.Builder()
                 .addLocationRequest(locationRequest)
                 .build();
+        Log.d(TAG, "Configured");
         return this;
     }
 
     @Override
     public void connect() {
+        Log.d(TAG, "Connecting...");
         if (status != ApiStatus.DISCONNECTED) {
+            Log.d(TAG, "Already connected");
             return;
         }
         status = ApiStatus.CONNECTING;
@@ -151,10 +162,12 @@ public final class GoogleLocationApi implements DogeLocationApi {
     @Override
     public void disconnect() {
         if (client != null) {
+            Log.d(TAG, "Removing location updates...");
             client.removeLocationUpdates(locationCallback);
             client = null;
         }
         status = ApiStatus.DISCONNECTED;
+        Log.d(TAG, "Disconnected");
     }
 
     @NotNull
