@@ -64,12 +64,17 @@ public final class GoogleLocationApi implements DogeLocationApi {
         @Override
         public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
             try {
-                client.requestLocationUpdates(locationRequest, locationCallback, null);
-                status = ApiStatus.CONNECTED;
-                receiver.onConnected();
+                if (receiver != null) {
+                    client.requestLocationUpdates(locationRequest, locationCallback, null);
+                    status = ApiStatus.CONNECTED;
+                    receiver.onConnected();
+                } else {
+                    Log.e(TAG, "Connected to location services but receiver is unavailable");
+                    disconnect();
+                }
             } catch (SecurityException ex) {
-                status = ApiStatus.DISCONNECTED;
                 Log.wtf(TAG, ex);
+                disconnect();
             }
         }
     };
@@ -98,9 +103,15 @@ public final class GoogleLocationApi implements DogeLocationApi {
         @Override
         public void onLocationResult(LocationResult locationResult) {
             if (locationResult == null) {
+                Log.e(TAG, "LocationCallback was provided a null LocationResult");
                 return;
             }
-            receiver.onLocation(locationResult.getLastLocation());
+            if (receiver != null) {
+                receiver.onLocation(locationResult.getLastLocation());
+            } else {
+                Log.e(TAG, "No receiver is available to the LocationCallback");
+                disconnect();
+            }
         }
     };
 
