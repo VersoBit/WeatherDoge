@@ -103,7 +103,7 @@
     <string name="contribute_name">Contribute</string>
     <string name="contribute_desc">Help support Weather Doge!</string>
 
-    <string name="dialog_about_copyright">Copyright © 2019 VersoBit</string>
+    <string name="dialog_about_copyright">Copyright © 2023 VersoBit</string>
     <string name="dialog_about_text1">Crafted by the fine shibes over at VersoBit and our wow-worthy open-source collaborators. &#x1f436;</string>
     <string name="dialog_about_text2">Based on <a href="http://dogeweather.com/">dogeweather.com</a>, which is probably one of the most awesome things on the planet.</string>
     <string name="dialog_about_contact">Send us an email!</string>
