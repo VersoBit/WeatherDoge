@@ -37,8 +37,9 @@ android {
         buildConfigField 'String', 'FLAVOR_FOSS', '"foss"'
     }
     packagingOptions {
-        exclude 'META-INF/LICENSE.txt'
-        exclude 'META-INF/NOTICE.txt'
+        resources {
+            excludes += ['META-INF/LICENSE.txt', 'META-INF/NOTICE.txt']
+        }
     }
     flavorDimensions 'version'
     productFlavors {
