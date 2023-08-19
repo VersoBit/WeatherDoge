@@ -26,7 +26,7 @@ apply plugin: 'kotlin-android'
 android {
     compileSdk 33
     defaultConfig {
-        minSdkVersion 15
+        minSdkVersion 21
         targetSdkVersion 33
         applicationId "com.versobit.weatherdoge"
         versionCode getVersionDef()[0].toInteger()
