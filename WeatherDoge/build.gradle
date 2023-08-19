@@ -24,10 +24,10 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion 28
+    compileSdk 33
     defaultConfig {
         minSdkVersion 15
-        targetSdkVersion 28
+        targetSdkVersion 33
         applicationId "com.versobit.weatherdoge"
         versionCode getVersionDef()[0].toInteger()
         versionName getVersionDef()[1]
