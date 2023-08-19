@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015, 2019 VersoBit
+ * Copyright (C) 2014-2015, 2019, 2023 VersoBit
  *
  * This file is part of Weather Doge.
  *
@@ -55,6 +55,11 @@ public final class AboutDialog extends DialogFragment {
         ((TextView) v.findViewById(R.id.dialog_about_version)).setText(BuildConfig.VERSION_NAME);
         ((TextView)v.findViewById(R.id.dialog_about_text2)).setMovementMethod(LinkMovementMethod.getInstance());
         v.findViewById(R.id.dialog_about_contact).setOnClickListener(v12 -> composeEmail());
+        v.findViewById(R.id.dialog_about_privacy).setOnClickListener(v1 ->
+                startActivity(
+                        new Intent(Intent.ACTION_VIEW,
+                                Uri.parse(getString(R.string.dialog_about_privacy_url)))
+                ));
         return new AlertDialog.Builder(getActivity(), getTheme())
                 .setView(v)
                 .setPositiveButton(R.string.wow, (dialog, which) -> dialog.dismiss())
