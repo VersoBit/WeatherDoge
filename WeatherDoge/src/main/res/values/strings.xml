@@ -162,6 +162,7 @@ Report Generated: %s\n
     <string name="widget_error_api">Error: API error.</string>
     <string name="widget_error_weather_util">Error: WeatherUtil error.</string>
     <string name="widget_error_location_settings">Error: Set location to &quot;Battery Saving&quot; or &quot;High Accuracy&quot;</string>
+    <string name="widget_error_no_background_location">Error: Open app to update your location.</string>
     <string name="widget_notification_permission_title">Location requested</string>
     <string name="widget_notification_permission_body">The Weather Doge widget needs access to your location.</string>
 

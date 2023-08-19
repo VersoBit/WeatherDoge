@@ -64,6 +64,19 @@ final class Cache {
             return memCacheWeatherData;
         }
 
+        WeatherUtil.WeatherData data = loadWeatherData(ctx);
+        if (data == null) {
+            return null;
+        }
+        if(!isWeatherDataExpired(data, latitude, longitude, location)) {
+            memCacheWeatherData = data;
+            return data;
+        }
+
+        return null;
+    }
+
+    static WeatherUtil.WeatherData loadWeatherData(Context ctx) {
         FileInputStream fileIn = null;
         ObjectInputStream objectIn = null;
         try {
@@ -74,11 +87,7 @@ final class Cache {
 
             fileIn = new FileInputStream(file);
             objectIn = new ObjectInputStream(fileIn);
-            WeatherUtil.WeatherData data = (WeatherUtil.WeatherData)objectIn.readObject();
-            if(!isWeatherDataExpired(data, latitude, longitude, location)) {
-                memCacheWeatherData = data;
-                return data;
-            }
+            return (WeatherUtil.WeatherData)objectIn.readObject();
         } catch (Exception ex) {
             Log.e(TAG, "Failed to retrieve or load WeatherData.", ex);
         } finally {
@@ -90,7 +99,7 @@ final class Cache {
 
     private static boolean isWeatherDataExpired(WeatherUtil.WeatherData data, double latitude, double longitude, String location) {
         // Expired?
-        if((data.time.getTime() + CACHE_MAX_AGE) < System.currentTimeMillis()) {
+        if (isWeatherDataExpired(data)) {
             return true;
         }
 
@@ -117,6 +126,10 @@ final class Cache {
         }
         // Must be good to go!
         return false;
+    }
+
+    static boolean isWeatherDataExpired(WeatherUtil.WeatherData data) {
+        return (data.time.getTime() + CACHE_MAX_AGE) < System.currentTimeMillis();
     }
 
     // Fire and forget cache storage

@@ -157,72 +157,96 @@ public final class WidgetWorker extends Worker implements LocationReceiver {
 
         setStatus(getApplicationContext().getString(R.string.loading), true);
 
-        DogeLocationApi locationApi = FlavoredApiSelector.get();
-        locationApi.configure(getApplicationContext(), this);
-        if(forceLocation == null || forceLocation.isEmpty()) {
-            if(!locationApi.isAvailable()) {
-                showError(BuildConfig.FLAVOR.equals(BuildConfig.FLAVOR_PLAY) ?
-                        R.string.widget_error_no_gms : R.string.widget_error_location_settings);
-                return Result.failure();
-            }
-        }
-
         WeatherUtil.WeatherResult result = null;
         WeatherUtil.WeatherData data;
         String locationName = "";
-        if(forceLocation == null || forceLocation.isEmpty()) {
-            if (ContextCompat.checkSelfPermission(getApplicationContext(), WeatherDoge.LOCATION_PERMISSION)
-                    != PackageManager.PERMISSION_GRANTED) {
-                showError(R.string.widget_error_permission);
-                showPermissionNotification();
-                return Result.failure();
-            }
-            locationApi.connect();
-            try {
-                locationBarrier.await(15, TimeUnit.SECONDS);
-            } catch (BrokenBarrierException | TimeoutException | InterruptedException ex) {
-                Log.wtf(TAG, ex);
-                showError(R.string.widget_error_unknown);
-                locationApi.disconnect();
-                return Result.retry();
-            }
-            if (locationApi.getStatus() != ApiStatus.CONNECTED) {
-                showError(R.string.widget_error_gms_connect);
-                locationApi.disconnect();
-                return Result.retry();
-            }
-            Location location = locationRef.get();
-            locationApi.disconnect();
-            if(location == null) {
-                Log.e(TAG, "Unable to retrieve location. (null)");
-                showError(BuildConfig.FLAVOR.equals(BuildConfig.FLAVOR_PLAY) ?
-                        R.string.widget_error_location : R.string.widget_error_location_settings);
-                return Result.retry();
-            }
-            data = Cache.getWeatherData(getApplicationContext(), location.getLatitude(),location.getLongitude());
-
-            if(data == null || data.source != weatherSource) {
-                result = WeatherUtil.getWeather(location.getLatitude(), location.getLongitude(),
-                        weatherSource);
-            }
-
-            Geocoder geocoder = new Geocoder(getApplicationContext());
-            try {
-                List<Address> addresses = geocoder.getFromLocation(location.getLatitude(),
-                        location.getLongitude(), 1);
-                if (addresses != null && addresses.size() > 0) {
-                    locationName = addresses.get(0).getLocality();
+        // For Google Play, do not attempt to retrieve the location in the background
+        // Use the last known location, if available
+        if (BuildConfig.FLAVOR.equals(BuildConfig.FLAVOR_PLAY)) {
+            WeatherUtil.WeatherData cached = Cache.loadWeatherData(getApplicationContext());
+            if (cached == null) {
+                data = null;
+                if (forceLocation.isEmpty()) {
+                    showError(R.string.widget_error_no_background_location);
+                    return Result.failure();
+                } else {
+                    result = WeatherUtil.getWeather(forceLocation, weatherSource);
                 }
-            } catch (IOException ex) {
-                Log.wtf(TAG, ex);
-                showError(R.string.widget_error_geocoder);
-                return Result.retry();
+            } else if (Cache.isWeatherDataExpired(cached) || cached.source != weatherSource) {
+                data = null;
+                if (forceLocation.isEmpty()) {
+                    result = WeatherUtil.getWeather(cached.latitude, cached.longitude, weatherSource);
+                } else {
+                    result = WeatherUtil.getWeather(forceLocation, weatherSource);
+                }
+            } else {
+                data = cached;
             }
         } else {
-            locationName = forceLocation;
-            data = Cache.getWeatherData(getApplicationContext(), forceLocation);
-            if(data == null || data.source != weatherSource) {
-                result = WeatherUtil.getWeather(forceLocation, weatherSource);
+            DogeLocationApi locationApi = FlavoredApiSelector.get();
+            locationApi.configure(getApplicationContext(), this);
+            if(forceLocation == null || forceLocation.isEmpty()) {
+                if(!locationApi.isAvailable()) {
+                    showError(BuildConfig.FLAVOR.equals(BuildConfig.FLAVOR_PLAY) ?
+                            R.string.widget_error_no_gms : R.string.widget_error_location_settings);
+                    return Result.failure();
+                }
+            }
+
+            if (forceLocation == null || forceLocation.isEmpty()) {
+                if (ContextCompat.checkSelfPermission(getApplicationContext(), WeatherDoge.LOCATION_PERMISSION)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    showError(R.string.widget_error_permission);
+                    showPermissionNotification();
+                    return Result.failure();
+                }
+                locationApi.connect();
+                try {
+                    locationBarrier.await(15, TimeUnit.SECONDS);
+                } catch (BrokenBarrierException | TimeoutException | InterruptedException ex) {
+                    Log.wtf(TAG, ex);
+                    showError(R.string.widget_error_unknown);
+                    locationApi.disconnect();
+                    return Result.retry();
+                }
+                if (locationApi.getStatus() != ApiStatus.CONNECTED) {
+                    showError(R.string.widget_error_gms_connect);
+                    locationApi.disconnect();
+                    return Result.retry();
+                }
+                Location location = locationRef.get();
+                locationApi.disconnect();
+                if (location == null) {
+                    Log.e(TAG, "Unable to retrieve location. (null)");
+                    showError(BuildConfig.FLAVOR.equals(BuildConfig.FLAVOR_PLAY) ?
+                            R.string.widget_error_location : R.string.widget_error_location_settings);
+                    return Result.retry();
+                }
+                data = Cache.getWeatherData(getApplicationContext(), location.getLatitude(), location.getLongitude());
+
+                if (data == null || data.source != weatherSource) {
+                    result = WeatherUtil.getWeather(location.getLatitude(), location.getLongitude(),
+                            weatherSource);
+                }
+
+                Geocoder geocoder = new Geocoder(getApplicationContext());
+                try {
+                    List<Address> addresses = geocoder.getFromLocation(location.getLatitude(),
+                            location.getLongitude(), 1);
+                    if (addresses != null && addresses.size() > 0) {
+                        locationName = addresses.get(0).getLocality();
+                    }
+                } catch (IOException ex) {
+                    Log.wtf(TAG, ex);
+                    showError(R.string.widget_error_geocoder);
+                    return Result.retry();
+                }
+            } else {
+                locationName = forceLocation;
+                data = Cache.getWeatherData(getApplicationContext(), forceLocation);
+                if (data == null || data.source != weatherSource) {
+                    result = WeatherUtil.getWeather(forceLocation, weatherSource);
+                }
             }
         }
 
