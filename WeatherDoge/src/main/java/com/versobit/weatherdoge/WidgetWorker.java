@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 VersoBit
+ * Copyright (C) 2019, 2023 VersoBit
  *
  * This file is part of Weather Doge.
  *
@@ -146,12 +146,12 @@ public final class WidgetWorker extends Worker implements LocationReceiver {
                                 .setAction(ACTION_REFRESH_ONE)
                                 .setData(dataUri)
                                 .putExtra(EXTRA_WIDGET_ID, widgets[i]),
-                        PendingIntent.FLAG_UPDATE_CURRENT
+                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
                 );
             } else {
                 pIntents[i] = PendingIntent.getActivity(getApplicationContext(), 0,
                         new Intent(getApplicationContext(), MainActivity.class),
-                        PendingIntent.FLAG_UPDATE_CURRENT);
+                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
             }
         }
 
@@ -422,7 +422,7 @@ public final class WidgetWorker extends Worker implements LocationReceiver {
     private void showPermissionNotification() {
         createNotificationGroupAndChannel();
         PendingIntent intent = PendingIntent.getActivity(getApplicationContext(), 0,
-                new Intent(getApplicationContext(), MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
+                new Intent(getApplicationContext(), MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), WIDGET_PERMISSION_REQ_NOTIFICATION_CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_doge_circle_notif) // TODO: Needs a real icon
                 .setContentTitle(getApplicationContext().getString(R.string.widget_notification_permission_title))
