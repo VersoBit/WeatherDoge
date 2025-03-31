@@ -4,7 +4,7 @@ plugins {
 
 android {
     namespace = "com.plattysoft.leonids.leonidslib"
-    compileSdk = 33
+    compileSdk = 35
 
     defaultConfig {
         minSdk = 11
