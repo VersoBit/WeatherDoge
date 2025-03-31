@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Copyright (C) 2014-2017, 2019, 2023 VersoBit
+    Copyright (C) 2014-2017, 2019, 2023, 2025 VersoBit
 
     This file is part of Weather Doge.
 
@@ -103,37 +103,11 @@
     <string name="contribute_name">Contribute</string>
     <string name="contribute_desc">Help support Weather Doge!</string>
 
-    <string name="dialog_about_copyright">Copyright © 2023 VersoBit</string>
+    <string name="dialog_about_copyright">Copyright © 2025 VersoBit</string>
     <string name="dialog_about_text1">Crafted by the fine shibes over at VersoBit and our wow-worthy open-source collaborators. &#x1f436;</string>
     <string name="dialog_about_text2">Based on dogeweather.com.</string>
     <string name="dialog_about_privacy">Privacy Policy</string>
     <string name="dialog_about_privacy_url">https://versobit.com/weather-doge-privacy-policy</string>
-    <string name="dialog_about_contact">Send us an email!</string>
-    <string name="dialog_about_contact_email">apps@versobit.com</string>
-    <string name="dialog_about_contact_subject">Weather Doge Inquiry</string>
-    <string name="dialog_about_contact_noemail">There is no email app installed.</string>
-    <string name="dialog_about_contact_body">
-Hey VersoBit,\n
-\n
-\n
-\n
-Device and app info:\n
-\n
-App Version Name: %s\n
-App Version Code: %d\n
-Flavor: %s\n
-Package Name: %s\n
-Build Type: %s\n
-Debug: %b\n
-Android Version: %s\n
-Android SDK: %d\n
-Device: %s\n
-Model: %s\n
-Product: %s\n
-Manufacturer: %s\n
-Brand: %s\n
-Report Generated: %s\n
-    </string>
 
     <string name="dialog_contribute_github_title">GitHub</string>
     <string name="dialog_contribute_github_msg">Weather Doge is open-source and on GitHub!</string>
