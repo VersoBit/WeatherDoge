@@ -27,7 +27,7 @@ android {
     compileSdk 35
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 33
+        targetSdkVersion 35
         applicationId "com.versobit.weatherdoge"
         versionCode getVersionDef()[0].toInteger()
         versionName getVersionDef()[1]
