@@ -64,6 +64,9 @@ android {
         }
     }
     namespace 'com.versobit.weatherdoge'
+    buildFeatures {
+        buildConfig true
+    }
 }
 
 dependencies {
