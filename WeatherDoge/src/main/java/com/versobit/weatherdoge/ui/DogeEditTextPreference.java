@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 VersoBit
+ * Copyright (C) 2016, 2025 VersoBit
  *
  * This file is part of Weather Doge.
  *
@@ -39,7 +39,6 @@ public final class DogeEditTextPreference extends EditTextPreference {
         super(ctx, attrs, defStyleAttr);
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public DogeEditTextPreference(Context ctx, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(ctx, attrs, defStyleAttr, defStyleRes);
     }

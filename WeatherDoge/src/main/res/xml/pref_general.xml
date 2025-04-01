@@ -36,6 +36,7 @@
         android:entryValues="@array/pref_weather_source_values"
         android:defaultValue="0"
         android:negativeButtonText="@null"
-        android:positiveButtonText="@null" />
+        android:positiveButtonText="@null"
+        android:enabled="false" />
 
 </PreferenceScreen>

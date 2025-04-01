@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017, 2019 VersoBit
+ * Copyright (C) 2014-2017, 2019, 2025 VersoBit
  *
  * This file is part of Weather Doge.
  *
@@ -151,9 +151,9 @@ final public class OptionsActivity extends PreferenceActivity {
             genForceLocation = prefs.getString(PREF_FORCE_LOCATION, genForceLocation);
             String strSource = prefs.getString(PREF_WEATHER_SOURCE, "0");
             genWeatherSource = WeatherUtil.Source.OPEN_WEATHER_MAP;
-            if ("1".equals(strSource)) {
+            /*if ("1".equals(strSource)) {
                 genWeatherSource = WeatherUtil.Source.YAHOO;
-            }
+            }*/
             widgetRefreshInterval = prefs.getString(PREF_WIDGET_REFRESH, widgetRefreshInterval);
             widgetTapToRefresh = prefs.getBoolean(PREF_WIDGET_TAP_TO_REFRESH, widgetTapToRefresh);
             widgetComicNeue = prefs.getBoolean(PREF_WIDGET_USE_COMIC_NEUE, widgetComicNeue);
@@ -191,6 +191,10 @@ final public class OptionsActivity extends PreferenceActivity {
                 }
                 //noinspection ConstantConditions
                 if (WeatherUtil.Source.ACCUWEATHER.getKey().equals(oldSrcValues[i]) && TextUtils.isEmpty(BuildConfig.ACCUWEATHER_KEY)) {
+                    continue;
+                }
+                if (WeatherUtil.Source.YAHOO.getKey().equals(oldSrcValues[i])) {
+                    // Game over for Yahoo Weather
                     continue;
                 }
                 newSrcEntries.add(oldSrcEntries[i]);
